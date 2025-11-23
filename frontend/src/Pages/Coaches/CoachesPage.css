@@ -1,0 +1,226 @@
+/* Page layout */
+.coaches-page {
+  background: #f5f6fb; /* light grey/blue background */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* HEADER / NAVBAR */
+.coaches-header {
+  background: #dedede; /* top grey bar */
+  padding: 18px 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 22px;
+  background: #ffce2f; /* yellow logo box */
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  font-size: 15px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #222222;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.nav-links a:hover {
+  background: #cfcfcf;
+}
+
+.nav-links .active-nav {
+  background: #4d4d4d;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Auth buttons */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.login-btn,
+.signup-btn {
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.login-btn {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.signup-btn {
+  background: #4d4d4d;
+  color: #ffffff;
+}
+
+/* MAIN HERO SECTION */
+.coaches-main {
+  padding: 60px 70px 40px;
+}
+
+.coaches-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+/* Text side */
+.coaches-text h1 {
+  font-size: 46px;
+  margin-bottom: 18px;
+  line-height: 1.1;
+  color: #111111;
+}
+
+.coaches-description {
+  max-width: 520px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #444444;
+  margin-bottom: 28px;
+}
+
+.primary-cta {
+  background: #22263a; /* dark navy button */
+  color: #ffffff;
+  padding: 14px 30px;
+  border-radius: 6px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.primary-cta:hover {
+  opacity: 0.9;
+}
+
+/* Image side */
+.coaches-image-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.coaches-image {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 20px;
+  object-fit: cover;
+}
+
+/* FOOTER */
+.coaches-footer {
+  background: #ffffff;
+  padding: 40px 70px 20px;
+  margin-top: 60px;
+  border-top: 1px solid #e1e1e1;
+}
+
+.footer-top {
+  display: flex;
+  gap: 60px;
+}
+
+/* Newsletter section */
+.newsletter {
+  flex: 1.2;
+}
+
+.newsletter h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.newsletter p {
+  font-size: 14px;
+  color: #555555;
+  margin-bottom: 20px;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 10px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  font-size: 14px;
+}
+
+.newsletter-form button {
+  background: #22263a;
+  color: #ffffff;
+  border-radius: 6px;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Footer columns */
+.footer-columns {
+  flex: 1.4;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.footer-column h4 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.footer-column a,
+.footer-column p {
+  display: block;
+  font-size: 13px;
+  color: #555555;
+  margin-bottom: 6px;
+  text-decoration: none;
+}
+
+/* Bottom bar */
+.footer-bottom {
+  margin-top: 30px;
+  padding-top: 14px;
+  border-top: 1px solid #e1e1e1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666666;
+}
+
+.footer-links a {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links a {
+  color: #555555;
+  text-decoration: none;
+}
+

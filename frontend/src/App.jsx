@@ -5,6 +5,7 @@ import HomePage from "./Pages/HomePage/HomePage";
 import ClubOverviewPage from "./Pages/Club/ClubOverviewPage";
 import ClubJoinMainPage from "./Pages/Club/ClubJoinMainPage";
 import ClubRedirectPage from "./Pages/Club/ClubRedirectPage";
+import CoachesPage from "./Pages/Coaches/CoachesPage";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/club" element={<ClubOverviewPage />} />
         <Route path="/clubs/join" element={<ClubJoinMainPage />} />
         <Route path="/clubs/redirect" element={<ClubRedirectPage />} />
+        <Route path="/coaches" element={<CoachesPage />} />
       </Routes>
     </Router>
   );

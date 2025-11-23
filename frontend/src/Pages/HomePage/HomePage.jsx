@@ -30,7 +30,7 @@ function Frame7({ navigate }) {
       </button>
       <button onClick={() => navigate("/events")} className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-black top-[56px] w-[72px]">Events</button>
       <button onClick={() => navigate("/clubs")} className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-black top-[54px] w-[71px]">Clubs</button>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-black top-[54px] w-[92px]">Coaches</p>
+      <button onClick={() => navigate("/coaches")} className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-black top-[54px] w-[92px]">Coaches</button>
       <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-black top-[54px] w-[88px]">Contact Us</p>
       <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px]" />
       <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-black top-[65px] w-[46px]">Sign Up</p>
