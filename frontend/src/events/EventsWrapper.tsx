@@ -1,11 +1,11 @@
 import { FormEvent } from 'react';
 // import Image_tennis from "../assets/9d55187a89062294bab1d32e8f7bb52789e4dc7e.png";
-import Image_tennis from "../../public/images/adult.jpg";
-import Image_tt from "../../public/images/adult.jpg";
-import Image_tennis_court from "../../public/images/adult.jpg";
-import Image_tt_table from "../../public/images/adult.jpg";
-import Image_kids_in_sports from "../../public/images/adult.jpg";
-import Image_coaching from "../../public/images/adult.jpg";
+import Image_tennis from "../../public/images/TT.png";
+import Image_tt from "../../public/images/Tennis.png";
+import Image_tennis_court from "../../public/images/TennisOpen.png";
+import Image_tt_table from "../../public/images/TTCup.png";
+import Image_kids_in_sports from "../../public/images/KidsSports.png";
+import Image_coaching from "../../public/images/OneonOneCoaching.png";
 
 import './eventspage.css'; // CSS import
 
