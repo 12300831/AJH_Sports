@@ -1,6 +1,7 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
-import "./CoachesPage.css";
+import { useNavigate } from "react-router-dom";
+import "./CoachesPage.css"; // header/footer styles
+import "./michael.css";
 
 const imgAjhSportsLogoNoOutline11 = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 
@@ -22,49 +23,55 @@ const CoachesHeader = ({ navigate }) => (
   </header>
 );
 
-const CoachesPage = () => {
+const CoachProfileCard = () => (
+  <section className="coach-profile-card">
+    <div className="coach-avatar-wrapper">
+      <div className="coach-avatar-ring" aria-hidden="true" />
+      <img
+        className="coach-avatar"
+        src="/images/michael.png"
+        alt="Michael Rodriguez"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    </div>
+
+    <h1 className="coach-name">Michael Rodriguez</h1>
+    <div className="coach-role">Advanced Techniques</div>
+
+    <p className="coach-text">Creds: 15+ yrs, Coached state champions & adult-league winners, TA Club Professional</p>
+    <p className="coach-text">Programs: Advanced stroke refinement, Tournament prep & match strategy, Fitness & footwork blocks, High-intensity sparring</p>
+    <p className="coach-text">Best for: Intermediate–Advanced</p>
+    <p className="coach-text">Availability: Mon–Fri 5:00–9:00 pm, Sat 8:00 am–12:00 pm</p>
+    <p className="coach-text">Location: Denistone courts and Rate: $75/hr</p>
+    <p className="coach-text">Language: English</p>
+
+    <div className="coach-social-row" aria-label="social links">
+      <span>in</span>
+      <span>tw</span>
+      <span>fb</span>
+      <span>ig</span>
+    </div>
+
+    <div className="coach-cta-row">
+      <button className="coach-btn primary">Book Now!</button>
+      <button className="coach-btn secondary">Learn More</button>
+    </div>
+  </section>
+);
+
+export default function MichaelPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="coaches-page">
-
- {/* Header */}
+    <div className="coach-profile-page">
       <CoachesHeader navigate={navigate} />
 
-      {/* Hero section */}
-      <main className="coaches-main">
-        <section className="coaches-hero">
-          <div className="coaches-text">
-            <h1>Coaching Packages</h1>
-            <p className="coaches-description">
-              AJH Sports offers coaching packages for all ages and skill levels.
-              Choose a plan that fits your goals, every package includes 10 weeks
-              of lessons (1 hour/week), reduced entry to social tennis sessions,
-              and catch-up group sessions for wet-weather closures.
-            </p>
-            <button 
-              className="primary-cta"
-              onClick={() => navigate("/coaches/names")}
-            >
-              Let's Get Started
-            </button>
-          </div>
-
-          {/* Image */}
-          <div className="coaches-image-wrapper">
-            <img
-              className="coaches-image"
-              src="/images/mytennis.png"
-              alt="Tennis coaching"
-              onError={(e) => {
-                e.target.src = "/images/adult.jpg";
-              }}
-            />
-          </div>
-        </section>
+      <main className="coach-profile-main">
+        <CoachProfileCard />
       </main>
 
-      {/* Footer */}
       <footer className="coaches-footer">
         <div className="footer-top">
           <div className="newsletter">
@@ -82,18 +89,18 @@ const CoachesPage = () => {
           <div className="footer-columns">
             <div className="footer-column">
               <h4>About</h4>
-              <Link to="#why">Why Choose Us?</Link>
-              <Link to="#featured">Featured</Link>
-              <Link to="#partnership">Partnership</Link>
-              <Link to="#team">Our Team</Link>
+              <a href="#why">Why Choose Us?</a>
+              <a href="#featured">Featured</a>
+              <a href="#partnership">Partnership</a>
+              <a href="#team">Our Team</a>
             </div>
 
             <div className="footer-column">
               <h4>Community</h4>
-              <Link to="/events">Events</Link>
-              <Link to="#blog">Blog</Link>
-              <Link to="#podcast">Podcast</Link>
-              <Link to="#invite">Invite a friend</Link>
+              <a href="#events">Events</a>
+              <a href="#blog">Blog</a>
+              <a href="#podcast">Podcast</a>
+              <a href="#invite">Invite a friend</a>
             </div>
 
             <div className="footer-column">
@@ -108,19 +115,11 @@ const CoachesPage = () => {
         <div className="footer-bottom">
           <span>©2025 Company Name. All rights reserved</span>
           <div className="footer-links">
-            <Link to="#privacy">Privacy & Policy</Link>
-            <Link to="#terms">Terms & Condition</Link>
+            <a href="#privacy">Privacy & Policy</a>
+            <a href="#terms">Terms & Condition</a>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default CoachesPage;
-  
-  
-  
-  
-  
-  
+}

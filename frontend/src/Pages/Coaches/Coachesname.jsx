@@ -1,8 +1,33 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
-import "./CoachesPage.css";
+import { useNavigate } from "react-router-dom";
+import "./Coachesname.css";
+import "./CoachesPage.css"; // reuse footer styling
 
 const imgAjhSportsLogoNoOutline11 = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
+
+const coaches = [
+  {
+    name: "Michael Rodriguez",
+    role: "Advanced Technique",
+    image: "/images/michael.png",
+    link: "/coaches/michael",
+  },
+  {
+    name: "James Wilson",
+    role: "Serve Specialist",
+    image: "/images/james.png",
+  },
+  {
+    name: "Mark Leo",
+    role: "Junior Development",
+    image: "/images/mark.png",
+  },
+  {
+    name: "Kristin Russell",
+    role: "Junior Development",
+    image: "/images/kristin.png",
+  },
+];
 
 const CoachesHeader = ({ navigate }) => (
   <header className="relative bg-[#d9d9d9] h-[124.5px] w-full">
@@ -22,49 +47,43 @@ const CoachesHeader = ({ navigate }) => (
   </header>
 );
 
-const CoachesPage = () => {
+const CoachCard = ({ coach, onView }) => (
+  <div className="coach-card">
+    <img src={coach.image} alt={coach.name} className="coach-photo" />
+    <div className="coach-name">{coach.name}</div>
+    <div className="coach-role">{coach.role}</div>
+    <div className="coach-socials">
+      <span aria-label="LinkedIn" className="social-dot">in</span>
+      <span aria-label="Twitter" className="social-dot">tw</span>
+      <span aria-label="Facebook" className="social-dot">fb</span>
+      <span aria-label="Instagram" className="social-dot">ig</span>
+    </div>
+    <button className="profile-btn" onClick={onView} disabled={!onView}>
+      View Profile
+    </button>
+  </div>
+);
+
+export default function Coachesname() {
   const navigate = useNavigate();
 
   return (
-    <div className="coaches-page">
-
- {/* Header */}
+    <div className="coachesname-page">
       <CoachesHeader navigate={navigate} />
 
-      {/* Hero section */}
-      <main className="coaches-main">
-        <section className="coaches-hero">
-          <div className="coaches-text">
-            <h1>Coaching Packages</h1>
-            <p className="coaches-description">
-              AJH Sports offers coaching packages for all ages and skill levels.
-              Choose a plan that fits your goals, every package includes 10 weeks
-              of lessons (1 hour/week), reduced entry to social tennis sessions,
-              and catch-up group sessions for wet-weather closures.
-            </p>
-            <button 
-              className="primary-cta"
-              onClick={() => navigate("/coaches/names")}
-            >
-              Let's Get Started
-            </button>
-          </div>
-
-          {/* Image */}
-          <div className="coaches-image-wrapper">
-            <img
-              className="coaches-image"
-              src="/images/mytennis.png"
-              alt="Tennis coaching"
-              onError={(e) => {
-                e.target.src = "/images/adult.jpg";
-              }}
+      <main className="coachesname-main">
+        <h1 className="page-title">Our tennis Coaches</h1>
+        <div className="coach-grid">
+          {coaches.map((coach) => (
+            <CoachCard
+              key={coach.name}
+              coach={coach}
+              onView={coach.link ? () => navigate(coach.link) : undefined}
             />
-          </div>
-        </section>
+          ))}
+        </div>
       </main>
 
-      {/* Footer */}
       <footer className="coaches-footer">
         <div className="footer-top">
           <div className="newsletter">
@@ -82,18 +101,18 @@ const CoachesPage = () => {
           <div className="footer-columns">
             <div className="footer-column">
               <h4>About</h4>
-              <Link to="#why">Why Choose Us?</Link>
-              <Link to="#featured">Featured</Link>
-              <Link to="#partnership">Partnership</Link>
-              <Link to="#team">Our Team</Link>
+              <a href="#why">Why Choose Us?</a>
+              <a href="#featured">Featured</a>
+              <a href="#partnership">Partnership</a>
+              <a href="#team">Our Team</a>
             </div>
 
             <div className="footer-column">
               <h4>Community</h4>
-              <Link to="/events">Events</Link>
-              <Link to="#blog">Blog</Link>
-              <Link to="#podcast">Podcast</Link>
-              <Link to="#invite">Invite a friend</Link>
+              <a href="#events">Events</a>
+              <a href="#blog">Blog</a>
+              <a href="#podcast">Podcast</a>
+              <a href="#invite">Invite a friend</a>
             </div>
 
             <div className="footer-column">
@@ -108,19 +127,11 @@ const CoachesPage = () => {
         <div className="footer-bottom">
           <span>©2025 Company Name. All rights reserved</span>
           <div className="footer-links">
-            <Link to="#privacy">Privacy & Policy</Link>
-            <Link to="#terms">Terms & Condition</Link>
+            <a href="#privacy">Privacy & Policy</a>
+            <a href="#terms">Terms & Condition</a>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default CoachesPage;
-  
-  
-  
-  
-  
-  
+}

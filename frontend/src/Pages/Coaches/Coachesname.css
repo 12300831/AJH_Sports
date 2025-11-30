@@ -1,0 +1,91 @@
+.coachesname-page {
+  background: #f7f7f7;
+  min-height: 100vh;
+  font-family: "Inter", Arial, sans-serif;
+  color: #2d2d2d;
+}
+
+.coachesname-main {
+  padding: 40px 48px 20px;
+  margin-top: 20px;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 36px;
+}
+
+.coach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 36px 48px;
+  justify-items: center;
+}
+
+.coach-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 18px 16px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 260px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.coach-photo {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.coach-name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.coach-role {
+  font-size: 13px;
+  color: #4a4a4a;
+  margin-bottom: 10px;
+}
+
+.coach-socials {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #3b3b3b;
+  font-size: 12px;
+}
+
+.social-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-btn {
+  margin-top: 2px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #4c85f0;
+  background: #4c85f0;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.profile-btn:hover {
+  background: #3a71d6;
+}
