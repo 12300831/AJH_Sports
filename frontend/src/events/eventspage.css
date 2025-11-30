@@ -99,10 +99,10 @@
 }
 
 .intro-image {
-  width: 220px;
-  height: 280px;
+  width: 250px;
+  height: 460px;
   object-fit: cover;
-  border-radius: 30px;
+  border-radius: 122px;
 }
 
 
@@ -145,7 +145,7 @@
 
 @media (min-width: 768px) {
   .events-list-container {
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
   }
