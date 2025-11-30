@@ -1,11 +1,23 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-// signup system
-const handleSignup = async () => {
+export default function Signup() {
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    password: ""
+  });
+
+  const handleSignup = async () => {
   setError("");
 
   try {
-    const res = await fetch("http://localhost:5000/api/auth/signup", {
+    const res = await fetch("http://localhost:3000/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -14,94 +26,48 @@ const handleSignup = async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.message || "Signup failed");
+      setError(data.message);
       return;
     }
 
-    // After successful signup → go to login
     navigate("/login");
 
-  } catch (err) {
-    setError("Server not responding");
+  } catch (error) {
+    setError("Cannot reach server");
   }
 };
 
-export default function Signup() {
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div className="h-screen flex justify-center items-center bg-gray-100">
+      <form onSubmit={handleSignup} className="bg-white p-8 rounded-lg shadow max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Let’s get you started
-        </h1>
+        {error && <p className="text-red-600">{error}</p>}
 
-        {/* Full Name */}
-        <label className="text-sm font-medium">Full name</label>
-        <input
-          type="text"
-          placeholder="Enter your full name"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
+        {["name", "email", "phone", "location", "password"].map((field) => (
+          <input
+            key={field}
+            type={field === "password" ? "password" : "text"}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            className="w-full border p-3 rounded mb-3"
+            required
+            onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+          />
+        ))}
 
-        {/* Email */}
-        <label className="text-sm font-medium">Email address</label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
-
-        {/* Phone */}
-        <label className="text-sm font-medium">Phone number</label>
-        <input
-          type="text"
-          placeholder="Enter your phone number"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
-
-        {/* Location */}
-        <label className="text-sm font-medium">Location (Optional)</label>
-        <input
-          type="text"
-          placeholder="Enter your location"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
-
-        {/* Password */}
-        <label className="text-sm font-medium">Create password</label>
-        <input
-          type="password"
-          placeholder="Enter a password"
-          className="w-full p-3 mt-1 mb-2 border rounded-lg 
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
-
-        {/* Password Rules */}
-        <p className="text-xs text-gray-600 mb-4">
-          Password must contain a minimum of 8 characters and at least one symbol (e.g., @, !)
-        </p>
-
-        {/* Button */}
         <button
-          className="w-full bg-black text-white py-3 rounded-lg 
-                     text-lg font-semibold hover:bg-gray-900 transition">
+          type="submit"
+          className="w-full bg-black text-white py-3 rounded-lg mt-2"
+        >
           Sign Up
         </button>
 
-        {/* Link to login */}
-        <p className="text-center mt-6 text-sm">
-          Already a user?{" "}
-          <Link to="/" className="text-blue-600 font-semibold">
-            Login
-          </Link>
+        <p className="text-center mt-4 text-sm">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600">Login</Link>
         </p>
-
-      </div>
+      </form>
     </div>
   );
 }

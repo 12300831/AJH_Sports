@@ -3,81 +3,72 @@ import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Login system
-  const handleLogin = async () => {
-  setError("");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setError(data.message || "Login failed");
-      return;
+      if (!res.ok) {
+        setError(data.message);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate("/dashboard");
+
+    } catch (err) {
+      setError("Server error");
     }
-
-    // Save token and user
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    navigate("/dashboard");
-
-  } catch (err) {
-    setError("Server not responding");
-  }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div className="h-screen flex justify-center items-center bg-gray-100">
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow max-w-md w-full">
 
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Sign in
-        </h1>
+        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
 
-        {error && (
-          <p className="text-red-600 text-sm mb-3">{error}</p>
-        )}
+        {error && <p className="text-red-600 mb-3">{error}</p>}
 
-        <label className="text-sm font-medium">E-mail</label>
         <input
           type="email"
-          placeholder="Enter your email"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg"
+          placeholder="Email"
+          className="w-full p-3 border rounded mb-4"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <label className="text-sm font-medium">Password</label>
         <input
           type="password"
-          placeholder="Enter your password"
-          className="w-full p-3 mt-1 mb-4 border rounded-lg"
+          placeholder="Password"
+          className="w-full p-3 border rounded mb-4"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button
-          onClick={handleLogin}
-          className="w-full bg-black text-white py-3 rounded-lg text-lg font-semibold"
-        >
-          Sign in
+        <button type="submit" className="bg-black text-white w-full py-3 rounded-lg">
+          Login
         </button>
 
-        <p className="text-center mt-6 text-sm">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-blue-600 font-semibold">
-            Create now
-          </Link>
+        <p className="mt-4 text-center text-sm">
+          Don’t have an account?
+          <Link to="/signup" className="text-blue-600 ml-1">Sign up</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }
