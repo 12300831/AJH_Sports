@@ -3,6 +3,7 @@ import { ClubMainWrapper } from './components/ClubMainWrapper';
 import { OurClubsWrapper } from './components/OurClubsWrapper';
 import { ClubAccountWrapper } from './components/ClubAccountWrapper';
 import { ContactWrapper } from './components/ContactWrapper';
+import { EventsWrapper } from './events/EventsWrapper';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
 
@@ -21,6 +22,8 @@ export default function App() {
         return <ClubMainWrapper onNavigate={handleNavigate} />;
       case 'clubs':
         return <OurClubsWrapper onNavigate={handleNavigate} />;
+      case 'events':
+        return <EventsWrapper onNavigate={handleNavigate} />;
       case 'account':
         return <ClubAccountWrapper onNavigate={handleNavigate} />;
       case 'contact':
