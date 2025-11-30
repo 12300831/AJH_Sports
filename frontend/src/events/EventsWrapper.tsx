@@ -1,4 +1,12 @@
 import { FormEvent } from 'react';
+// import Image_tennis from "../assets/9d55187a89062294bab1d32e8f7bb52789e4dc7e.png";
+import Image_tennis from "../../public/images/adult.jpg";
+import Image_tt from "../../public/images/adult.jpg";
+import Image_tennis_court from "../../public/images/adult.jpg";
+import Image_tt_table from "../../public/images/adult.jpg";
+import Image_kids_in_sports from "../../public/images/adult.jpg";
+import Image_coaching from "../../public/images/adult.jpg";
+
 import './eventspage.css'; // CSS import
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
@@ -31,10 +39,10 @@ const additionalInfo = [
 ];
 
 const events = [
-  { image: 'tennis.jpg', title: 'Tennis Open 2025 🎾', alt: 'Tennis Open 2025' },
-  { image: 'table-tennis.jpg', title: 'Table Tennis Tournament 2025 🏓', alt: 'Table Tennis Tournament 2025' },
-  { image: 'kids-party.jpg', title: 'Kids Sports Parties 🎉', alt: 'Kids Sports Parties' },
-  { image: 'coaching.jpg', title: '1-ON-1 Coaching 🧑‍🏫', alt: '1-on-1 Coaching' },
+  { image: Image_tennis_court, title: 'Tennis Open 2025 🎾', alt: 'Tennis Open 2025' },
+  { image: Image_tt_table, title: 'Table Tennis Tournament 2025 🏓', alt: 'Table Tennis Tournament 2025' },
+  { image: Image_kids_in_sports, title: 'Kids Sports Parties 🎉', alt: 'Kids Sports Parties' },
+  { image: Image_coaching, title: '1-ON-1 Coaching 🧑‍🏫', alt: '1-on-1 Coaching' },
 ];
 
 // --- COMPONENT ---
@@ -130,12 +138,12 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
 
             <div className="intro-images">
               <img
-                src="/mnt/data/00380abb-b864-468b-a559-b083d99184f4.png"
+                src={Image_tennis}
                 alt="Tennis and Table Tennis"
                 className="intro-image"
               />
               <img
-                src="/mnt/data/00380abb-b864-468b-a559-b083d99184f4.png"
+                src={Image_tt}
                 alt="Tennis and Table Tennis"
                 className="intro-image"
               />
