@@ -8,12 +8,18 @@ import ClubRedirectPage from "./Pages/Club/ClubRedirectPage";
 import CoachesPage from "./Pages/Coaches/CoachesPage";
 import Coachesname from "./Pages/Coaches/Coachesname";
 import MichaelPage from "./Pages/Coaches/michael";
+import Login from "./Pages/Contactuspage/login";
+import Signup from "./Pages/Contactuspage/signup";
+import Dashboard from "./Pages/Contactuspage/dashboard";
 
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/clubs" element={<ClubOverviewPage />} />
         <Route path="/club" element={<ClubOverviewPage />} />
         <Route path="/clubs/join" element={<ClubJoinMainPage />} />
