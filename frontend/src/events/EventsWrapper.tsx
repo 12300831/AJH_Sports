@@ -7,6 +7,7 @@ interface EventsWrapperProps {
   onNavigate: (page: Page) => void;
 }
 
+// --- DATA ARRAYS ---
 const navItems: Array<{ label: string; page: Page }> = [
   { label: 'Home', page: 'home' },
   { label: 'Events', page: 'events' },
@@ -15,6 +16,28 @@ const navItems: Array<{ label: string; page: Page }> = [
   { label: 'Contact Us', page: 'contact' },
 ];
 
+const features = ['PLAY', 'LEARN', 'CONNECT', 'COMPETE'];
+
+const stats = [
+  { icon: '👥', number: '100+', text: 'Active players' },
+  { icon: '📅', number: '10+', text: 'Events Monthly' },
+  { icon: '🏟️', number: '10', text: 'Courts Available' },
+];
+
+const additionalInfo = [
+  '🎾 200+ Tennis Players',
+  '🏓 150+ Table Tennis Enthusiasts',
+  '🎉 50+ Kids Parties Hosted',
+];
+
+const events = [
+  { image: 'tennis.jpg', title: 'Tennis Open 2025 🎾', alt: 'Tennis Open 2025' },
+  { image: 'table-tennis.jpg', title: 'Table Tennis Tournament 2025 🏓', alt: 'Table Tennis Tournament 2025' },
+  { image: 'kids-party.jpg', title: 'Kids Sports Parties 🎉', alt: 'Kids Sports Parties' },
+  { image: 'coaching.jpg', title: '1-ON-1 Coaching 🧑‍🏫', alt: '1-on-1 Coaching' },
+];
+
+// --- COMPONENT ---
 export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const handleNavClick = (page: Page) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -76,39 +99,35 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
                 social matches designed for all ages and skill levels. Book your
                 spot today and be part of the AJH Sports community."
               </div>
+
               <div className="intro-features">
-                <div className="feature-item">PLAY</div>
-                <div className="feature-item">LEARN</div>
-                <div className="feature-item">CONNECT</div>
-                <div className="feature-item">COMPETE</div>
+                {features.map((feature) => (
+                  <div key={feature} className="feature-item">{feature}</div>
+                ))}
               </div>
+
               <p className="intro-description">
                 Join exciting tournaments, coaching sessions, and social matches.
                 Perfect for all skill levels and age groups.
               </p>
+
               <div className="intro-stats">
-                <div className="stat">
-                  <div className="stat-icon">👥</div>
-                  <div className="stat-number">100+</div>
-                  <div className="stat-text">Active players</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-icon">📅</div>
-                  <div className="stat-number">10+</div>
-                  <div className="stat-text">Events Monthly</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-icon">🏟️</div>
-                  <div className="stat-number">10</div>
-                  <div className="stat-text">Courts Available</div>
-                </div>
+                {stats.map(({ icon, number, text }) => (
+                  <div key={text} className="stat">
+                    <div className="stat-icon">{icon}</div>
+                    <div className="stat-number">{number}</div>
+                    <div className="stat-text">{text}</div>
+                  </div>
+                ))}
               </div>
+
               <div className="intro-additional-info">
-                <span>🎾 200+ Tennis Players</span>
-                <span>🏓 150+ Table Tennis Enthusiasts</span>
-                <span>🎉 50+ Kids Parties Hosted</span>
+                {additionalInfo.map((info) => (
+                  <span key={info}>{info}</span>
+                ))}
               </div>
             </div>
+
             <div className="intro-images">
               <img
                 src="/mnt/data/00380abb-b864-468b-a559-b083d99184f4.png"
@@ -128,25 +147,12 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
 
       <section className="events-list-section">
         <div className="events-list-container">
-          <div className="event-item">
-            <img src="tennis.jpg" alt="Tennis Open 2025" className="event-image" />
-            <div className="event-title">Tennis Open 2025 🎾</div>
-          </div>
-
-          <div className="event-item">
-            <img src="table-tennis.jpg" alt="Table Tennis Tournament 2025" className="event-image" />
-            <div className="event-title">Table Tennis Tournament 2025 🏓</div>
-          </div>
-
-          <div className="event-item">
-            <img src="kids-party.jpg" alt="Kids Sports Parties" className="event-image" />
-            <div className="event-title">Kids Sports Parties 🎉</div>
-          </div>
-
-          <div className="event-item">
-            <img src="coaching.jpg" alt="1-on-1 Coaching" className="event-image" />
-            <div className="event-title">1-ON-1 Coaching 🧑‍🏫</div>
-          </div>
+          {events.map(({ image, title, alt }) => (
+            <div key={title} className="event-item">
+              <img src={image} alt={alt} className="event-image" />
+              <div className="event-title">{title}</div>
+            </div>
+          ))}
         </div>
       </section>
     </div>
