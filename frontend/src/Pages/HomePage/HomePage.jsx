@@ -67,7 +67,7 @@ function Frame6() {
 
 function ButtonSecondary({ navigate }) {
   return (
-    <button onClick={() => navigate("/clubs/join")} className="absolute bg-black bottom-[0.22px] box-border content-stretch flex flex-col gap-[10px] h-[72.776px] items-start justify-end left-0 px-[16px] py-[23px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[210px] cursor-pointer" data-name="Button Secondary">
+    <button onClick={() => navigate("/events")} className="absolute bg-black bottom-[0.22px] box-border content-stretch flex flex-col gap-[10px] h-[72.776px] items-start justify-end left-0 px-[16px] py-[23px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[210px] cursor-pointer" data-name="Button Secondary">
       <div className="absolute inset-0 rounded-[5px]" data-name="Background">
         <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[5px]" />
       </div>
