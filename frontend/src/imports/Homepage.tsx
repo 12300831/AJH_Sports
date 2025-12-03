@@ -1,19 +1,22 @@
-import svgPaths from "./svg-culciwgzgp";
-import imgAjhSportsLogoNoOutline11 from "figma:asset/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
-import imgRyanSearleQjrjJnFypa0Unsplash1 from "figma:asset/be55409ab178d60cc8800a7db65e0c0084f2087d.png";
-import imgGuilhermeMaggieriOh5G9IgcMWsUnsplash1 from "figma:asset/1cb401a09c88c0be3414381de9e4970ff8e5e3f2.png";
-import imgLauraMarksMfFVeuItimIUnsplash1 from "figma:asset/4a2e57a48d0ea7383cf4e1374e26a7750326f1df.png";
-import imgJefferyErhunse6D2LmtvX8AUnsplash1 from "figma:asset/5d474e6f0e667612801b4d13548f871b8eefc7e9.png";
-import imgTaylorFriehlIw7PtXxaggUnsplash1 from "figma:asset/04a5d7b060c01bddfbcf1e77cd4898348f0e4796.png";
-import imgAnastasiaChistik9Vy4FRXo0Unsplash1 from "figma:asset/e58b138902d52828d69ba4ef05fd9ab5c1d76e81.png";
-import imgPlaceholderPicture from "figma:asset/58f9fa003be2792d1781f3e8508d1d1ec7cc37e2.png";
-import imgPlaceholderPicture1 from "figma:asset/6c014402f53c0ab15ae6ffd733804128707edec2.png";
-import imgPlaceholderPicture2 from "figma:asset/6824ef8fe8d3d486f89cabd83096d2d012ebac2b.png";
-import imgPlaceholderPicture3 from "figma:asset/45f045a338b542553061cceacf2055b16db8bdc4.png";
-import imgIvanCortezC9AGBqkeoE4Unsplash1 from "figma:asset/93e783382215f659ecc0b080c5f770f71f2fb303.png";
-import imgAlexSuprunMynsNaNwVDcUnsplash1 from "figma:asset/a21b0580eca4150847553b6629467196a5db386b.png";
-import imgVickyHladynetsC8Ta0GwPbQgUnsplash1 from "figma:asset/e03b622db8f6154839c7ac9ca6de71525441341f.png";
-import imgJulianWan2EdIxO2LkIUnsplash11 from "figma:asset/2b2f317f1219e9a5d4533fad23763ff965f1f9a3.png";
+import React from 'react';
+import svgPaths from "./svg-kq0znrhkhm";
+
+// Images served from the public folder at /images/...
+const imgAjhSportsLogoNoOutline11 = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
+const imgRyanSearleQjrjJnFypa0Unsplash1 = "/images/be55409ab178d60cc8800a7db65e0c0084f2087d.png";
+const imgGuilhermeMaggieriOh5G9IgcMWsUnsplash1 = "/images/1cb401a09c88c0be3414381de9e4970ff8e5e3f2.png";
+const imgLauraMarksMfFVeuItimIUnsplash1 = "/images/4a2e57a48d0ea7383cf4e1374e26a7750326f1df.png";
+const imgJefferyErhunse6D2LmtvX8AUnsplash1 = "/images/5d474e6f0e667612801b4d13548f871b8eefc7e9.png";
+const imgTaylorFriehlIw7PtXxaggUnsplash1 = "/images/04a5d7b060c01bddfbcf1e77cd4898348f0e4796.png";
+const imgAnastasiaChistik9Vy4FRXo0Unsplash1 = "/images/e58b138902d52828d69ba4ef05fd9ab5c1d76e81.png";
+const imgPlaceholderPicture = "/images/58f9fa003be2792d1781f3e8508d1d1ec7cc37e2.png";
+const imgPlaceholderPicture1 = "/images/6c014402f53c0ab15ae6ffd733804128707edec2.png";
+const imgPlaceholderPicture2 = "/images/6824ef8fe8d3d486f89cabd83096d2d012ebac2b.png";
+const imgPlaceholderPicture3 = "/images/45f045a338b542553061cceacf2055b16db8bdc4.png";
+const imgIvanCortezC9AGBqkeoE4Unsplash1 = "/images/93e783382215f659ecc0b080c5f770f71f2fb303.png";
+const imgAlexSuprunMynsNaNwVDcUnsplash1 = "/images/a21b0580eca4150847553b6629467196a5db386b.png";
+const imgVickyHladynetsC8Ta0GwPbQgUnsplash1 = "/images/e03b622db8f6154839c7ac9ca6de71525441341f.png";
+const imgJulianWan2EdIxO2LkIUnsplash11 = "/images/2b2f317f1219e9a5d4533fad23763ff965f1f9a3.png";
 
 function Frame7() {
   return (
