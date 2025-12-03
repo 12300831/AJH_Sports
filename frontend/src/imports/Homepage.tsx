@@ -20,20 +20,20 @@ const imgJulianWan2EdIxO2LkIUnsplash11 = "/images/2b2f317f1219e9a5d4533fad23763f
 
 function Frame7() {
   return (
-    <div className="absolute bg-[#d9d9d9] h-[124.5px] left-0 top-0 w-[1440px]">
+    <div className="absolute bg-black h-[124.5px] left-0 top-0 w-[1440px]">
       <div className="absolute h-[53px] left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[43px] w-[80px]" data-name="AJHSports-Logo-no-outline-1 1">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline11} />
       </div>
-      <button className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-black top-[56px] w-[62px]">
+      <button className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px]">
         <p className="leading-[normal]">Home</p>
       </button>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-black top-[56px] w-[72px]">Events</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-black top-[54px] w-[71px]">Clubs</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-black top-[54px] w-[92px]">Coaches</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-black top-[54px] w-[88px]">Contact Us</p>
+      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px]">Events</p>
+      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px]">Clubs</p>
+      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px]">Coaches</p>
+      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px]">Contact Us</p>
       <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px]" />
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-black top-[65px] w-[46px]">Sign Up</p>
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-black top-[63px] w-[36px]">Log In</p>
+      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px]">Sign Up</p>
+      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px]">Log In</p>
     </div>
   );
 }
@@ -288,7 +288,7 @@ function CopyWhyChooseUs() {
 function About() {
   return (
     <div className="absolute contents leading-[0] left-[753px] top-[4577px]" data-name="About">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[753px] not-italic text-[#1a202c] text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
+      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[753px] not-italic text-slate-200 text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
         <p className="mb-0">Why Choose Us?</p>
         <p className="mb-0">&nbsp;</p>
         <p className="mb-0">Featured</p>
@@ -297,7 +297,7 @@ function About() {
         <p className="mb-0">&nbsp;</p>
         <p>Our Team</p>
       </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[753px] text-[#040404] text-[20px] top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
+      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[753px] text-white text-[20px] top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
         <p className="leading-[1.5]">About</p>
       </div>
     </div>
@@ -307,7 +307,7 @@ function About() {
 function Community() {
   return (
     <div className="absolute contents leading-[0] left-[957.29px] top-[4577px]" data-name="Community">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[957.29px] not-italic text-[#1a202c] text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
+      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[957.29px] not-italic text-slate-200 text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
         <p className="mb-0">Events</p>
         <p className="mb-0">&nbsp;</p>
         <p className="mb-0">Blog</p>
@@ -316,7 +316,7 @@ function Community() {
         <p className="mb-0">&nbsp;</p>
         <p>Invite a friend</p>
       </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[957.29px] text-[20px] text-black top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
+      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[957.29px] text-[20px] text-white top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
         <p className="leading-[1.5]">Community</p>
       </div>
     </div>
@@ -326,14 +326,14 @@ function Community() {
 function Socials() {
   return (
     <div className="absolute contents leading-[0] left-[1161.57px] top-[4577px]" data-name="Socials">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[1162px] not-italic text-[#1a202c] text-[16px] top-[4703px] tracking-[-0.32px] translate-y-[-50%] w-[203.717px]">
+      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[1162px] not-italic text-slate-200 text-[16px] top-[4703px] tracking-[-0.32px] translate-y-[-50%] w-[203.717px]">
         <p className="mb-0">ajhsports.com.au</p>
         <p className="mb-0">&nbsp;</p>
         <p className="mb-0 whitespace-pre-wrap">{`+61  0412345678`}</p>
         <p className="mb-0">&nbsp;</p>
         <p>123 Ave, Sydney, NSW</p>
       </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[1161.57px] text-[20px] text-black top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[203.717px]">
+      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[1161.57px] text-[20px] text-white top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[203.717px]">
         <p className="leading-[1.5]">Contact Us</p>
       </div>
     </div>
@@ -344,7 +344,7 @@ function InputDefault() {
   return (
     <div className="absolute inset-0 overflow-clip" data-name="Input/Default">
       <div className="absolute inset-0 rounded-[4px]" data-name="Rectangle">
-        <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[4px]" />
+        <div aria-hidden="true" className="absolute bg-white border border-white border-solid inset-0 pointer-events-none rounded-[4px]" />
       </div>
       <p className="absolute font-['Rubik:Regular',sans-serif] font-normal leading-[22px] left-[15px] text-[16px] text-black text-nowrap top-[12px] whitespace-pre">Your email</p>
     </div>
@@ -465,11 +465,11 @@ function Socials1() {
 function Main() {
   return (
     <div className="absolute contents left-0 top-[4547px]" data-name="MAIN">
-      <div className="absolute bg-[#fefefe] h-[364px] left-0 top-[4547px] w-[1440px]" />
+      <div className="absolute bg-black h-[364px] left-0 top-[4547px] w-[1440px]" />
       <div className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[4577px] w-[47px]" data-name="AJHSports-Logo-no-outline-1 3">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline11} />
       </div>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] not-italic text-[24px] text-black text-center top-[4604px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">Join Our Newsletter</p>
+      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] not-italic text-[24px] text-white text-center top-[4604px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">Join Our Newsletter</p>
       <div className="absolute flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center left-[654px] top-[4589px] w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]" style={{ "--transform-inner-width": "213", "--transform-inner-height": "0" } as React.CSSProperties}>
         <div className="flex-none rotate-[90deg]">
           <div className="h-0 relative w-[213px]">
@@ -484,7 +484,7 @@ function Main() {
       <About />
       <Community />
       <Socials />
-      <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] not-italic text-[14px] text-black text-center top-[4660px] translate-x-[-50%] w-[470px]">Subscribe to our newsletter to be the first to know about new sessions, competitions and events.</p>
+      <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] not-italic text-[14px] text-slate-200 text-center top-[4660px] translate-x-[-50%] w-[470px]">Subscribe to our newsletter to be the first to know about new sessions, competitions and events.</p>
       <Input />
       <Button />
       <div className="absolute flex h-0 items-center justify-center left-[77px] top-[4844px] w-[1318.17px]">
@@ -498,13 +498,13 @@ function Main() {
           </div>
         </div>
       </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[30px] not-italic text-[11px] text-neutral-600 top-[4879.5px] tracking-[-0.22px] translate-y-[-50%] w-[327.544px]">
+      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[30px] not-italic text-[11px] text-slate-200 top-[4879.5px] tracking-[-0.22px] translate-y-[-50%] w-[327.544px]">
         <p className="leading-[1.5]">©2025 Company Name. All rights reserved</p>
       </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1204.8px] not-italic text-[11px] text-neutral-600 text-right top-[4882.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
+      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1204.8px] not-italic text-[11px] text-slate-200 text-right top-[4882.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
         <p className="leading-[1.5]">{`Privacy & Policy`}</p>
       </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1406.8px] not-italic text-[11px] text-neutral-600 text-right top-[4883.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
+      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1406.8px] not-italic text-[11px] text-slate-200 text-right top-[4883.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
         <p className="leading-[1.5]">{`Terms & Condition`}</p>
       </div>
       <Socials1 />
