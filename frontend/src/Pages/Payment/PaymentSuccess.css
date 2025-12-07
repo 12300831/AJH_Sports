@@ -1,0 +1,16 @@
+.payment-success-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.payment-success-footer {
+  margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .payment-success-footer {
+    padding: 32px 16px;
+  }
+}
+

@@ -6,8 +6,10 @@ import { ClubAccountWrapper } from './components/ClubAccountWrapper';
 import { ContactWrapper } from './components/ContactWrapper';
 import { EventsWrapper } from './events/EventsWrapper';
 import { CoachesWrapper } from './components/CoachesWrapper';
+import { PaymentWrapper } from './components/PaymentWrapper';
+import { PaymentSuccessWrapper } from './components/PaymentSuccessWrapper';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'payment' | 'paymentSuccess';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -41,6 +43,10 @@ export default function App() {
         return <CoachesWrapper onNavigate={handleNavigate} />;
       case 'contact':
         return <ContactWrapper onNavigate={handleNavigate} />;
+      case 'payment':
+        return <PaymentWrapper onNavigate={handleNavigate} />;
+      case 'paymentSuccess':
+        return <PaymentSuccessWrapper onNavigate={handleNavigate} />;
       default:
         return <ClubMainWrapper onNavigate={handleNavigate} />;
     }

@@ -15,7 +15,7 @@ const Image_tt_hero = '/images/table-tennis-hero.jpg';
 const Image_kids_hero = '/images/kids-party-hero.jpg';
 const Image_coaching_hero = '/images/coaching-hero.jpg';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'payment';
 
 interface EventsWrapperProps {
   onNavigate: (page: Page) => void;
@@ -174,7 +174,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   };
 
   const handleRegisterNow = () => {
-    onNavigate('account');
+    onNavigate('payment');
   };
 
   const filteredEvents =
