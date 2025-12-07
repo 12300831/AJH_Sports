@@ -1,28 +1,27 @@
 import { MouseEvent } from 'react';
-import OurClubsOriginal from '../imports/OurClubs';
+import Homepage from '../imports/Homepage';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
-interface OurClubsWrapperProps {
+interface HomepageWrapperProps {
   onNavigate: (page: Page) => void;
 }
 
-export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
+export function HomepageWrapper({ onNavigate }: HomepageWrapperProps) {
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     const text = target.textContent?.trim();
-    const normalizedText = text?.replace(/\u2019/g, "'"); // normalize smart quotes for menu items
+    const normalizedText = text?.replace(/\u2019/g, "'"); // normalize smart quotes
     const cta = target.closest('[data-cta]')?.getAttribute('data-cta');
 
-    if (cta) {
-      if (cta.startsWith('join')) {
-        onNavigate('account');
-        return;
-      }
-      if (cta.startsWith('contact')) {
-        onNavigate('contact');
-        return;
-      }
+    if (cta === 'lets-play') {
+      // From homepage hero -> go straight to clubs list (youth/adult)
+      onNavigate('clubsList');
+      return;
+    }
+    if (cta === 'join-club') {
+      onNavigate('account');
+      return;
     }
 
     // Navigation items in header
@@ -31,36 +30,44 @@ export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
     } else if (normalizedText === 'Events') {
       onNavigate('events');
     } else if (normalizedText === 'Clubs') {
+      // Header "Clubs" should show the Join Our Club page
       onNavigate('clubs');
     } else if (normalizedText === 'Coaches') {
       onNavigate('coaches');
     } else if (normalizedText === 'Contact Us') {
       onNavigate('contact');
-    } else if (normalizedText === 'Join Us') {
-      // Redirect to account page when clicking Join Us buttons
-      onNavigate('account');
+    } else if (normalizedText === "Let's Play!" || text === "Let's Play!") {
+      // Fallback: any Let's Play text navigates to clubs list
+      onNavigate('clubsList');
     }
   };
 
   return (
     <div onClick={handleClick}>
       <style>{`
-        [data-name="Our Clubs"] p {
+        [data-name="Homepage"] p {
           cursor: pointer;
           transition: opacity 0.2s;
         }
-        [data-name="Our Clubs"] p:hover {
+        [data-name="Homepage"] p:hover {
           opacity: 0.8;
         }
-        [data-name="Our Clubs"] div[class*="bg-[#e0cb23]"] {
+        [data-name="Homepage"] div[class*="bg-[#e0cb23]"] {
           cursor: pointer;
           transition: opacity 0.2s;
         }
-        [data-name="Our Clubs"] div[class*="bg-[#e0cb23]"]:hover {
+        [data-name="Homepage"] div[class*="bg-[#e0cb23]"]:hover {
           opacity: 0.9;
         }
+        [data-name="Homepage"] div[class*="bg-[rgba(196,196,196,0.2)]"] {
+          background-color: rgba(196, 196, 196, 0.6) !important;
+        }
       `}</style>
-      <OurClubsOriginal />
+      <Homepage />
     </div>
   );
 }
+
+
+
+

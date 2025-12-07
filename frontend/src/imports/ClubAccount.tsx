@@ -1,6 +1,7 @@
+import React from "react";
 import svgPaths from "./svg-w1cm51d0o4";
 import img256941 from "../assets/5e80db934d6a91b9278c5c40d1cc305b8b64ad1b.png";
-import imgAjhSportsLogoNoOutline11 from "../assets/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
+import imgAjhSportsLogoNoOutline11 from  "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";   
 import imgKirillZharkiyItKtQOaIzQUnsplash1 from "../assets/8c23f89b547e9b2b24f6240e8a7d64cd78d5a4d5.png";
 
 function NavSportsWordmark() {
@@ -128,11 +129,47 @@ function Group() {
 export default function ClubAccount() {
   return (
     <div className="relative size-full" data-name="Club Account" style={{ backgroundImage: "linear-gradient(90deg, rgba(238, 255, 200, 0.2) 0%, rgba(238, 255, 200, 0.2) 100%), linear-gradient(90deg, rgb(247, 250, 252) 0%, rgb(247, 250, 252) 100%)" }}>
+      {/* Shared header from Homepage */}
+      <div className="absolute bg-black h-[124.5px] left-0 top-0 w-[1440px] z-10">
+        <div
+          className="absolute h-[53px] left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[43px] w-[80px]"
+          data-name="AJHSports-Logo-no-outline-1 1"
+        >
+          <img
+            alt="AJH Sports"
+            className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
+            src={imgAjhSportsLogoNoOutline11}
+          />
+        </div>
+        <button className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px]">
+          <p className="leading-[normal]">Home</p>
+        </button>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px]">
+          Events
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px]">
+          Clubs
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px]">
+          Coaches
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px]">
+          Contact Us
+        </p>
+        <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px]" />
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px]">
+          Sign Up
+        </p>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px]">
+          Log In
+        </p>
+      </div>
+
       <div className="absolute h-[183px] left-[583px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[202px] w-[274px]" data-name="AJHSports-Logo-no-outline-1 1">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline11} />
       </div>
       <Right />
-      <div className="absolute h-[961px] left-0 opacity-80 top-0 w-[1440px]" data-name="kirill-zharkiy-ItKtQ-OaIzQ-unsplash 1">
+    <div className="absolute h-[961px] left-0 opacity-80 top-0 w-[1440px]" data-name="kirill-zharkiy-ItKtQ-OaIzQ-unsplash 1">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgKirillZharkiyItKtQOaIzQUnsplash1} />
       </div>
       <p className="[text-shadow:rgba(0,0,0,0.25)_0px_4px_4px] absolute font-['Roboto:Condensed_Light_Italic',sans-serif] font-light italic leading-[36px] left-[637px] text-[48px] text-nowrap text-white top-[481px] whitespace-pre" style={{ fontVariationSettings: "'wdth' 75" }}>
@@ -141,7 +178,7 @@ export default function ClubAccount() {
       <div className="absolute bg-[#ffe93d] h-[20px] left-[548px] rounded-[50px] top-[576px] w-[344px]" />
        <p className="absolute font-['Rounded_Mplus_1c:Regular',sans-serif] leading-[36px] left-[472px] not-italic text-[24px] text-nowrap text-white top-[655px] whitespace-pre">You're being redirected to NavSports Group!!</p>
       <a
-        href="https://navsports.com/contact"
+        href="https://navsports.com"
         target="_blank"
         rel="noreferrer"
         className="absolute left-1/2 top-[710px] flex -translate-x-1/2 items-center gap-4 rounded-[999px] bg-white/90 px-8 py-4 text-black shadow-[0px_6px_18px_rgba(0,0,0,0.2)] transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1C7CFF]"
@@ -149,6 +186,7 @@ export default function ClubAccount() {
         <NavSportsWordmark />
       </a>
       <Group />
+
     </div>
   );
 }

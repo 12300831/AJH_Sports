@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { HomepageWrapper } from './components/HomepageWrapper';
 import { ClubMainWrapper } from './components/ClubMainWrapper';
 import { OurClubsWrapper } from './components/OurClubsWrapper';
 import { ClubAccountWrapper } from './components/ClubAccountWrapper';
@@ -6,7 +7,7 @@ import { ContactWrapper } from './components/ContactWrapper';
 import { EventsWrapper } from './events/EventsWrapper';
 import { CoachesWrapper } from './components/CoachesWrapper';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -25,8 +26,12 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <ClubMainWrapper onNavigate={handleNavigate} />;
+        return <HomepageWrapper onNavigate={handleNavigate} />;
       case 'clubs':
+        // "Clubs" in the header shows the Join Our Club page
+        return <ClubMainWrapper onNavigate={handleNavigate} />;
+    case 'clubsList':
+        // Detailed youth/adult clubs page
         return <OurClubsWrapper onNavigate={handleNavigate} />;
       case 'events':
         return <EventsWrapper onNavigate={handleNavigate} />;
