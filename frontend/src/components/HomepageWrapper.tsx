@@ -23,6 +23,22 @@ export function HomepageWrapper({ onNavigate }: HomepageWrapperProps) {
       onNavigate('account');
       return;
     }
+    if (cta === 'book-session') {
+      onNavigate('events');
+      return;
+    }
+    if (cta === 'learn-more-coaching') {
+      onNavigate('coaches');
+      return;
+    }
+    if (cta === 'learn-more-holiday') {
+      onNavigate('events');
+      return;
+    }
+    if (cta === 'check-events') {
+      onNavigate('events');
+      return;
+    }
 
     // Navigation items in header
     if (normalizedText === 'Home') {

@@ -48,25 +48,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      {/* Responsive container that scales content for mobile/tablet */}
       <div className="w-full relative">
-        <style>{`
-          @media (max-width: 1439px) {
-            .responsive-wrapper {
-              transform-origin: top center;
-              transform: scale(calc(100vw / 1440));
-            }
-          }
-          
-          @media (min-width: 1440px) {
-            .responsive-wrapper {
-              margin: 0 auto;
-            }
-          }
-        `}</style>
-        <div className="responsive-wrapper" style={{ width: '1440px', margin: '0 auto' }}>
-          {renderPage()}
-        </div>
+        {renderPage()}
       </div>
     </div>
   );
