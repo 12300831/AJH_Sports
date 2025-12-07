@@ -43,7 +43,7 @@ export function ClubMainWrapper({ onNavigate }: ClubMainWrapperProps) {
   };
 
   return (
-    <div onClick={handleClick}>
+    <div onClick={handleClick} className="flex flex-col flex-1 w-full">
       <style>{`
         [data-name="Club Main"] p {
           cursor: pointer;

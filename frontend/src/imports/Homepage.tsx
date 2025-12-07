@@ -1433,14 +1433,16 @@ function TrustedByThousand() {
 
 export default function Homepage() {
   return (
-    <div className="bg-white relative w-full" data-name="Homepage">
-      <CopyOfFirst />
-      <CopyProfessionalCoaching />
-      <CopyHoliday />
-      <ReadyToGetStarted />
-      <CopyWhyChooseUs />
-      <OurLovelyTeam />
-      <TrustedByThousand />
+    <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Homepage">
+      <div className="flex-1">
+        <CopyOfFirst />
+        <CopyProfessionalCoaching />
+        <CopyHoliday />
+        <ReadyToGetStarted />
+        <CopyWhyChooseUs />
+        <OurLovelyTeam />
+        <TrustedByThousand />
+      </div>
       <Main />
     </div>
   );

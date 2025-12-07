@@ -47,8 +47,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      <div className="w-full relative">
+    <div className="min-h-screen w-full bg-white overflow-x-hidden flex flex-col">
+      <div className="w-full relative flex-1 flex flex-col">
         {renderPage()}
       </div>
     </div>
