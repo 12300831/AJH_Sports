@@ -19,6 +19,42 @@ function Group() {
 export default function OurClubs() {
   return (
     <div className="bg-white relative size-full" data-name="Our Clubs">
+      {/* Shared header from Homepage */}
+      <div className="absolute bg-black h-[124.5px] left-0 top-0 w-[1440px]">
+        <div
+          className="absolute h-[53px] left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[43px] w-[80px]"
+          data-name="AJHSports-Logo-no-outline-1 1"
+        >
+          <img
+            alt="AJH Sports"
+            className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full"
+            src={imgAjhSportsLogoNoOutline13}
+          />
+        </div>
+        <button className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px]">
+          <p className="leading-[normal]">Home</p>
+        </button>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px]">
+          Events
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px]">
+          Clubs
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px]">
+          Coaches
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px]">
+          Contact Us
+        </p>
+        <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px]" />
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px]">
+          Sign Up
+        </p>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px]">
+          Log In
+        </p>
+      </div>
+
       <div className="absolute h-[348px] left-0 rounded-bl-[1px] rounded-br-[240px] rounded-tl-[1px] rounded-tr-[240px] top-[304px] w-[715px]" data-name="irish83-uy0dwKvAOnk-unsplash 1">
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-bl-[1px] rounded-br-[240px] rounded-tl-[1px] rounded-tr-[240px] size-full" src={imgIrish83Uy0DwKvAOnkUnsplash1} />
       </div>
@@ -72,20 +108,6 @@ export default function OurClubs() {
         <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-bl-[174px] rounded-tl-[174px] size-full" src={imgDimaKhudorozhkovMCsj0O9Nox4Unsplash1} />
       </div>
       <Group />
-      <div className="absolute bg-[#d9d9d9] h-[124.519px] left-0 top-0 w-[1440px]" />
-      <div className="absolute bg-[#d9d9d9] h-[124.519px] left-0 top-0 w-[1440px]" />
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[283.59px] not-italic text-[16px] text-black top-[50.02px] w-[72.438px]">Events</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[168px] not-italic text-[16px] text-black top-[50.02px] w-[61.649px]">Home</p>
-      <div className="absolute bg-[#838383] h-[41px] left-[388px] top-[38px] w-[88px]" />
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[408.43px] not-italic text-[16px] text-black top-[50.02px] w-[70.897px]">Clubs</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[531.73px] not-italic text-[16px] text-black top-[50.02px] w-[92.474px]">Coaches</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[678.15px] not-italic text-[16px] text-black top-[50.02px] w-[87.851px]">Contact Us</p>
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[15.964px] leading-[normal] left-[1180px] not-italic text-[12px] text-black top-[51.08px] w-[36px]">Log In</p>
-      <div className="absolute bg-[#878787] h-[41.506px] left-[1228px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[39.38px] w-[64px]" />
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[15.964px] leading-[normal] left-[1237px] not-italic text-[12px] text-black top-[51.08px] w-[46px]">Sign Up</p>
-      <div className="absolute h-[48.487px] left-[30.89px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[35.89px] w-[72.73px]" data-name="AJHSports-Logo-no-outline-1 3">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline13} />
-      </div>
     </div>
   );
 }

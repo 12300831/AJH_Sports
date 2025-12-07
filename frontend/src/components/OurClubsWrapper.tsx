@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import OurClubsOriginal from '../imports/OurClubs';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
 interface OurClubsWrapperProps {
   onNavigate: (page: Page) => void;
