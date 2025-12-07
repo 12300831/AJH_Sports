@@ -1,20 +1,43 @@
 import { MouseEvent } from 'react';
 import ClubAccountOriginal from '../imports/ClubAccount';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
 interface ClubAccountWrapperProps {
   onNavigate: (page: Page) => void;
 }
 
 export function ClubAccountWrapper({ onNavigate }: ClubAccountWrapperProps) {
-  // Auto-redirect to NavSports after 3 seconds
-  // Replace with your actual NavSports URL or contact method
-  const navsportsUrl = 'https://navsports.com/contact'; // Update this URL as needed
+
+  const navsportsUrl = 'https://navsports.com'; // U
   
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
+    const text = target.textContent?.trim();
+    const normalizedText = text?.replace(/\u2019/g, "'"); // 
     
+    // Header navigation items
+    if (normalizedText === 'Home') {
+      onNavigate('home');
+      return;
+    }
+    if (normalizedText === 'Events') {
+      onNavigate('events');
+      return;
+    }
+    if (normalizedText === 'Clubs') {
+      onNavigate('clubs');
+      return;
+    }
+    if (normalizedText === 'Coaches') {
+      onNavigate('coaches');
+      return;
+    }
+    if (normalizedText === 'Contact Us') {
+      onNavigate('contact');
+      return;
+    }
+
     // Check if clicking the home icon at the bottom
     if (target.closest('[data-name="25694 1"]') || target.closest('img[src*="25694"]')) {
       onNavigate('home');

@@ -67,7 +67,7 @@ function CoachCard({ coach, onViewProfile }) {
 
       {/* View profile button */}
       <button
-        onClick={onViewProfile}
+        onClick={() => onViewProfile?.(coach.id)}
         className="border border-[#2f68ff] text-[#2f68ff] text-[12px] px-6 py-2 rounded-[4px] hover:bg-[#2f68ff] hover:text-white transition"
       >
         View Profile
@@ -76,7 +76,7 @@ function CoachCard({ coach, onViewProfile }) {
   );
 }
 
-export default function CoachesPage() {
+export default function CoachesPage({ onViewProfile }) {
   return (
     <div className="min-h-screen bg-[#f5f7fb] flex flex-col">
       <HomeHeader />
@@ -90,7 +90,11 @@ export default function CoachesPage() {
         {/* 2x2 coach grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 md:gap-x-16 gap-y-16 md:gap-y-24">
           {coaches.map((coach) => (
-            <CoachCard key={coach.id} coach={coach} onViewProfile={() => {}} />
+            <CoachCard
+              key={coach.id}
+              coach={coach}
+              onViewProfile={onViewProfile}
+            />
           ))}
         </div>
       </main>

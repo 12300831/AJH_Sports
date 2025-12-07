@@ -1,6 +1,6 @@
 import { FormEvent } from 'react';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
 interface ContactWrapperProps {
   onNavigate: (page: Page) => void;
@@ -31,9 +31,19 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
 
   return (
     <div className="min-h-screen bg-[#f7f7f7]" data-name="Contact Page">
-      <header className="bg-[#d9d9d9] shadow">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-          <div className="flex items-center gap-10 text-[16px] font-medium text-black">
+      {/* Shared-style header (aligned with main site navigation) */}
+      <header className="bg-black shadow">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-10 text-[16px] font-medium text-white">
+            <div className="flex items-center gap-3">
+              <div className="h-[40px] w-[60px]">
+                <img
+                  src="/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png"
+                  alt="AJH Sports logo"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            </div>
             {navItems.map(({ label, page }) => (
               <button
                 key={label}
@@ -45,7 +55,7 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-6 text-sm font-semibold text-black">
+          <div className="flex items-center gap-6 text-sm font-semibold text-white">
             <button
               type="button"
               className="transition-opacity hover:opacity-70"
