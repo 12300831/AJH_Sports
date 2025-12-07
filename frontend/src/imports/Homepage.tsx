@@ -19,6 +19,8 @@ const imgVickyHladynetsC8Ta0GwPbQgUnsplash1 = "/images/e03b622db8f6154839c7ac9ca
 const imgJulianWan2EdIxO2LkIUnsplash11 = "/images/2b2f317f1219e9a5d4533fad23763ff965f1f9a3.png";
 
 function Frame7() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
     <div className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px]">
       {/* Logo */}
@@ -33,10 +35,10 @@ function Frame7() {
         />
       </div>
       
-      {/* Desktop Navigation */}
-      <div className="hidden md:block">
+      {/* Desktop Navigation - Show on lg and above */}
+      <div className="hidden lg:block">
         <button 
-          className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-[#e0cb23] top-[56px] w-[62px] hover:text-[#e0cb23] transition-colors"
+          className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[190px] not-italic text-[16px] text-[#e0cb23] top-[56px] w-[62px] hover:text-white transition-colors"
         >
           <p className="leading-[normal]">Home</p>
         </button>
@@ -54,30 +56,90 @@ function Frame7() {
         </p>
       </div>
       
-      {/* Sign Up Button */}
+      {/* Tablet Navigation - Show on md to lg */}
+      <div className="hidden md:flex lg:hidden absolute left-[120px] top-[56px] gap-4 md:gap-6">
+        <button className="font-['Inter:Medium',sans-serif] font-medium text-sm text-[#e0cb23] cursor-pointer hover:text-white transition-colors">
+          <p>Home</p>
+        </button>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Events
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Clubs
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Coaches
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Contact
+        </p>
+      </div>
+      
+      {/* Sign Up Button - Desktop */}
       <div 
-        className="absolute bg-[#878787] h-[50px] left-[1327.25px] md:left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden md:block"
+        className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block"
       />
       <p 
-        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] md:left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden md:block"
+        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block"
       >
         Sign Up
       </p>
       
-      {/* Log In */}
+      {/* Log In - Desktop */}
       <p 
-        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] md:left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden md:block"
+        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block"
       >
         Log In
       </p>
       
-      {/* Mobile Navigation */}
+      {/* Tablet/Mobile Auth Buttons */}
+      <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
+        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors">Log In</p>
+        <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white">Sign Up</p>
+        </div>
+      </div>
+      
+      {/* Mobile Menu Button and Auth */}
       <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
+        {/* Hamburger Menu Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="flex flex-col gap-1.5 w-6 h-6 justify-center items-center"
+          aria-label="Toggle menu"
+        >
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+        </button>
         <p className="font-semibold text-xs text-white cursor-pointer">Log In</p>
         <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
           <p className="font-semibold text-xs text-white">Sign Up</p>
         </div>
       </div>
+      
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-black border-t border-gray-800 z-50">
+          <div className="flex flex-col py-4">
+            <button className="font-['Inter:Medium',sans-serif] font-medium text-base text-[#e0cb23] px-6 py-3 text-left hover:bg-gray-900 transition-colors">
+              Home
+            </button>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Events
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Clubs
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Coaches
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Contact Us
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -471,170 +533,215 @@ function Socials1() {
 
 function Main() {
   return (
-    <div className="w-full h-auto min-h-[364px] bg-black relative pb-8 md:pb-0 md:h-[364px]" data-name="MAIN">
-      {/* Logo */}
-      <div 
-        className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[30px] w-[47px] cursor-pointer"
-        data-name="AJHSports-Logo-no-outline-1 3"
-      >
-        <img 
-          alt="AJH Sports Logo" 
-          className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
-          src={imgAjhSportsLogoNoOutline11} 
-        />
-      </div>
-      
-      {/* Newsletter Title */}
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] md:left-[335.5px] lg:left-[335.5px] text-[24px] text-white text-center top-[57px] tracking-[-0.24px] translate-x-[-50%] w-[407px] hidden md:block">
-        Join Our Newsletter
-      </p>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold text-lg md:text-[24px] text-white text-center top-[30px] left-1/2 -translate-x-1/2 w-[90%] md:hidden">
-        Join Our Newsletter
-      </p>
-      
-      {/* Newsletter Description */}
-      <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] md:left-[327px] lg:left-[327px] text-[14px] text-slate-200 text-center top-[113px] translate-x-[-50%] w-[470px] hidden md:block">
-        Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
-      </p>
-      <p className="absolute font-['Inter:Regular',sans-serif] font-normal text-xs md:text-sm text-slate-200 text-center top-[60px] left-1/2 -translate-x-1/2 w-[90%] max-w-[470px] md:hidden">
-        Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
-      </p>
-      
-      {/* Email Input Form - Desktop */}
-      <form className="absolute left-[92px] top-[183px] hidden md:block">
-        <input
-          type="email"
-          name="email"
-          placeholder="Your email"
-          required
-          className="w-[316px] h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-[16px] outline-none"
-        />
-        <button
-          type="submit"
-          className="absolute left-[358px] top-[-2px] h-[49px] w-[151px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-[14px] text-white hover:bg-[#333] transition-colors"
+    <div className="w-full bg-black relative" data-name="MAIN">
+      {/* Desktop Layout */}
+      <div className="hidden md:block relative min-h-[364px]">
+        {/* Logo */}
+        <div 
+          className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[30px] w-[47px] cursor-pointer z-10"
+          data-name="AJHSports-Logo-no-outline-1 3"
         >
-          Subscribe
-        </button>
-      </form>
-      
-      {/* Email Input Form - Mobile */}
-      <form className="absolute top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[500px] md:hidden">
-        <div className="flex flex-col gap-3">
+          <img 
+            alt="AJH Sports Logo" 
+            className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+            src={imgAjhSportsLogoNoOutline11} 
+          />
+        </div>
+        
+        {/* Newsletter Title */}
+        <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] lg:left-[335.5px] text-[24px] text-white text-center top-[57px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">
+          Join Our Newsletter
+        </p>
+        
+        {/* Newsletter Description */}
+        <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] lg:left-[327px] text-[14px] text-slate-200 text-center top-[113px] translate-x-[-50%] w-[470px]">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        
+        {/* Email Input Form - Desktop */}
+        <form className="absolute left-[92px] top-[183px]">
           <input
             type="email"
             name="email"
             placeholder="Your email"
             required
-            className="w-full h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-base outline-none"
+            className="w-[316px] h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-[16px] outline-none"
           />
           <button
             type="submit"
-            className="w-full h-[49px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-sm text-white hover:bg-[#333] transition-colors"
+            className="absolute left-[358px] top-[-2px] h-[49px] w-[151px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-[14px] text-white hover:bg-[#333] transition-colors"
           >
             Subscribe
           </button>
-        </div>
-      </form>
-      
-      {/* Vertical Divider Line - Desktop */}
-      <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
-      
-      {/* About Section - Desktop */}
-      <div className="absolute left-[753px] top-[30px] hidden lg:block">
-        <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
-        <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
-        </div>
-      </div>
-      
-      {/* Community Section - Desktop */}
-      <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
-        <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
-        <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
-          <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
-        </div>
-      </div>
-      
-      {/* Contact Section - Desktop */}
-      <div className="absolute left-[1162px] top-[30px] hidden lg:block">
-        <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
-        <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-          <p>ajhsports.com.au</p>
-          <p>+61 0412345678</p>
-          <p>123 Ave, Sydney, NSW</p>
-        </div>
-      </div>
-      
-      {/* Footer Links - Mobile/Tablet */}
-      <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] md:top-[200px] lg:hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
-          <div>
-            <p className="font-semibold text-base text-white mb-2">About</p>
-            <div className="font-medium text-sm text-slate-200 space-y-1">
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
-            </div>
+        </form>
+        
+        {/* Vertical Divider Line - Desktop */}
+        <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
+        
+        {/* About Section - Desktop */}
+        <div className="absolute left-[753px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
           </div>
-          <div>
-            <p className="font-semibold text-base text-white mb-2">Community</p>
-            <div className="font-medium text-sm text-slate-200 space-y-1">
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
-              <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
-            </div>
+        </div>
+        
+        {/* Community Section - Desktop */}
+        <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
           </div>
-          <div>
-            <p className="font-semibold text-base text-white mb-2">Contact Us</p>
-            <div className="font-medium text-sm text-slate-200 space-y-1">
-              <p>ajhsports.com.au</p>
-              <p>+61 0412345678</p>
-              <p>123 Ave, Sydney, NSW</p>
-            </div>
+        </div>
+        
+        {/* Contact Section - Desktop */}
+        <div className="absolute left-[1162px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p>ajhsports.com.au</p>
+            <p>+61 0412345678</p>
+            <p>123 Ave, Sydney, NSW</p>
+          </div>
+        </div>
+        
+        {/* Bottom Divider - Desktop */}
+        <div className="absolute left-[77px] top-[297px] w-[calc(100%-154px)] max-w-[1318.17px] h-[1px] bg-[#807E7E]" />
+        
+        {/* Copyright - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold left-[30px] text-[11px] text-slate-200 top-[332px] tracking-[-0.22px]">
+          ©2025 Company Name. All rights reserved
+        </p>
+        
+        {/* Privacy & Terms - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[335px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors" style={{ left: '1061px' }}>
+          Privacy & Policy
+        </p>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[336px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors" style={{ left: '1263px' }}>
+          Terms & Condition
+        </p>
+        
+        {/* Social Icons - Desktop */}
+        <div className="absolute left-[646px] top-[320px] flex gap-[20px]">
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">f</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">𝕏</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">in</span>
           </div>
         </div>
       </div>
-      
-      {/* Bottom Divider */}
-      <div className="absolute left-[77px] md:left-[77px] lg:left-[77px] top-[297px] w-[calc(100%-154px)] max-w-[1318.17px] h-[1px] bg-[#807E7E]" />
-      
-      {/* Copyright */}
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold left-[30px] text-[11px] text-slate-200 top-[332px] tracking-[-0.22px]">
-        ©2025 Company Name. All rights reserved
-      </p>
-      
-      {/* Privacy & Terms - Desktop */}
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[335px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block" style={{ left: '1061px' }}>
-        Privacy & Policy
-      </p>
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[336px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block" style={{ left: '1263px' }}>
-        Terms & Condition
-      </p>
-      
-      {/* Privacy & Terms - Mobile/Tablet */}
-      <div className="absolute right-[30px] top-[332px] flex gap-4 lg:hidden">
-        <p className="font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
-        <p className="font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
-      </div>
-      
-      {/* Social Icons */}
-      <div className="absolute left-[646px] md:left-[646px] lg:left-[646px] top-[320px] hidden md:flex gap-[20px]">
-        <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-          <span className="text-[10px] text-white">f</span>
+
+      {/* Mobile/Tablet Layout */}
+      <div className="md:hidden relative py-8 px-4">
+        {/* Logo */}
+        <div 
+          className="flex justify-center mb-6"
+          data-name="AJHSports-Logo-no-outline-1 3"
+        >
+          <div className="h-[31px] w-[47px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
+            <img 
+              alt="AJH Sports Logo" 
+              className="w-full h-full object-cover pointer-events-none" 
+              src={imgAjhSportsLogoNoOutline11} 
+            />
+          </div>
         </div>
-        <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-          <span className="text-[10px] text-white">𝕏</span>
+        
+        {/* Newsletter Title */}
+        <p className="font-['Inter:Bold',sans-serif] font-bold text-xl text-white text-center mb-2">
+          Join Our Newsletter
+        </p>
+        
+        {/* Newsletter Description */}
+        <p className="font-['Inter:Regular',sans-serif] font-normal text-xs text-slate-200 text-center mb-6 px-4">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        
+        {/* Email Input Form - Mobile */}
+        <form className="mb-8 px-4">
+          <div className="flex flex-col gap-3">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              required
+              className="w-full h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-base outline-none"
+            />
+            <button
+              type="submit"
+              className="w-full h-[49px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-sm text-white hover:bg-[#333] transition-colors"
+            >
+              Subscribe
+            </button>
+          </div>
+        </form>
+        
+        {/* Footer Links - Mobile/Tablet */}
+        <div className="mb-6 px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">About</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">Community</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">Contact Us</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p>ajhsports.com.au</p>
+                <p>+61 0412345678</p>
+                <p>123 Ave, Sydney, NSW</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-          <span className="text-[10px] text-white">in</span>
+        
+        {/* Bottom Divider - Mobile */}
+        <div className="mx-4 mb-4 h-[1px] bg-[#807E7E]" />
+        
+        {/* Social Icons - Mobile */}
+        <div className="flex justify-center gap-4 mb-4">
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">f</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">𝕏</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">in</span>
+          </div>
+        </div>
+        
+        {/* Copyright & Privacy - Mobile */}
+        <div className="px-4 pb-4">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[10px] text-slate-200 text-center mb-2 tracking-[-0.22px]">
+            ©2025 Company Name. All rights reserved
+          </p>
+          <div className="flex justify-center gap-4">
+            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
+            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
+          </div>
         </div>
       </div>
     </div>
