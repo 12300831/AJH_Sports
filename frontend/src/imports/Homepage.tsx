@@ -182,7 +182,7 @@ function Frame5() {
         <p className="leading-[1.2]">AJH Sports</p>
       </div>
       <div className="font-normal leading-relaxed relative w-full text-[#2d3648] text-base md:text-lg lg:text-[18px]">
-        <p className="mb-4">{`"AJH Sports has 40+ years of experience, led by Level 3 Tennis Pro Andrew Hill. We provide expert coaching, equipment, and facilities for tennis, table tennis, and modified sports across Australia. `}</p>
+        <p className="mb-4">{`"AJH Sports has 40+ years of experience, led by Level 4 Tennis Pro Andrew Hill. We provide expert coaching, equipment, and facilities for tennis, table tennis, and modified sports across Australia. `}</p>
         <p>Based in Denistone, we use the STARS Program to keep kids healthy, active, and energized in schools and local tennis centers."</p>
       </div>
       <ButtonSecondary />
