@@ -3,19 +3,9 @@
     "composite": true,
     "skipLibCheck": true,
     "module": "ESNext",
-<<<<<<< HEAD
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
-=======
-    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
     "types": ["node"]
->>>>>>> origin/main
   },
   "include": ["vite.config.js"]
 }
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
