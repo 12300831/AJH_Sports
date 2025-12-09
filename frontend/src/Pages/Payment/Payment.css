@@ -1,0 +1,27 @@
+.payment-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.payment-header {
+  position: relative;
+  z-index: 10;
+}
+
+.payment-footer {
+  margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .payment-header {
+    height: auto;
+    min-height: 80px;
+    padding: 20px 0;
+  }
+
+  .payment-footer {
+    padding: 32px 16px;
+  }
+}
+

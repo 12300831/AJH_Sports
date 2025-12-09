@@ -19,46 +19,147 @@ const imgVickyHladynetsC8Ta0GwPbQgUnsplash1 = "/images/e03b622db8f6154839c7ac9ca
 const imgJulianWan2EdIxO2LkIUnsplash11 = "/images/2b2f317f1219e9a5d4533fad23763ff965f1f9a3.png";
 
 function Frame7() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
-    <div className="absolute bg-black h-[124.5px] left-0 top-0 w-[1440px]">
-      <div className="absolute h-[53px] left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[43px] w-[80px]" data-name="AJHSports-Logo-no-outline-1 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline11} />
+    <div className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px]">
+      {/* Logo */}
+      <div 
+        className="absolute h-[53px] left-[20px] md:left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[20px] md:top-[43px] w-[80px] cursor-pointer z-10"
+        data-name="AJHSports-Logo-no-outline-1 1"
+      >
+        <img 
+          alt="AJH Sports Logo" 
+          className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+          src={imgAjhSportsLogoNoOutline11} 
+        />
       </div>
-      <button className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px]">
-        <p className="leading-[normal]">Home</p>
-      </button>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px]">Events</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px]">Clubs</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px]">Coaches</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px]">Contact Us</p>
-      <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px]" />
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px]">Sign Up</p>
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px]">Log In</p>
+      
+      {/* Desktop Navigation - Show on lg and above */}
+      <div className="hidden lg:block">
+        <button 
+          className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[190px] not-italic text-[16px] text-[#e0cb23] top-[56px] w-[62px] hover:text-white transition-colors"
+        >
+          <p className="leading-[normal]">Home</p>
+        </button>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Events
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Clubs
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Coaches
+        </p>
+        <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Contact Us
+        </p>
+      </div>
+      
+      {/* Tablet Navigation - Show on md to lg */}
+      <div className="hidden md:flex lg:hidden absolute left-[120px] top-[56px] gap-4 md:gap-6">
+        <button className="font-['Inter:Medium',sans-serif] font-medium text-sm text-[#e0cb23] cursor-pointer hover:text-white transition-colors">
+          <p>Home</p>
+        </button>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Events
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Clubs
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Coaches
+        </p>
+        <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+          Contact
+        </p>
+      </div>
+      
+      {/* Sign Up Button - Desktop */}
+      <div 
+        className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block"
+      />
+      <p 
+        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block"
+      >
+        Sign Up
+      </p>
+      
+      {/* Log In - Desktop */}
+      <p 
+        className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block"
+      >
+        Log In
+      </p>
+      
+      {/* Tablet/Mobile Auth Buttons */}
+      <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
+        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors">Log In</p>
+        <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white">Sign Up</p>
+        </div>
+      </div>
+      
+      {/* Mobile Menu Button and Auth */}
+      <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
+        {/* Hamburger Menu Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="flex flex-col gap-1.5 w-6 h-6 justify-center items-center"
+          aria-label="Toggle menu"
+        >
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+        </button>
+        <p className="font-semibold text-xs text-white cursor-pointer">Log In</p>
+        <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
+          <p className="font-semibold text-xs text-white">Sign Up</p>
+        </div>
+      </div>
+      
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-black border-t border-gray-800 z-50">
+          <div className="flex flex-col py-4">
+            <button className="font-['Inter:Medium',sans-serif] font-medium text-base text-[#e0cb23] px-6 py-3 text-left hover:bg-gray-900 transition-colors">
+              Home
+            </button>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Events
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Clubs
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Coaches
+            </p>
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors">
+              Contact Us
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function Frame6() {
   return (
-    <div className="absolute bg-white box-border content-start flex flex-wrap gap-[10px] h-[465px] items-start left-[735px] pl-[22px] pr-[13px] py-[17px] rounded-[4px] top-[183px] w-[550px]">
-      <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[4px]" />
-      <div className="h-[12px] relative shrink-0 w-[11px]" data-name="Button">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 11 12">
+    <div className="relative bg-white border border-black rounded-lg p-4 md:p-5 w-full lg:w-1/2">
+      <div className="h-[12px] flex gap-2 mb-3">
+        <svg className="h-[12px] w-[11px]" fill="none" preserveAspectRatio="none" viewBox="0 0 11 12">
           <path d={svgPaths.p248f7300} id="Button" stroke="var(--stroke-0, black)" />
         </svg>
-      </div>
-      <div className="h-[12px] relative shrink-0 w-[10px]" data-name="Button">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 10 12">
+        <svg className="h-[12px] w-[10px]" fill="none" preserveAspectRatio="none" viewBox="0 0 10 12">
+          <path d={svgPaths.p33b4b9f0} id="Button" stroke="var(--stroke-0, black)" />
+        </svg>
+        <svg className="h-[12px] w-[10px]" fill="none" preserveAspectRatio="none" viewBox="0 0 10 12">
           <path d={svgPaths.p33b4b9f0} id="Button" stroke="var(--stroke-0, black)" />
         </svg>
       </div>
-      <div className="h-[12px] relative shrink-0 w-[10px]" data-name="Button">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 10 12">
-          <path d={svgPaths.p33b4b9f0} id="Button" stroke="var(--stroke-0, black)" />
-        </svg>
-      </div>
-      <div className="h-[395px] relative shrink-0 w-[509px]" data-name="ryan-searle-qjrjJnFypa0-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgRyanSearleQjrjJnFypa0Unsplash1} />
+      <div className="h-[300px] md:h-[400px] lg:h-[450px] w-full rounded overflow-hidden" data-name="ryan-searle-qjrjJnFypa0-unsplash 1">
+        <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgRyanSearleQjrjJnFypa0Unsplash1} />
       </div>
     </div>
   );
@@ -66,12 +167,9 @@ function Frame6() {
 
 function ButtonSecondary() {
   return (
-    <div className="absolute bg-black bottom-[0.22px] box-border content-stretch flex flex-col gap-[10px] h-[72.776px] items-start justify-end left-0 px-[16px] py-[23px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[210px]" data-name="Button Secondary">
-      <div className="absolute inset-0 rounded-[5px]" data-name="Background">
-        <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[5px]" />
-      </div>
-      <div className="flex flex-col font-['Roboto:Medium',sans-serif] font-medium justify-center leading-[0] relative shrink-0 text-[20px] text-center text-white w-[177px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-        <p className="leading-[115%]">Book a Session!</p>
+    <div className="relative bg-black border border-black rounded-lg flex items-center justify-center px-6 py-3 md:px-8 md:py-4 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-full sm:w-auto cursor-pointer hover:opacity-90 transition-opacity" data-name="Button Secondary" data-cta="book-session">
+      <div className="flex items-center justify-center font-medium text-base md:text-lg lg:text-[20px] text-center text-white">
+        <p className="leading-relaxed">Book a Session!</p>
       </div>
     </div>
   );
@@ -79,13 +177,13 @@ function ButtonSecondary() {
 
 function Frame5() {
   return (
-    <div className="absolute box-border content-start flex flex-wrap gap-[27px] h-[436px] items-start left-[110px] pl-0 pr-[104px] py-0 top-[206px] w-[601px]">
-      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[86px] justify-center leading-[0] mr-[-104px] not-italic relative shrink-0 text-[#2d3648] text-[56px] tracking-[0.56px] w-[426px]">
+    <div className="relative flex flex-col gap-6 md:gap-8 items-start w-full lg:w-1/2">
+      <div className="flex flex-col font-bold justify-center leading-tight relative w-full text-[#2d3648] text-4xl md:text-5xl lg:text-[56px] tracking-wide">
         <p className="leading-[1.2]">AJH Sports</p>
       </div>
-      <div className="font-['Inter:Regular',sans-serif] font-normal h-[264px] leading-[1.5] mr-[-104px] not-italic relative shrink-0 text-[#2d3648] text-[18px] tracking-[-0.18px] w-[496px]">
-        <p className="mb-[16px]">{`“AJH Sports has 40+ years of experience, led by Level 3 Tennis Pro Andrew Hill. We provide expert coaching, equipment, and facilities for tennis, table tennis, and modified sports across Australia. `}</p>
-        <p>Based in Denistone, we use the STARS Program to keep kids healthy, active, and energized in schools and local tennis centers.”</p>
+      <div className="font-normal leading-relaxed relative w-full text-[#2d3648] text-base md:text-lg lg:text-[18px]">
+        <p className="mb-4">{`"AJH Sports has 40+ years of experience, led by Level 4 Tennis Pro Andrew Hill. We provide expert coaching, equipment, and facilities for tennis, table tennis, and modified sports across Australia. `}</p>
+        <p>Based in Denistone, we use the STARS Program to keep kids healthy, active, and energized in schools and local tennis centers."</p>
       </div>
       <ButtonSecondary />
     </div>
@@ -94,22 +192,21 @@ function Frame5() {
 
 function CopyOfFirst() {
   return (
-    <div className="absolute bg-white h-[737px] left-0 overflow-x-clip overflow-y-auto top-0 w-[1440px]" data-name="Copy of First">
+    <div className="relative bg-white min-h-[737px] w-full overflow-x-hidden" data-name="Copy of First">
       <Frame7 />
-      <Frame6 />
-      <Frame5 />
+      <div className="relative flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 px-4 md:px-6 lg:px-8 xl:px-12 py-12 md:py-16 lg:py-20 xl:py-24 max-w-7xl mx-auto">
+        <Frame5 />
+        <Frame6 />
+      </div>
     </div>
   );
 }
 
 function ButtonSecondary1() {
   return (
-    <div className="absolute inset-[67.17%_29.79%_22.33%_55.63%]" data-name="Button Secondary">
-      <div className="absolute inset-0 rounded-[5px]" data-name="Background">
-        <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[5px]" />
-      </div>
-      <div className="absolute flex flex-col font-['Roboto:Regular',sans-serif] font-normal justify-center leading-[0] left-[17px] right-[16px] text-[18px] text-black text-center top-[calc(50%+1px)] translate-y-[-50%]" style={{ fontVariationSettings: "'wdth' 100" }}>
-        <p className="leading-[115%]">Learn More</p>
+    <div className="relative border-2 border-black rounded-lg flex items-center justify-center px-6 py-3 md:px-8 md:py-4 w-full sm:w-auto cursor-pointer hover:bg-[#e0cb23] hover:border-[#e0cb23] transition-all group" data-name="Button Secondary" data-cta="learn-more-coaching">
+      <div className="flex items-center justify-center font-medium text-base md:text-lg lg:text-[18px] text-black group-hover:text-white text-center transition-colors">
+        <p className="leading-relaxed">Learn More</p>
       </div>
     </div>
   );
@@ -117,50 +214,36 @@ function ButtonSecondary1() {
 
 function Content() {
   return (
-    <div className="absolute contents inset-[22.5%_4.51%_22.33%_55.63%]" data-name="Content">
-      <ButtonSecondary1 />
-      <p className="absolute font-['Roboto:Regular',sans-serif] font-normal inset-[39.28%_4.51%_28.76%_55.63%] leading-[120%] text-[20px] text-black" style={{ fontVariationSettings: "'wdth' 100" }}>
-        “AJH Sports offers expert group, semi-private, and private lessons for all ages. Start with a group session, or boost your game with private coaching to improve gameplay, decision-making, and footwork.”
+    <div className="relative flex flex-col gap-6 md:gap-8 w-full" data-name="Content">
+      <p className="font-bold leading-tight text-3xl md:text-4xl lg:text-[32px] text-black">Professional Coaching</p>
+      <p className="font-normal leading-relaxed text-base md:text-lg lg:text-[20px] text-black">
+        "AJH Sports offers expert group, semi-private, and private lessons for all ages. Start with a group session, or boost your game with private coaching to improve gameplay, decision-making, and footwork."
       </p>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold inset-[22.5%_18.13%_69.83%_55.63%] leading-[1.406] not-italic text-[32px] text-black">Professional Coaching</p>
-    </div>
-  );
-}
-
-function HalfBox() {
-  return (
-    <div className="absolute inset-[11.67%_90.42%_77.67%_5.14%]" data-name="Half Box">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 64 64">
-        <g id="Half Box">
-          <line id="Line 5" stroke="var(--stroke-0, black)" x1="0.500005" x2="0.500003" y1="2.18557e-08" y2="64" />
-          <line id="Line 6" stroke="var(--stroke-0, black)" x1="64" x2="1.52813e-05" y1="0.5" y2="0.500011" />
-        </g>
-      </svg>
+      <ButtonSecondary1 />
     </div>
   );
 }
 
 function CopyProfessionalCoaching() {
   return (
-    <div className="absolute h-[600px] left-[-1px] top-[761px] w-[1440px]" data-name="Copy - Professional Coaching">
-      <div className="absolute bg-white inset-0" data-name="Background" />
-      <Content />
-      <div className="absolute bottom-[22.33%] left-[8.33%] right-1/2 rounded-[20px] top-[19.33%]" data-name="guilherme-maggieri-OH5g9IgcMWs-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[20px] size-full" src={imgGuilhermeMaggieriOh5G9IgcMWsUnsplash1} />
+    <div className="relative bg-white min-h-[600px] w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12" data-name="Copy - Professional Coaching">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 xl:gap-16">
+        <div className="w-full lg:w-1/2 h-[300px] md:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-lg" data-name="guilherme-maggieri-OH5g9IgcMWs-unsplash 1">
+          <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgGuilhermeMaggieriOh5G9IgcMWsUnsplash1} />
+        </div>
+        <div className="w-full lg:w-1/2 flex flex-col justify-center">
+          <Content />
+        </div>
       </div>
-      <HalfBox />
     </div>
   );
 }
 
 function ButtonSecondary2() {
   return (
-    <div className="absolute inset-[68.67%_77.71%_20.83%_7.71%]" data-name="Button Secondary">
-      <div className="absolute inset-0 rounded-[5px]" data-name="Background">
-        <div aria-hidden="true" className="absolute border border-black border-solid inset-0 pointer-events-none rounded-[5px]" />
-      </div>
-      <div className="absolute flex flex-col font-['Roboto:Regular',sans-serif] font-normal justify-center leading-[0] left-[17px] right-[16px] text-[18px] text-black text-center top-[calc(50%+1px)] translate-y-[-50%]" style={{ fontVariationSettings: "'wdth' 100" }}>
-        <p className="leading-[115%]">Learn More</p>
+    <div className="relative border-2 border-black rounded-lg flex items-center justify-center px-6 py-3 md:px-8 md:py-4 w-full sm:w-auto cursor-pointer hover:bg-[#e0cb23] hover:border-[#e0cb23] transition-all group" data-name="Button Secondary" data-cta="learn-more-holiday">
+      <div className="flex items-center justify-center font-medium text-base md:text-lg lg:text-[18px] text-black group-hover:text-white text-center transition-colors">
+        <p className="leading-relaxed">Learn More</p>
       </div>
     </div>
   );
@@ -168,47 +251,25 @@ function ButtonSecondary2() {
 
 function Content1() {
   return (
-    <div className="absolute contents inset-[25.67%_47.85%_20.83%_7.64%]" data-name="Content">
-      <ButtonSecondary2 />
-      <p className="absolute font-['Roboto:Regular',sans-serif] font-normal inset-[42.5%_47.85%_25.67%_7.64%] leading-[120%] text-[20px] text-black" style={{ fontVariationSettings: "'wdth' 100" }}>
-        AJH Sports runs multi-sport camps for kids aged 5–16. Originally designed to keep kids healthy and active during school holidays, our camps get them out of the house and off screens. Now, with three locations across Sydney, we also give parents a well-deserved break!”
+    <div className="relative flex flex-col gap-6 md:gap-8 w-full" data-name="Content">
+      <p className="font-bold leading-tight text-3xl md:text-4xl lg:text-[32px] text-black">{`Holiday Campus for Kids `}</p>
+      <p className="font-normal leading-relaxed text-base md:text-lg lg:text-[20px] text-black">
+        AJH Sports runs multi-sport camps for kids aged 5–16. Originally designed to keep kids healthy and active during school holidays, our camps get them out of the house and off screens. Now, with three locations across Sydney, we also give parents a well-deserved break!"
       </p>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold inset-[25.67%_63.06%_66.67%_7.64%] leading-[1.406] not-italic text-[32px] text-black">{`Holiday Campus for Kids `}</p>
-    </div>
-  );
-}
-
-function HalfBox1() {
-  return (
-    <div className="relative size-full" data-name="Half Box">
-      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 64 64">
-        <g id="Half Box">
-          <line id="Line 5" stroke="var(--stroke-0, black)" x1="0.500005" x2="0.500003" y1="2.18561e-08" y2="64" />
-          <line id="Line 6" stroke="var(--stroke-0, black)" x1="64" x2="2.25607e-08" y1="0.5" y2="0.500011" />
-        </g>
-      </svg>
+      <ButtonSecondary2 />
     </div>
   );
 }
 
 function CopyHoliday() {
   return (
-    <div className="absolute h-[600px] left-0 top-[1261px] w-[1440px]" data-name="Copy - Holiday">
-      <div className="absolute bg-white inset-0" data-name="Background" />
-      <Content1 />
-      <div className="absolute inset-[21.17%_6.81%_20.5%_56.6%] rounded-[20px]" data-name="laura-marks-mfFVeuItimI-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[20px] size-full" src={imgLauraMarksMfFVeuItimIUnsplash1} />
-      </div>
-      <div className="absolute inset-[6.33%_17.71%_93.67%_19.44%]">
-        <div className="absolute bottom-0 left-0 right-0 top-[-1px]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 905 1">
-            <line id="Line 4" stroke="var(--stroke-0, #939393)" x2="905" y1="0.5" y2="0.5" />
-          </svg>
+    <div className="relative bg-white min-h-[600px] w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12 border-t border-gray-300" data-name="Copy - Holiday">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-8 lg:gap-12 xl:gap-16">
+        <div className="w-full lg:w-1/2 h-[300px] md:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-lg" data-name="laura-marks-mfFVeuItimI-unsplash 1">
+          <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgLauraMarksMfFVeuItimIUnsplash1} />
         </div>
-      </div>
-      <div className="absolute flex inset-[78.67%_2.5%_10.67%_93.06%] items-center justify-center">
-        <div className="flex-none rotate-[180deg] size-[64px]">
-          <HalfBox1 />
+        <div className="w-full lg:w-1/2 flex flex-col justify-center">
+          <Content1 />
         </div>
       </div>
     </div>
@@ -217,10 +278,9 @@ function CopyHoliday() {
 
 function ButtonPrimary() {
   return (
-    <div className="absolute inset-[62.4%_43.06%_25.6%_43.06%] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)]" data-name="Button Primary">
-      <div className="absolute bg-black bottom-0 left-[-6.5%] right-[-8.5%] rounded-[5px] top-0" data-name="Background" />
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[14px] not-italic right-[15px] text-[18px] text-center text-white top-1/2 translate-y-[-50%]">
-        <p className="leading-[normal]">Check our Events!!</p>
+    <div className="relative bg-black rounded-lg flex items-center justify-center px-8 py-4 md:px-10 md:py-5 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer hover:opacity-90 transition-opacity" data-name="Button Primary" data-cta="check-events">
+      <div className="flex items-center justify-center font-semibold text-base md:text-lg lg:text-[18px] text-center text-white">
+        <p className="leading-normal">Check our Events!!</p>
       </div>
     </div>
   );
@@ -228,24 +288,25 @@ function ButtonPrimary() {
 
 function Content2() {
   return (
-    <div className="absolute contents inset-[20.2%_35.35%_25.6%_35.35%]" data-name="Content">
+    <div className="relative flex flex-col gap-6 items-center text-center z-10 bg-[#f2f2f2] bg-opacity-95 p-8 md:p-10 lg:p-12 rounded-xl shadow-xl max-w-2xl" data-name="Content">
+      <p className="font-bold leading-tight text-2xl md:text-3xl lg:text-[28px] text-black">Ready to get started?</p>
+      <p className="font-normal leading-relaxed text-base md:text-lg lg:text-[18px] text-black">"Ready to play, compete, and have fun? Let's get started!"</p>
       <ButtonPrimary />
-      <p className="absolute font-['Inter:Regular',sans-serif] font-normal inset-[41.4%_35.35%_48.4%_35.35%] leading-[1.406] not-italic text-[18px] text-black text-center">“Ready to play, compete, and have fun? Let’s get started!”</p>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold inset-[20.2%_39.79%_71.8%_39.72%] leading-[1.406] not-italic text-[28px] text-black text-center text-nowrap whitespace-pre">Ready to get started?</p>
     </div>
   );
 }
 
 function ReadyToGetStarted() {
   return (
-    <div className="absolute h-[500px] left-0 top-[3302px] w-[1440px]" data-name="Ready to get started">
-      <div className="absolute bg-[#f2f2f2] inset-0" data-name="Background" />
-      <Content2 />
-      <div className="absolute bottom-0 left-0 right-[69.65%] top-0" data-name="jeffery-erhunse-6D2Lmtv_X8A-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgJefferyErhunse6D2LmtvX8AUnsplash1} />
+    <div className="relative min-h-[500px] w-full flex flex-col md:flex-row" data-name="Ready to get started">
+      <div className="relative w-full md:w-1/2 h-[300px] md:h-[500px]" data-name="jeffery-erhunse-6D2Lmtv_X8A-unsplash 1">
+        <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgJefferyErhunse6D2LmtvX8AUnsplash1} />
       </div>
-      <div className="absolute h-[500px] left-[69.65%] right-0 top-0" data-name="taylor-friehl-IW-7PtXxagg-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgTaylorFriehlIw7PtXxaggUnsplash1} />
+      <div className="relative w-full md:w-1/2 h-[300px] md:h-[500px]" data-name="taylor-friehl-IW-7PtXxagg-unsplash 1">
+        <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgTaylorFriehlIw7PtXxaggUnsplash1} />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <Content2 />
       </div>
     </div>
   );
@@ -253,16 +314,16 @@ function ReadyToGetStarted() {
 
 function Frame4() {
   return (
-    <div className="bg-white content-stretch flex flex-col gap-[20px] items-center justify-center not-italic relative shrink-0 text-black text-center text-nowrap whitespace-pre">
-      <p className="font-['Poppins:Regular',sans-serif] leading-[32px] relative shrink-0 text-[24px] tracking-[-0.24px]">The reasons</p>
-      <p className="font-['Inter:Bold',sans-serif] font-bold leading-[40px] relative shrink-0 text-[32px] tracking-[-0.32px]">Why Choose Us?</p>
+    <div className="flex flex-col gap-4 md:gap-5 items-center justify-center text-black text-center">
+      <p className="font-normal leading-relaxed text-lg md:text-xl lg:text-[24px]">The reasons</p>
+      <p className="font-bold leading-tight text-3xl md:text-4xl lg:text-[32px]">Why Choose Us?</p>
     </div>
   );
 }
 
 function IconPlay() {
   return (
-    <div className="absolute left-1/2 size-[96px] top-[calc(50%+85px)] translate-x-[-50%] translate-y-[-50%]" data-name="Icon/Play">
+    <div className="relative w-16 h-16 md:w-24 md:h-24" data-name="Icon/Play">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 96 96">
         <g id="Icon/Play">
           <g id="Base"></g>
@@ -275,30 +336,42 @@ function IconPlay() {
 
 function CopyWhyChooseUs() {
   return (
-    <div className="absolute bg-white box-border content-stretch flex flex-col gap-[94px] items-center left-0 px-[200px] py-[78px] top-[1861px] w-[1440px]" data-name="Copy - Why Choose Us">
-      <Frame4 />
-      <div className="h-[338px] relative rounded-[15px] shrink-0 w-full" data-name="anastasia-chistik--9Vy4fR_Xo0-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[15px] size-full" src={imgAnastasiaChistik9Vy4FRXo0Unsplash1} />
+    <div className="relative bg-white w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12" data-name="Copy - Why Choose Us">
+      <div className="max-w-7xl mx-auto flex flex-col gap-12 md:gap-16 lg:gap-20 items-center">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="font-['Inter:Bold',sans-serif] font-bold text-2xl md:text-3xl lg:text-[24px] text-black">Why Choose Us?</h2>
+        </div>
+        
+        <div className="flex flex-wrap justify-center gap-8 md:gap-12 lg:gap-[60px] w-full">
+          {[
+            { icon: '🎯', title: 'Expert Coaching', desc: '40+ years experience' },
+            { icon: '👥', title: 'All Levels', desc: 'Beginner to advanced' },
+            { icon: '🤝', title: 'Community', desc: 'Friendly environment' },
+            { icon: '🏆', title: 'Quality', desc: 'Modern facilities' },
+          ].map(({ icon, title, desc }) => (
+            <div key={title} className="text-center flex-shrink-0">
+              <div className="w-[50px] h-[50px] mx-auto mb-[10px] rounded-full bg-white border-2 border-black flex items-center justify-center">
+                <span className="text-[22px]">{icon}</span>
+              </div>
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base lg:text-[14px] text-black mb-[2px]">{title}</h3>
+              <p className="font-['Inter:Regular',sans-serif] text-xs md:text-sm lg:text-[12px] text-[#666]">{desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
-      <IconPlay />
     </div>
   );
 }
 
 function About() {
   return (
-    <div className="absolute contents leading-[0] left-[753px] top-[4577px]" data-name="About">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[753px] not-italic text-slate-200 text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
-        <p className="mb-0">Why Choose Us?</p>
-        <p className="mb-0">&nbsp;</p>
-        <p className="mb-0">Featured</p>
-        <p className="mb-0">&nbsp;</p>
-        <p className="mb-0">Partnership</p>
-        <p className="mb-0">&nbsp;</p>
-        <p>Our Team</p>
-      </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[753px] text-white text-[20px] top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
-        <p className="leading-[1.5]">About</p>
+    <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="About">
+      <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">About</div>
+      <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
+        <p className="cursor-pointer hover:text-white transition-colors">Why Choose Us?</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Featured</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Partnership</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Our Team</p>
       </div>
     </div>
   );
@@ -306,18 +379,13 @@ function About() {
 
 function Community() {
   return (
-    <div className="absolute contents leading-[0] left-[957.29px] top-[4577px]" data-name="Community">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[957.29px] not-italic text-slate-200 text-[16px] top-[4727px] tracking-[-0.32px] translate-y-[-50%] w-[151.789px]">
-        <p className="mb-0">Events</p>
-        <p className="mb-0">&nbsp;</p>
-        <p className="mb-0">Blog</p>
-        <p className="mb-0">&nbsp;</p>
-        <p className="mb-0">Podcast</p>
-        <p className="mb-0">&nbsp;</p>
-        <p>Invite a friend</p>
-      </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[957.29px] text-[20px] text-white top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[151.789px]">
-        <p className="leading-[1.5]">Community</p>
+    <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="Community">
+      <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">Community</div>
+      <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
+        <p className="cursor-pointer hover:text-white transition-colors">Events</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Blog</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Podcast</p>
+        <p className="cursor-pointer hover:text-white transition-colors">Invite a friend</p>
       </div>
     </div>
   );
@@ -325,16 +393,12 @@ function Community() {
 
 function Socials() {
   return (
-    <div className="absolute contents leading-[0] left-[1161.57px] top-[4577px]" data-name="Socials">
-      <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[188px] justify-center leading-[1.5] left-[1162px] not-italic text-slate-200 text-[16px] top-[4703px] tracking-[-0.32px] translate-y-[-50%] w-[203.717px]">
-        <p className="mb-0">ajhsports.com.au</p>
-        <p className="mb-0">&nbsp;</p>
-        <p className="mb-0 whitespace-pre-wrap">{`+61  0412345678`}</p>
-        <p className="mb-0">&nbsp;</p>
+    <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="Socials">
+      <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">Contact Us</div>
+      <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
+        <p>ajhsports.com.au</p>
+        <p>{`+61  0412345678`}</p>
         <p>123 Ave, Sydney, NSW</p>
-      </div>
-      <div className="absolute flex flex-col font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold h-[32px] justify-center left-[1161.57px] text-[20px] text-white top-[4593px] tracking-[-0.4px] translate-y-[-50%] w-[203.717px]">
-        <p className="leading-[1.5]">Contact Us</p>
       </div>
     </div>
   );
@@ -353,169 +417,341 @@ function InputDefault() {
 
 function Input() {
   return (
-    <div className="absolute h-[47px] left-[92px] top-[4730px] w-[316px]" data-name="Input">
-      <InputDefault />
+    <div className="relative flex-1 w-full" data-name="Input">
+      <input 
+        type="email" 
+        placeholder="Your email" 
+        className="w-full h-[47px] md:h-[50px] px-4 md:px-5 rounded-lg border border-white bg-white text-black text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black transition-all" 
+      />
     </div>
   );
 }
 
 function Button() {
   return (
-    <div className="absolute h-[49px] left-[450px] top-[4728px] w-[151px]" data-name="Button">
-      <div className="absolute bg-[#191919] inset-0 rounded-[100px]" data-name="Rectangle" />
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[16px] leading-[16px] left-[24.26%] not-italic right-[23.86%] text-[14px] text-center text-white top-[calc(50%-9.5px)]">Subscribe</p>
+    <div className="relative w-full sm:w-auto sm:flex-shrink-0 cursor-pointer" data-name="Button">
+      <div className="bg-[#191919] hover:bg-[#2a2a2a] h-[47px] md:h-[50px] rounded-full flex items-center justify-center px-6 md:px-8 transition-colors">
+        <p className="font-bold text-sm md:text-base lg:text-[14px] text-center text-white">Subscribe</p>
+      </div>
     </div>
   );
 }
 
 function SocmedFacebook() {
   return (
-    <div className="absolute h-[25.561px] left-[646px] top-[4866.99px] w-[22.248px]" data-name="Socmed/Facebook">
-      <div className="absolute inset-[-6.72%_-80.91%_-121.28%_-80.91%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
-          <g id="Socmed/Facebook">
-            <g filter="url(#filter0_d_1_2264)" id="Ellipse 176">
-              <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
-            </g>
-            <path d={svgPaths.p2da0980} fill="var(--fill-0, white)" id="Vector" />
+    <div className="relative w-full h-full" data-name="Socmed/Facebook">
+      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
+        <g id="Socmed/Facebook">
+          <g filter="url(#filter0_d_1_2264)" id="Ellipse 176">
+            <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
           </g>
-          <defs>
-            <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2264" width="58.2477" x="0" y="0">
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-              <feOffset dy="13" />
-              <feGaussianBlur stdDeviation="9" />
-              <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
-              <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2264" />
-              <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2264" mode="normal" result="shape" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
+          <path d={svgPaths.p2da0980} fill="var(--fill-0, white)" id="Vector" />
+        </g>
+        <defs>
+          <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2264" width="58.2477" x="0" y="0">
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+            <feOffset dy="13" />
+            <feGaussianBlur stdDeviation="9" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
+            <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2264" />
+            <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2264" mode="normal" result="shape" />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 }
 
 function SocmedTwitter() {
   return (
-    <div className="absolute h-[25.561px] left-[688.44px] top-[4866.99px] w-[22.248px]" data-name="Socmed/Twitter">
-      <div className="absolute inset-[-6.72%_-80.91%_-121.28%_-80.91%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
-          <g id="Socmed/Twitter">
-            <g filter="url(#filter0_d_1_2252)" id="Ellipse 177">
-              <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
-            </g>
-            <path d={svgPaths.pdb48f00} fill="var(--fill-0, white)" id="Vector" />
+    <div className="relative w-full h-full" data-name="Socmed/Twitter">
+      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
+        <g id="Socmed/Twitter">
+          <g filter="url(#filter0_d_1_2252)" id="Ellipse 177">
+            <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
           </g>
-          <defs>
-            <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2252" width="58.2477" x="-4.00454e-07" y="0">
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-              <feOffset dy="13" />
-              <feGaussianBlur stdDeviation="9" />
-              <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
-              <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2252" />
-              <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2252" mode="normal" result="shape" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
+          <path d={svgPaths.pdb48f00} fill="var(--fill-0, white)" id="Vector" />
+        </g>
+        <defs>
+          <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2252" width="58.2477" x="-4.00454e-07" y="0">
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+            <feOffset dy="13" />
+            <feGaussianBlur stdDeviation="9" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
+            <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2252" />
+            <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2252" mode="normal" result="shape" />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 }
 
 function SocmedInstagram() {
   return (
-    <div className="absolute h-[25.561px] left-[730.87px] top-[4865px] w-[22.248px]" data-name="Socmed/Instagram">
-      <div className="absolute inset-[-6.72%_-80.91%_-121.28%_-80.91%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
-          <g id="Socmed/Instagram">
-            <g filter="url(#filter0_d_1_2248)" id="Ellipse 178">
-              <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
-            </g>
-            <path d={svgPaths.p9bf9192} fill="var(--fill-0, white)" id="Vector" />
+    <div className="relative w-full h-full" data-name="Socmed/Instagram">
+      <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 59 59">
+        <g id="Socmed/Instagram">
+          <g filter="url(#filter0_d_1_2248)" id="Ellipse 178">
+            <ellipse cx="29.1239" cy="16.1393" fill="var(--fill-0, #1A202C)" rx="11.1239" ry="11.1393" />
           </g>
-          <defs>
-            <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2248" width="58.2477" x="-8.00903e-07" y="0">
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-              <feOffset dy="13" />
-              <feGaussianBlur stdDeviation="9" />
-              <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
-              <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2248" />
-              <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2248" mode="normal" result="shape" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
+          <path d={svgPaths.p9bf9192} fill="var(--fill-0, white)" id="Vector" />
+        </g>
+        <defs>
+          <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="58.2786" id="filter0_d_1_2248" width="58.2477" x="-8.00903e-07" y="0">
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+            <feOffset dy="13" />
+            <feGaussianBlur stdDeviation="9" />
+            <feColorMatrix type="matrix" values="0 0 0 0 0.0658854 0 0 0 0 0.0730469 0 0 0 0 0.1375 0 0 0 0.08 0" />
+            <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_2248" />
+            <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_2248" mode="normal" result="shape" />
+          </filter>
+        </defs>
+      </svg>
     </div>
   );
 }
 
 function Socials1() {
   return (
-    <div className="absolute contents left-[646px] top-[4865px]" data-name="Socials">
-      <SocmedFacebook />
-      <SocmedTwitter />
-      <SocmedInstagram />
+    <div className="flex items-center justify-center gap-4 md:gap-6" data-name="Socials">
+      <div className="w-10 h-10 md:w-12 md:h-12 cursor-pointer hover:opacity-80 transition-opacity">
+        <SocmedFacebook />
+      </div>
+      <div className="w-10 h-10 md:w-12 md:h-12 cursor-pointer hover:opacity-80 transition-opacity">
+        <SocmedTwitter />
+      </div>
+      <div className="w-10 h-10 md:w-12 md:h-12 cursor-pointer hover:opacity-80 transition-opacity">
+        <SocmedInstagram />
+      </div>
     </div>
   );
 }
 
 function Main() {
   return (
-    <div className="absolute contents left-0 top-[4547px]" data-name="MAIN">
-      <div className="absolute bg-black h-[364px] left-0 top-[4547px] w-[1440px]" />
-      <div className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[4577px] w-[47px]" data-name="AJHSports-Logo-no-outline-1 3">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline11} />
-      </div>
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] not-italic text-[24px] text-white text-center top-[4604px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">Join Our Newsletter</p>
-      <div className="absolute flex h-[calc(1px*((var(--transform-inner-width)*1)+(var(--transform-inner-height)*0)))] items-center justify-center left-[654px] top-[4589px] w-[calc(1px*((var(--transform-inner-height)*1)+(var(--transform-inner-width)*0)))]" style={{ "--transform-inner-width": "213", "--transform-inner-height": "0" } as React.CSSProperties}>
-        <div className="flex-none rotate-[90deg]">
-          <div className="h-0 relative w-[213px]">
-            <div className="absolute bottom-0 left-0 right-0 top-[-1px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 213 1">
-                <line id="Line 2" stroke="var(--stroke-0, #807E7E)" x2="213" y1="0.5" y2="0.5" />
-              </svg>
-            </div>
+    <div className="w-full bg-black relative" data-name="MAIN">
+      {/* Desktop Layout */}
+      <div className="hidden md:block relative min-h-[364px]">
+        {/* Logo */}
+        <div 
+          className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[30px] w-[47px] cursor-pointer z-10"
+          data-name="AJHSports-Logo-no-outline-1 3"
+        >
+          <img 
+            alt="AJH Sports Logo" 
+            className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+            src={imgAjhSportsLogoNoOutline11} 
+          />
+        </div>
+        
+        {/* Newsletter Title */}
+        <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] lg:left-[335.5px] text-[24px] text-white text-center top-[57px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">
+          Join Our Newsletter
+        </p>
+        
+        {/* Newsletter Description */}
+        <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] lg:left-[327px] text-[14px] text-slate-200 text-center top-[113px] translate-x-[-50%] w-[470px]">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        
+        {/* Email Input Form - Desktop */}
+        <form className="absolute left-[92px] top-[183px]">
+          <input
+            type="email"
+            name="email"
+            placeholder="Your email"
+            required
+            className="w-[316px] h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-[16px] outline-none"
+          />
+          <button
+            type="submit"
+            className="absolute left-[358px] top-[-2px] h-[49px] w-[151px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-[14px] text-white hover:bg-[#333] transition-colors"
+          >
+            Subscribe
+          </button>
+        </form>
+        
+        {/* Vertical Divider Line - Desktop */}
+        <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
+        
+        {/* About Section - Desktop */}
+        <div className="absolute left-[753px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+          </div>
+        </div>
+        
+        {/* Community Section - Desktop */}
+        <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+          </div>
+        </div>
+        
+        {/* Contact Section - Desktop */}
+        <div className="absolute left-[1162px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p>ajhsports.com.au</p>
+            <p>+61 0412345678</p>
+            <p>123 Ave, Sydney, NSW</p>
+          </div>
+        </div>
+        
+        {/* Bottom Divider - Desktop */}
+        <div className="absolute left-[77px] top-[297px] w-[calc(100%-154px)] max-w-[1318.17px] h-[1px] bg-[#807E7E]" />
+        
+        {/* Copyright - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold left-[30px] text-[11px] text-slate-200 top-[332px] tracking-[-0.22px]">
+          ©2025 Company Name. All rights reserved
+        </p>
+        
+        {/* Privacy & Terms - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[335px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors" style={{ left: '1061px' }}>
+          Privacy & Policy
+        </p>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[336px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors" style={{ left: '1263px' }}>
+          Terms & Condition
+        </p>
+        
+        {/* Social Icons - Desktop */}
+        <div className="absolute left-[646px] top-[320px] flex gap-[20px]">
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">f</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">𝕏</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">in</span>
           </div>
         </div>
       </div>
-      <About />
-      <Community />
-      <Socials />
-      <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] not-italic text-[14px] text-slate-200 text-center top-[4660px] translate-x-[-50%] w-[470px]">Subscribe to our newsletter to be the first to know about new sessions, competitions and events.</p>
-      <Input />
-      <Button />
-      <div className="absolute flex h-0 items-center justify-center left-[77px] top-[4844px] w-[1318.17px]">
-        <div className="flex-none rotate-[180deg]">
-          <div className="h-0 relative w-[1318.17px]" data-name="Line">
-            <div className="absolute bottom-0 left-0 right-0 top-[-1px]">
-              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 1319 1">
-                <line id="Line" stroke="var(--stroke-0, #807E7E)" x2="1318.17" y1="0.5" y2="0.5" />
-              </svg>
+
+      {/* Mobile/Tablet Layout */}
+      <div className="md:hidden relative py-8 px-4">
+        {/* Logo */}
+        <div 
+          className="flex justify-center mb-6"
+          data-name="AJHSports-Logo-no-outline-1 3"
+        >
+          <div className="h-[31px] w-[47px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
+            <img 
+              alt="AJH Sports Logo" 
+              className="w-full h-full object-cover pointer-events-none" 
+              src={imgAjhSportsLogoNoOutline11} 
+            />
+          </div>
+        </div>
+        
+        {/* Newsletter Title */}
+        <p className="font-['Inter:Bold',sans-serif] font-bold text-xl text-white text-center mb-2">
+          Join Our Newsletter
+        </p>
+        
+        {/* Newsletter Description */}
+        <p className="font-['Inter:Regular',sans-serif] font-normal text-xs text-slate-200 text-center mb-6 px-4">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        
+        {/* Email Input Form - Mobile */}
+        <form className="mb-8 px-4">
+          <div className="flex flex-col gap-3">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              required
+              className="w-full h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-base outline-none"
+            />
+            <button
+              type="submit"
+              className="w-full h-[49px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-sm text-white hover:bg-[#333] transition-colors"
+            >
+              Subscribe
+            </button>
+          </div>
+        </form>
+        
+        {/* Footer Links - Mobile/Tablet */}
+        <div className="mb-6 px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">About</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">Community</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-sm text-white mb-3">Contact Us</p>
+              <div className="font-medium text-xs text-slate-200 space-y-2">
+                <p>ajhsports.com.au</p>
+                <p>+61 0412345678</p>
+                <p>123 Ave, Sydney, NSW</p>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Bottom Divider - Mobile */}
+        <div className="mx-4 mb-4 h-[1px] bg-[#807E7E]" />
+        
+        {/* Social Icons - Mobile */}
+        <div className="flex justify-center gap-4 mb-4">
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">f</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">𝕏</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">in</span>
+          </div>
+        </div>
+        
+        {/* Copyright & Privacy - Mobile */}
+        <div className="px-4 pb-4">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[10px] text-slate-200 text-center mb-2 tracking-[-0.22px]">
+            ©2025 Company Name. All rights reserved
+          </p>
+          <div className="flex justify-center gap-4">
+            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
+            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
+          </div>
+        </div>
       </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[30px] not-italic text-[11px] text-slate-200 top-[4879.5px] tracking-[-0.22px] translate-y-[-50%] w-[327.544px]">
-        <p className="leading-[1.5]">©2025 Company Name. All rights reserved</p>
-      </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1204.8px] not-italic text-[11px] text-slate-200 text-right top-[4882.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
-        <p className="leading-[1.5]">{`Privacy & Policy`}</p>
-      </div>
-      <div className="absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center leading-[0] left-[1406.8px] not-italic text-[11px] text-slate-200 text-right top-[4883.5px] tracking-[-0.22px] translate-x-[-100%] translate-y-[-50%] w-[143.8px]">
-        <p className="leading-[1.5]">{`Terms & Condition`}</p>
-      </div>
-      <Socials1 />
     </div>
   );
 }
 
 function Top() {
   return (
-    <div className="content-stretch flex flex-col gap-[8px] items-center relative shrink-0 w-full" data-name="Top">
-      <p className="font-['Roboto:Bold',sans-serif] font-bold leading-[1.1] relative shrink-0 text-[#21272a] text-[42px] text-center w-full" style={{ fontVariationSettings: "'wdth' 100" }}>
+    <div className="flex flex-col items-center w-full" data-name="Top">
+      <p className="font-bold leading-tight text-4xl md:text-5xl lg:text-[42px] text-[#21272a] text-center">
         Our Team
       </p>
     </div>
@@ -524,7 +760,7 @@ function Top() {
 
 function SectionText() {
   return (
-    <div className="content-stretch flex flex-col gap-[48px] items-start relative shrink-0 w-[1280px]" data-name="Section Text">
+    <div className="flex flex-col items-center w-full" data-name="Section Text">
       <Top />
     </div>
   );
@@ -532,20 +768,18 @@ function SectionText() {
 
 function PlaceholderPicture() {
   return (
-    <div className="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" data-name="Placeholder / picture">
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-        <img alt="" className="absolute max-w-none object-50%-50% object-cover size-full" src={imgPlaceholderPicture} />
-        <div className="absolute bg-[rgba(0,0,0,0.2)] inset-0" />
-      </div>
+    <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-lg" data-name="Placeholder / picture">
+      <img alt="" className="w-full h-full object-cover" src={imgPlaceholderPicture} />
+      <div className="absolute bg-[rgba(0,0,0,0.2)] inset-0" />
     </div>
   );
 }
 
 function NameAndRole() {
   return (
-    <div className="content-stretch flex flex-col font-['Inter:Regular',sans-serif] font-normal items-center leading-[1.4] not-italic relative shrink-0 text-[18px] text-center w-full" data-name="Name and Role">
-      <p className="relative shrink-0 text-[#21272a] w-full">Darrell Steward</p>
-      <p className="relative shrink-0 text-[#697077] w-full">{`UI Designer & Co-founder`}</p>
+    <div className="flex flex-col items-center text-center w-full" data-name="Name and Role">
+      <p className="font-semibold text-lg md:text-xl text-[#21272a] mb-1">Darrell Steward</p>
+      <p className="font-normal text-sm md:text-base text-[#697077]">{`UI Designer & Co-founder`}</p>
     </div>
   );
 }
@@ -602,27 +836,35 @@ function IconJamIconsOutlineLogosFacebook() {
 
 function Frame() {
   return (
-    <div className="content-stretch flex gap-[16px] items-center justify-center relative shrink-0">
-      <IconJamIconsOutlineLogosLinkedin />
-      <IconJamIconsOutlineLogosTwitter />
-      <IconJamIconsOutlineLogosInstagram />
-      <IconJamIconsOutlineLogosFacebook />
+    <div className="flex gap-3 md:gap-4 items-center justify-center">
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosLinkedin />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosTwitter />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosInstagram />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosFacebook />
+      </div>
     </div>
   );
 }
 
 function TextContainer() {
   return (
-    <div className="box-border content-stretch flex gap-[10px] items-center justify-center px-[16px] py-0 relative shrink-0" data-name="Text Container">
-      <p className="font-['Inter:Medium',sans-serif] font-medium leading-none not-italic relative shrink-0 text-[#0f62fe] text-[16px] text-nowrap tracking-[0.5px] whitespace-pre">Contact Darrell</p>
+    <div className="flex items-center justify-center" data-name="Text Container">
+      <p className="font-medium text-[#0f62fe] text-sm md:text-base">Contact Darrell</p>
     </div>
   );
 }
 
 function Button1() {
   return (
-    <div className="box-border content-stretch flex h-[48px] items-center justify-center px-[12px] py-[16px] relative shrink-0 w-[180px]" data-name="button">
-      <div aria-hidden="true" className="absolute border-2 border-[#0f62fe] border-solid inset-0 pointer-events-none" />
+    <div className="relative flex h-12 items-center justify-center px-6 py-3 w-full max-w-[180px] cursor-pointer hover:opacity-80 transition-opacity" data-name="button">
+      <div className="absolute border-2 border-[#0f62fe] border-solid inset-0 rounded pointer-events-none" />
       <TextContainer />
     </div>
   );
@@ -630,7 +872,7 @@ function Button1() {
 
 function TeamMember() {
   return (
-    <div className="basis-0 content-stretch flex flex-col gap-[16px] grow h-[473px] items-center min-h-px min-w-px relative shrink-0" data-name="Team-member">
+    <div className="flex flex-col gap-4 md:gap-6 items-center w-full" data-name="Team-member">
       <PlaceholderPicture />
       <NameAndRole />
       <Frame />
@@ -641,17 +883,17 @@ function TeamMember() {
 
 function PlaceholderPicture1() {
   return (
-    <div className="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" data-name="Placeholder / picture">
-      <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgPlaceholderPicture1} />
+    <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-lg" data-name="Placeholder / picture">
+      <img alt="" className="w-full h-full object-cover" src={imgPlaceholderPicture1} />
     </div>
   );
 }
 
 function NameAndRole1() {
   return (
-    <div className="content-stretch flex flex-col font-['Inter:Regular',sans-serif] font-normal items-center leading-[1.4] not-italic relative shrink-0 text-[18px] text-center w-full" data-name="Name and Role">
-      <p className="relative shrink-0 text-[#21272a] w-full">Savannah Nguyen</p>
-      <p className="relative shrink-0 text-[#697077] w-full">{`UX Designer & Co-founder`}</p>
+    <div className="flex flex-col items-center text-center w-full" data-name="Name and Role">
+      <p className="font-semibold text-lg md:text-xl text-[#21272a] mb-1">Savannah Nguyen</p>
+      <p className="font-normal text-sm md:text-base text-[#697077]">{`UX Designer & Co-founder`}</p>
     </div>
   );
 }
@@ -708,27 +950,35 @@ function IconJamIconsOutlineLogosFacebook1() {
 
 function Frame1() {
   return (
-    <div className="content-stretch flex gap-[16px] items-center justify-center relative shrink-0">
-      <IconJamIconsOutlineLogosLinkedin1 />
-      <IconJamIconsOutlineLogosTwitter1 />
-      <IconJamIconsOutlineLogosInstagram1 />
-      <IconJamIconsOutlineLogosFacebook1 />
+    <div className="flex gap-3 md:gap-4 items-center justify-center">
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosLinkedin1 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosTwitter1 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosInstagram1 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosFacebook1 />
+      </div>
     </div>
   );
 }
 
 function TextContainer1() {
   return (
-    <div className="box-border content-stretch flex gap-[10px] items-center justify-center px-[16px] py-0 relative shrink-0" data-name="Text Container">
-      <p className="font-['Inter:Medium',sans-serif] font-medium leading-none not-italic relative shrink-0 text-[#0f62fe] text-[16px] text-nowrap tracking-[0.5px] whitespace-pre">Contact Savannah</p>
+    <div className="flex items-center justify-center" data-name="Text Container">
+      <p className="font-medium text-[#0f62fe] text-sm md:text-base">Contact Savannah</p>
     </div>
   );
 }
 
 function Button2() {
   return (
-    <div className="box-border content-stretch flex h-[48px] items-center justify-center px-[12px] py-[16px] relative shrink-0 w-[180px]" data-name="button">
-      <div aria-hidden="true" className="absolute border-2 border-[#0f62fe] border-solid inset-0 pointer-events-none" />
+    <div className="relative flex h-12 items-center justify-center px-6 py-3 w-full max-w-[180px] cursor-pointer hover:opacity-80 transition-opacity" data-name="button">
+      <div className="absolute border-2 border-[#0f62fe] border-solid inset-0 rounded pointer-events-none" />
       <TextContainer1 />
     </div>
   );
@@ -736,7 +986,7 @@ function Button2() {
 
 function TeamMember1() {
   return (
-    <div className="basis-0 content-stretch flex flex-col gap-[16px] grow h-[473px] items-center min-h-px min-w-px relative shrink-0" data-name="Team-member">
+    <div className="flex flex-col gap-4 md:gap-6 items-center w-full" data-name="Team-member">
       <PlaceholderPicture1 />
       <NameAndRole1 />
       <Frame1 />
@@ -747,17 +997,17 @@ function TeamMember1() {
 
 function PlaceholderPicture2() {
   return (
-    <div className="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" data-name="Placeholder / picture">
-      <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgPlaceholderPicture2} />
+    <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-lg" data-name="Placeholder / picture">
+      <img alt="" className="w-full h-full object-cover" src={imgPlaceholderPicture2} />
     </div>
   );
 }
 
 function NameAndRole2() {
   return (
-    <div className="content-stretch flex flex-col font-['Inter:Regular',sans-serif] font-normal items-center leading-[1.4] not-italic relative shrink-0 text-[18px] text-center w-full" data-name="Name and Role">
-      <p className="relative shrink-0 text-[#21272a] w-full">Dianne Russell</p>
-      <p className="relative shrink-0 text-[#697077] w-full">Developer</p>
+    <div className="flex flex-col items-center text-center w-full" data-name="Name and Role">
+      <p className="font-semibold text-lg md:text-xl text-[#21272a] mb-1">Dianne Russell</p>
+      <p className="font-normal text-sm md:text-base text-[#697077]">Developer</p>
     </div>
   );
 }
@@ -814,27 +1064,35 @@ function IconJamIconsOutlineLogosFacebook2() {
 
 function Frame2() {
   return (
-    <div className="content-stretch flex gap-[16px] items-center justify-center relative shrink-0">
-      <IconJamIconsOutlineLogosLinkedin2 />
-      <IconJamIconsOutlineLogosTwitter2 />
-      <IconJamIconsOutlineLogosInstagram2 />
-      <IconJamIconsOutlineLogosFacebook2 />
+    <div className="flex gap-3 md:gap-4 items-center justify-center">
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosLinkedin2 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosTwitter2 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosInstagram2 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosFacebook2 />
+      </div>
     </div>
   );
 }
 
 function TextContainer2() {
   return (
-    <div className="box-border content-stretch flex gap-[10px] items-center justify-center px-[16px] py-0 relative shrink-0" data-name="Text Container">
-      <p className="font-['Inter:Medium',sans-serif] font-medium leading-none not-italic relative shrink-0 text-[#0f62fe] text-[16px] text-nowrap tracking-[0.5px] whitespace-pre">Contact Dianne</p>
+    <div className="flex items-center justify-center" data-name="Text Container">
+      <p className="font-medium text-[#0f62fe] text-sm md:text-base">Contact Dianne</p>
     </div>
   );
 }
 
 function Button3() {
   return (
-    <div className="box-border content-stretch flex h-[48px] items-center justify-center px-[12px] py-[16px] relative shrink-0 w-[180px]" data-name="button">
-      <div aria-hidden="true" className="absolute border-2 border-[#0f62fe] border-solid inset-0 pointer-events-none" />
+    <div className="relative flex h-12 items-center justify-center px-6 py-3 w-full max-w-[180px] cursor-pointer hover:opacity-80 transition-opacity" data-name="button">
+      <div className="absolute border-2 border-[#0f62fe] border-solid inset-0 rounded pointer-events-none" />
       <TextContainer2 />
     </div>
   );
@@ -842,7 +1100,7 @@ function Button3() {
 
 function TeamMember2() {
   return (
-    <div className="basis-0 content-stretch flex flex-col gap-[16px] grow h-[473px] items-center min-h-px min-w-px relative shrink-0" data-name="Team-member">
+    <div className="flex flex-col gap-4 md:gap-6 items-center w-full" data-name="Team-member">
       <PlaceholderPicture2 />
       <NameAndRole2 />
       <Frame2 />
@@ -853,17 +1111,17 @@ function TeamMember2() {
 
 function PlaceholderPicture3() {
   return (
-    <div className="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" data-name="Placeholder / picture">
-      <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgPlaceholderPicture3} />
+    <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-lg" data-name="Placeholder / picture">
+      <img alt="" className="w-full h-full object-cover" src={imgPlaceholderPicture3} />
     </div>
   );
 }
 
 function NameAndRole3() {
   return (
-    <div className="content-stretch flex flex-col font-['Inter:Regular',sans-serif] font-normal items-center leading-[1.4] not-italic relative shrink-0 text-[18px] text-center w-full" data-name="Name and Role">
-      <p className="relative shrink-0 text-[#21272a] w-full">Kristin Watson</p>
-      <p className="relative shrink-0 text-[#697077] w-full">Sr. Product Designer</p>
+    <div className="flex flex-col items-center text-center w-full" data-name="Name and Role">
+      <p className="font-semibold text-lg md:text-xl text-[#21272a] mb-1">Kristin Watson</p>
+      <p className="font-normal text-sm md:text-base text-[#697077]">Sr. Product Designer</p>
     </div>
   );
 }
@@ -920,27 +1178,35 @@ function IconJamIconsOutlineLogosFacebook3() {
 
 function Frame3() {
   return (
-    <div className="content-stretch flex gap-[16px] items-center justify-center relative shrink-0">
-      <IconJamIconsOutlineLogosLinkedin3 />
-      <IconJamIconsOutlineLogosTwitter3 />
-      <IconJamIconsOutlineLogosInstagram3 />
-      <IconJamIconsOutlineLogosFacebook3 />
+    <div className="flex gap-3 md:gap-4 items-center justify-center">
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosLinkedin3 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosTwitter3 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosInstagram3 />
+      </div>
+      <div className="w-6 h-6 cursor-pointer hover:opacity-70 transition-opacity">
+        <IconJamIconsOutlineLogosFacebook3 />
+      </div>
     </div>
   );
 }
 
 function TextContainer3() {
   return (
-    <div className="box-border content-stretch flex gap-[10px] items-center justify-center px-[16px] py-0 relative shrink-0" data-name="Text Container">
-      <p className="font-['Inter:Medium',sans-serif] font-medium leading-none not-italic relative shrink-0 text-[#0f62fe] text-[16px] text-nowrap tracking-[0.5px] whitespace-pre">Contact Kristin</p>
+    <div className="flex items-center justify-center" data-name="Text Container">
+      <p className="font-medium text-[#0f62fe] text-sm md:text-base">Contact Kristin</p>
     </div>
   );
 }
 
 function Button4() {
   return (
-    <div className="box-border content-stretch flex h-[48px] items-center justify-center px-[12px] py-[16px] relative shrink-0 w-[180px]" data-name="button">
-      <div aria-hidden="true" className="absolute border-2 border-[#0f62fe] border-solid inset-0 pointer-events-none" />
+    <div className="relative flex h-12 items-center justify-center px-6 py-3 w-full max-w-[180px] cursor-pointer hover:opacity-80 transition-opacity" data-name="button">
+      <div className="absolute border-2 border-[#0f62fe] border-solid inset-0 rounded pointer-events-none" />
       <TextContainer3 />
     </div>
   );
@@ -948,7 +1214,7 @@ function Button4() {
 
 function TeamMember3() {
   return (
-    <div className="basis-0 content-stretch flex flex-col gap-[16px] grow h-[473px] items-center min-h-px min-w-px relative shrink-0" data-name="Team-member">
+    <div className="flex flex-col gap-4 md:gap-6 items-center w-full" data-name="Team-member">
       <PlaceholderPicture3 />
       <NameAndRole3 />
       <Frame3 />
@@ -959,7 +1225,7 @@ function TeamMember3() {
 
 function Images() {
   return (
-    <div className="content-stretch flex gap-[16px] items-start relative shrink-0 w-full" data-name="Images">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 w-full" data-name="Images">
       <TeamMember />
       <TeamMember1 />
       <TeamMember2 />
@@ -970,9 +1236,11 @@ function Images() {
 
 function OurLovelyTeam() {
   return (
-    <div className="absolute bg-white box-border content-stretch flex flex-col gap-[64px] items-center left-0 p-[80px] top-[3804px] w-[1440px]" data-name="Our Lovely Team">
-      <SectionText />
-      <Images />
+    <div className="relative bg-white w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12" data-name="Our Lovely Team">
+      <div className="max-w-7xl mx-auto flex flex-col gap-12 md:gap-16 items-center">
+        <SectionText />
+        <Images />
+      </div>
     </div>
   );
 }
@@ -1216,39 +1484,55 @@ function EvaArrowBackFill3() {
 
 function TrustedByThousand() {
   return (
-    <div className="absolute bg-white h-[769px] left-0 top-[2534px] w-[1440px]" data-name="trusted by Thousand">
-      <div className="absolute h-[769px] left-0 opacity-80 top-0 w-[1440px]" data-name="ivan-cortez-c9aGBqkeoE4-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgIvanCortezC9AGBqkeoE4Unsplash1} />
+    <div className="relative bg-white min-h-[600px] w-full py-12 md:py-16 lg:py-20" data-name="trusted by Thousand">
+      <div className="absolute inset-0 opacity-80 z-0" data-name="ivan-cortez-c9aGBqkeoE4-unsplash 1">
+        <img alt="" className="w-full h-full object-cover pointer-events-none" src={imgIvanCortezC9AGBqkeoE4Unsplash1} />
       </div>
-      <Group />
-      <Group1 />
-      <Group2 />
-      <Group3 />
-      <EvaArrowBackFill />
-      <div className="absolute flex items-center justify-center left-[1385px] size-[30px] top-[406px]">
-        <div className="flex-none rotate-[180deg] scale-y-[-100%]">
-          <EvaArrowBackFill1 />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-8 xl:px-12">
+        <div className="text-center mb-10 md:mb-12 lg:mb-16">
+          <div className="font-bold text-3xl md:text-4xl lg:text-[35px] text-white mb-4 md:mb-6">
+            <p className="mb-0">{`Trusted by Thousands of `}</p>
+            <p>Happy Customer</p>
+          </div>
+          <p className="font-normal text-base md:text-lg lg:text-[18px] text-white max-w-2xl mx-auto leading-relaxed">
+            "Here's what our happy participants are saying about their experience."
+          </p>
         </div>
-      </div>
-      <Dots />
-      <Group4 />
-      <Group5 />
-      <Group6 />
-      <EvaArrowBackFill2 />
-      <div className="absolute flex items-center justify-center left-[1385px] size-[30px] top-[406px]">
-        <div className="flex-none rotate-[180deg] scale-y-[-100%]">
-          <EvaArrowBackFill3 />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg">
+            <p className="text-sm md:text-base leading-relaxed mb-6">"Really well organized event by AJH Sports. Great communication, smooth scheduling, and everything ran on time."</p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
+              <div className="flex-1">
+                <p className="font-medium text-base">Viezh Robert</p>
+                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+              </div>
+              <p className="text-base font-semibold">4.5</p>
+            </div>
+          </div>
+          <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg">
+            <p className="text-sm md:text-base leading-relaxed mb-6">"Very well organised sports event. The team was helpful, schedules were clear, and the atmosphere was great."</p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
+              <div className="flex-1">
+                <p className="font-medium text-base">Viezh Robert</p>
+                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+              </div>
+              <p className="text-base font-semibold">4.5</p>
+            </div>
+          </div>
+          <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg md:col-span-2 lg:col-span-1">
+            <p className="text-sm md:text-base leading-relaxed mb-6">"Had a great time! Everything was well set up and ran smoothly. Awesome job by AJH Sports."</p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
+              <div className="flex-1">
+                <p className="font-medium text-base">Viezh Robert</p>
+                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+              </div>
+              <p className="text-base font-semibold">4.5</p>
+            </div>
+          </div>
         </div>
-      </div>
-      <Dots />
-      <div className="absolute left-[100px] rounded-[80px] size-[54px] top-[333px]" data-name="alex-suprun-mynsNaNwVDc-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[80px] size-full" src={imgAlexSuprunMynsNaNwVDcUnsplash1} />
-      </div>
-      <div className="absolute left-[554px] rounded-[80px] size-[54px] top-[337px]" data-name="vicky-hladynets-C8Ta0gwPbQg-unsplash 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[80px] size-full" src={imgVickyHladynetsC8Ta0GwPbQgUnsplash1} />
-      </div>
-      <div className="absolute left-[1000px] rounded-[80px] size-[54px] top-[334px]" data-name="julian-wan-2EdIX-O2lkI-unsplash (1) 1">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none rounded-[80px] size-full" src={imgJulianWan2EdIxO2LkIUnsplash11} />
       </div>
     </div>
   );
@@ -1256,15 +1540,17 @@ function TrustedByThousand() {
 
 export default function Homepage() {
   return (
-    <div className="bg-white relative size-full" data-name="Homepage">
-      <CopyOfFirst />
-      <CopyProfessionalCoaching />
-      <CopyHoliday />
-      <ReadyToGetStarted />
-      <CopyWhyChooseUs />
+    <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Homepage">
+      <div className="flex-1">
+        <CopyOfFirst />
+        <CopyProfessionalCoaching />
+        <CopyHoliday />
+        <ReadyToGetStarted />
+        <CopyWhyChooseUs />
+        <OurLovelyTeam />
+        <TrustedByThousand />
+      </div>
       <Main />
-      <OurLovelyTeam />
-      <TrustedByThousand />
     </div>
   );
 }

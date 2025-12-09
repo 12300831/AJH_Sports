@@ -1,15 +1,32 @@
 import { MouseEvent, useState } from 'react';
 import Coaches from '../Pages/Coaches/Coaches';
 import CoachesPage from '../Pages/Coaches/CoachesPage';
+import Michael from '../Pages/Coaches/Michael';
+import BookNow from '../Pages/Coaches/BookNow';
+import BookingSummary from '../Pages/Coaches/BookingSummary';
+import PaymentMethod from '../Pages/Coaches/PaymentMethod';
+import PaymentSuccess from '../Pages/Coaches/PaymentSuccess';
+import PaymentHistory from '../Pages/Coaches/PaymentHistory';
+import Receipt from '../Pages/Coaches/Receipt';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type CoachView =
+  | 'landing'
+  | 'list'
+  | 'michael'
+  | 'booknow'
+  | 'bookingsummary'
+  | 'paymentmethod'
+  | 'paymentsuccess'
+  | 'paymenthistory'
+  | 'receipt';
 
 interface CoachesWrapperProps {
   onNavigate: (page: Page) => void;
 }
 
 export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
-  const [showCoachesPage, setShowCoachesPage] = useState(false);
+  const [view, setView] = useState<CoachView>('landing');
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
@@ -21,35 +38,117 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     }
 
     if (target.classList.contains('primary-cta') || normalizedText === "Let's Get Started") {
-      setShowCoachesPage(true);
+      setView('list');
       return;
     }
 
     if (normalizedText === 'Home') {
       onNavigate('home');
-      setShowCoachesPage(false);
+      setView('landing');
     } else if (normalizedText === 'Events') {
       onNavigate('events');
-      setShowCoachesPage(false);
+      setView('landing');
     } else if (normalizedText === 'Clubs') {
       onNavigate('clubs');
-      setShowCoachesPage(false);
+      setView('landing');
     } else if (normalizedText === 'Coaches') {
       onNavigate('coaches');
     } else if (normalizedText === 'Contact Us') {
       onNavigate('contact');
-      setShowCoachesPage(false);
+      setView('landing');
     } else if (normalizedText === 'Log In' || normalizedText === 'Sign Up') {
       onNavigate('account');
-      setShowCoachesPage(false);
+      setView('landing');
     } else if (normalizedText === "Let's Get Started") {
-      setShowCoachesPage(true);
+      setView('list');
     }
+  };
+
+  const handleViewProfile = (coachId: string) => {
+    if (coachId === 'michael-rodriguez') {
+      setView('michael');
+    }
+  };
+
+  const handleBackToList = () => {
+    setView('list');
+  };
+
+  const handleBookNow = () => {
+    setView('booknow');
+  };
+
+  const handleBookingSubmit = () => {
+    setView('bookingsummary');
+  };
+
+  const handleBackToMichael = () => {
+    setView('michael');
+  };
+
+  const handleBackToBooking = () => {
+    setView('booknow');
+  };
+
+  const handleProceedToPayment = () => {
+    setView('paymentmethod');
+  };
+
+  const handleBackToSummary = () => {
+    setView('bookingsummary');
+  };
+
+  const handlePay = () => {
+    setView('paymentsuccess');
+  };
+
+  const handleGoToHistory = () => {
+    setView('paymenthistory');
+  };
+
+  const handleGoToPaymentSuccess = () => {
+    setView('paymentsuccess');
+  };
+
+  const handleGoToReceipt = () => {
+    setView('receipt');
   };
 
   return (
     <div onClick={handleClick}>
-      {showCoachesPage ? <CoachesPage /> : <Coaches />}
+      {view === 'michael' ? (
+        <Michael onBack={handleBackToList} onBookNow={handleBookNow} />
+      ) : view === 'booknow' ? (
+        <BookNow onBack={handleBackToMichael} onSubmit={handleBookingSubmit} />
+      ) : view === 'bookingsummary' ? (
+        <BookingSummary onBack={handleBackToBooking} onProceed={handleProceedToPayment} />
+      ) : view === 'paymentmethod' ? (
+        <PaymentMethod
+          onBack={handleBackToSummary}
+          onPay={handlePay}
+          onSummary={handleBackToSummary}
+        />
+      ) : view === 'paymentsuccess' ? (
+        <PaymentSuccess
+          onSummary={handleBackToSummary}
+          onMethod={() => setView('paymentmethod')}
+          onHistory={handleGoToHistory}
+          onReceipt={handleGoToReceipt}
+        />
+      ) : view === 'paymenthistory' ? (
+        <PaymentHistory
+          onSummary={handleBackToSummary}
+          onMethod={() => setView('paymentmethod')}
+          onSuccess={handleGoToPaymentSuccess}
+          onReceipt={handleGoToReceipt}
+        />
+      ) : view === 'receipt' ? (
+        <Receipt onBack={() => setView('paymentsuccess')} />
+      ) : view === 'list' ? (
+        <CoachesPage onViewProfile={handleViewProfile} />
+      ) : (
+        <Coaches />
+      )}
     </div>
   );
 }

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { HomepageWrapper } from './components/HomepageWrapper';
 import { ClubMainWrapper } from './components/ClubMainWrapper';
 import { OurClubsWrapper } from './components/OurClubsWrapper';
 import { ClubAccountWrapper } from './components/ClubAccountWrapper';
 import { ContactWrapper } from './components/ContactWrapper';
 import { EventsWrapper } from './events/EventsWrapper';
 import { CoachesWrapper } from './components/CoachesWrapper';
+import { PaymentWrapper } from './components/PaymentWrapper';
+import { PaymentSuccessWrapper } from './components/PaymentSuccessWrapper';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'payment' | 'paymentSuccess';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -25,8 +28,12 @@ export default function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <ClubMainWrapper onNavigate={handleNavigate} />;
+        return <HomepageWrapper onNavigate={handleNavigate} />;
       case 'clubs':
+        // "Clubs" in the header shows the Join Our Club page
+        return <ClubMainWrapper onNavigate={handleNavigate} />;
+    case 'clubsList':
+        // Detailed youth/adult clubs page
         return <OurClubsWrapper onNavigate={handleNavigate} />;
       case 'events':
         return <EventsWrapper onNavigate={handleNavigate} />;
@@ -36,32 +43,19 @@ export default function App() {
         return <CoachesWrapper onNavigate={handleNavigate} />;
       case 'contact':
         return <ContactWrapper onNavigate={handleNavigate} />;
+      case 'payment':
+        return <PaymentWrapper onNavigate={handleNavigate} />;
+      case 'paymentSuccess':
+        return <PaymentSuccessWrapper onNavigate={handleNavigate} />;
       default:
         return <ClubMainWrapper onNavigate={handleNavigate} />;
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-white overflow-x-hidden">
-      {/* Responsive container that scales content for mobile/tablet */}
-      <div className="w-full relative">
-        <style>{`
-          @media (max-width: 1439px) {
-            .responsive-wrapper {
-              transform-origin: top center;
-              transform: scale(calc(100vw / 1440));
-            }
-          }
-          
-          @media (min-width: 1440px) {
-            .responsive-wrapper {
-              margin: 0 auto;
-            }
-          }
-        `}</style>
-        <div className="responsive-wrapper" style={{ width: '1440px', margin: '0 auto' }}>
-          {renderPage()}
-        </div>
+    <div className="min-h-screen w-full bg-white overflow-x-hidden flex flex-col">
+      <div className="w-full relative flex-1 flex flex-col">
+        {renderPage()}
       </div>
     </div>
   );

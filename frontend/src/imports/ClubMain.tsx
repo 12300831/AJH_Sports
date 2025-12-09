@@ -1,7 +1,8 @@
-import svgPaths from "./svg-kq0znrhkhm";
-import imgAjhSportsLogoNoOutline12 from "../assets/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 
-  function Group6() {
+import svgPaths from "./svg-kq0znrhkhm";
+import imgAjhSportsLogoNoOutline11 from "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
+
+function Group6() {
   return (
     <div className="absolute left-[994px] top-[224px] flex gap-8">
       <div className="size-[28px] bg-[rgba(196,196,196,0.2)]" />
@@ -882,7 +883,7 @@ function Group18() {
 
 function Group21() {
   return (
-    <div className="absolute contents left-[994px] top-[224px]">
+    <div className="absolute contents left-[994px] top-[224px] hidden lg:block">
       <Group17 />
       <Group18 />
     </div>
@@ -1446,7 +1447,7 @@ function Group133() {
 
 function Group26() {
   return (
-    <div className="absolute contents left-[174px] top-[350px]">
+    <div className="absolute contents left-[174px] top-[350px] hidden lg:block">
       <X />
       <X2 />
       <X3 />
@@ -1516,18 +1517,19 @@ function Group26() {
 
 function Group25() {
   return (
-    <div className="absolute contents left-[548px] top-[578px]">
-      <div className="absolute bg-[#e0cb23] h-[66.127px] left-[548px] top-[578px] w-[322.255px]" data-cta="lets-play" />
-      <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[27px] leading-[normal] left-[704.5px] not-italic text-[24px] text-center text-white top-[597px] translate-x-[-50%] w-[149px]" data-cta="lets-play">
-        Let’s Play!
-      </p>
+    <div className="relative">
+      <div className="bg-[#e0cb23] h-[50px] md:h-[60px] lg:h-[66.127px] rounded-lg shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-8 md:px-12 lg:px-16 cursor-pointer hover:opacity-90 transition-opacity min-w-[200px] md:min-w-[280px] lg:min-w-[322.255px]" data-cta="lets-play">
+        <p className="font-['Inter:Bold',sans-serif] font-bold text-lg md:text-xl lg:text-[24px] text-center text-white" data-cta="lets-play">
+          Let's Play!
+        </p>
+      </div>
     </div>
   );
 }
 
 function Group24() {
   return (
-    <div className="absolute contents left-[548px] top-[578px]">
+    <div className="relative">
       <Group25 />
     </div>
   );
@@ -1535,39 +1537,271 @@ function Group24() {
 
 function Group28() {
   return (
-    <div className="absolute contents left-[424px] top-[379px]">
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[45px] leading-[normal] left-[525px] not-italic text-[48px] text-black top-[379px] uppercase w-[458px]" data-cta="join-club">
-        Join our Club
-      </p>
-      <div className="absolute font-['Inter:Regular',sans-serif] font-normal h-[80.098px] leading-[normal] left-[709px] not-italic text-[15px] text-black text-center top-[465.27px] translate-x-[-50%] w-[570px]">
-        <p className="mb-0">We love what we do and we do it with passion.</p>
-        <p className="mb-0">We value the experimentation of the message and</p>
-        <p>smart incentives.</p>
+    <div className="relative flex flex-col items-center justify-center w-full px-4 md:px-6 lg:px-8 xl:px-12 py-20 md:py-24 lg:py-32 xl:py-40">
+      <div className="max-w-4xl mx-auto flex flex-col items-center gap-8 md:gap-10 lg:gap-12 text-center">
+        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-4xl md:text-5xl lg:text-6xl xl:text-[48px] text-black uppercase leading-tight" data-cta="join-club">
+          Join our Club
+        </p>
+        <div className="font-['Inter:Regular',sans-serif] font-normal text-base md:text-lg lg:text-[15px] text-black max-w-2xl leading-relaxed">
+          <p className="mb-3">We love what we do and we do it with passion.</p>
+          <p className="mb-3">We value the experimentation of the message and</p>
+          <p>smart incentives.</p>
+        </div>
+        <div className="flex justify-center mt-6 md:mt-8">
+          <Group24 />
+        </div>
       </div>
-      <Group24 />
     </div>
   );
 }
 
 export default function ClubMain() {
   return (
-    <div className="bg-white relative size-full" data-name="Club Main">
+    <div
+      className="relative w-full flex flex-col flex-1"
+      data-name="Club Main"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, rgba(238, 255, 200, 0.2) 0%, rgba(238, 255, 200, 0.2) 100%), linear-gradient(90deg, rgb(247, 250, 252) 0%, rgb(247, 250, 252) 100%)",
+        minHeight: '100vh',
+      }}
+    >
+      {/* Decorative elements - hidden on mobile */}
       <Group21 />
       <Group26 />
-      <Group28 />
-      <div className="absolute bg-[#d9d9d9] h-[124.519px] left-0 top-0 w-[1440px]" />
-      <div className="absolute bg-[#d9d9d9] h-[124.519px] left-0 top-0 w-[1440px]" />
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[283.59px] not-italic text-[16px] text-black top-[50.02px] w-[72.438px]">Events</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[168px] not-italic text-[16px] text-black top-[50.02px] w-[61.649px]">Home</p>
-      <div className="absolute bg-[#838383] h-[41px] left-[388px] top-[38px] w-[88px]" />
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[408.43px] not-italic text-[16px] text-black top-[50.02px] w-[70.897px]">Clubs</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[531.73px] not-italic text-[16px] text-black top-[50.02px] w-[92.474px]">Coaches</p>
-      <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[20.221px] leading-[normal] left-[678.15px] not-italic text-[16px] text-black top-[50.02px] w-[87.851px]">Contact Us</p>
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[15.964px] leading-[normal] left-[1180px] not-italic text-[12px] text-black top-[51.08px] w-[36px]">Log In</p>
-      <div className="absolute bg-[#878787] h-[41.506px] left-[1228px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[39.38px] w-[64px]" />
-      <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[15.964px] leading-[normal] left-[1237px] not-italic text-[12px] text-black top-[51.08px] w-[46px]">Sign Up</p>
-      <div className="absolute h-[48.487px] left-[30.89px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[35.89px] w-[72.73px]" data-name="AJHSports-Logo-no-outline-1 2">
-        <img alt="" className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" src={imgAjhSportsLogoNoOutline12} />
+
+      {/* Header */}
+      <div className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px] flex-shrink-0 z-20">
+        {/* Logo */}
+        <div 
+          className="absolute h-[53px] left-[20px] md:left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[20px] md:top-[43px] w-[80px] cursor-pointer z-10"
+          data-name="AJHSports-Logo-no-outline-1 1"
+        >
+          <img 
+            alt="AJH Sports Logo" 
+            className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+            src={imgAjhSportsLogoNoOutline11} 
+          />
+        </div>
+        
+        {/* Desktop Navigation */}
+        <div className="hidden md:block">
+          <button 
+            className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px] hover:text-[#e0cb23] transition-colors"
+          >
+            <p className="leading-[normal]">Home</p>
+          </button>
+          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Events
+          </p>
+          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-[#e0cb23] top-[54px] w-[71px] cursor-pointer">
+            Clubs
+          </p>
+          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Coaches
+          </p>
+          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px] cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Contact Us
+          </p>
+        </div>
+        
+        {/* Sign Up Button */}
+        <div 
+          className="absolute bg-[#878787] h-[50px] left-[1327.25px] md:left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden md:block"
+        />
+        <p 
+          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] md:left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden md:block"
+        >
+          Sign Up
+        </p>
+        
+        {/* Log In */}
+        <p 
+          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] md:left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden md:block"
+        >
+          Log In
+        </p>
+        
+        {/* Mobile Navigation */}
+        <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
+          <p className="font-semibold text-xs text-white cursor-pointer">Log In</p>
+          <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
+            <p className="font-semibold text-xs text-white">Sign Up</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        <Group28 />
+      </div>
+
+      {/* Footer - Using same structure as Homepage */}
+      <div className="w-full h-auto min-h-[364px] bg-black relative pb-8 md:pb-0 md:h-[364px] flex-shrink-0 mt-auto">
+        {/* Logo */}
+        <div 
+          className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[30px] w-[47px] cursor-pointer"
+        >
+          <img 
+            alt="AJH Sports Logo" 
+            className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+            src={imgAjhSportsLogoNoOutline11} 
+          />
+        </div>
+        
+        {/* Newsletter Title */}
+        <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] md:left-[335.5px] lg:left-[335.5px] text-[24px] text-white text-center top-[57px] tracking-[-0.24px] translate-x-[-50%] w-[407px] hidden md:block">
+          Join Our Newsletter
+        </p>
+        <p className="absolute font-['Inter:Bold',sans-serif] font-bold text-lg md:text-[24px] text-white text-center top-[30px] left-1/2 -translate-x-1/2 w-[90%] md:hidden">
+          Join Our Newsletter
+        </p>
+        
+        {/* Newsletter Description */}
+        <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] md:left-[327px] lg:left-[327px] text-[14px] text-slate-200 text-center top-[113px] translate-x-[-50%] w-[470px] hidden md:block">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        <p className="absolute font-['Inter:Regular',sans-serif] font-normal text-xs md:text-sm text-slate-200 text-center top-[60px] left-1/2 -translate-x-1/2 w-[90%] max-w-[470px] md:hidden">
+          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+        </p>
+        
+        {/* Email Input Form - Desktop */}
+        <form className="absolute left-[92px] top-[183px] hidden md:block">
+          <input
+            type="email"
+            name="email"
+            placeholder="Your email"
+            required
+            className="w-[316px] h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-[16px] outline-none"
+          />
+          <button
+            type="submit"
+            className="absolute left-[358px] top-[-2px] h-[49px] w-[151px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-[14px] text-white hover:bg-[#333] transition-colors"
+          >
+            Subscribe
+          </button>
+        </form>
+        
+        {/* Email Input Form - Mobile */}
+        <form className="absolute top-[100px] left-1/2 -translate-x-1/2 w-[90%] max-w-[500px] md:hidden">
+          <div className="flex flex-col gap-3">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              required
+              className="w-full h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-base outline-none"
+            />
+            <button
+              type="submit"
+              className="w-full h-[49px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-sm text-white hover:bg-[#333] transition-colors"
+            >
+              Subscribe
+            </button>
+          </div>
+        </form>
+        
+        {/* Vertical Divider Line - Desktop */}
+        <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
+        
+        {/* About Section - Desktop */}
+        <div className="absolute left-[753px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+          </div>
+        </div>
+        
+        {/* Community Section - Desktop */}
+        <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+          </div>
+        </div>
+        
+        {/* Contact Section - Desktop */}
+        <div className="absolute left-[1162px] top-[30px] hidden lg:block">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
+          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
+            <p>ajhsports.com.au</p>
+            <p>+61 0412345678</p>
+            <p>123 Ave, Sydney, NSW</p>
+          </div>
+        </div>
+        
+        {/* Footer Links - Mobile/Tablet */}
+        <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[90%] max-w-[600px] md:top-[200px] lg:hidden">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+            <div>
+              <p className="font-semibold text-base text-white mb-2">About</p>
+              <div className="font-medium text-sm text-slate-200 space-y-1">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-base text-white mb-2">Community</p>
+              <div className="font-medium text-sm text-slate-200 space-y-1">
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
+                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-base text-white mb-2">Contact Us</p>
+              <div className="font-medium text-sm text-slate-200 space-y-1">
+                <p>ajhsports.com.au</p>
+                <p>+61 0412345678</p>
+                <p>123 Ave, Sydney, NSW</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Bottom Divider */}
+        <div className="absolute left-[77px] md:left-[77px] lg:left-[77px] top-[297px] w-[calc(100%-154px)] max-w-[1318.17px] h-[1px] bg-[#807E7E]" />
+        
+        {/* Copyright */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold left-[30px] text-[11px] text-slate-200 top-[332px] tracking-[-0.22px]">
+          ©2025 Company Name. All rights reserved
+        </p>
+        
+        {/* Privacy & Terms - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[335px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block" style={{ left: '1061px' }}>
+          Privacy & Policy
+        </p>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 text-right top-[336px] tracking-[-0.22px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block" style={{ left: '1263px' }}>
+          Terms & Condition
+        </p>
+        
+        {/* Privacy & Terms - Mobile/Tablet */}
+        <div className="absolute right-[30px] top-[332px] flex gap-4 lg:hidden">
+          <p className="font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
+          <p className="font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
+        </div>
+        
+        {/* Social Icons */}
+        <div className="absolute left-[646px] md:left-[646px] lg:left-[646px] top-[320px] hidden md:flex gap-[20px]">
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">f</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">𝕏</span>
+          </div>
+          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+            <span className="text-[10px] text-white">in</span>
+          </div>
+        </div>
       </div>
     </div>
   );
