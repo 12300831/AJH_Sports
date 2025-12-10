@@ -8,8 +8,11 @@ import { EventsWrapper } from './events/EventsWrapper';
 import { CoachesWrapper } from './components/CoachesWrapper';
 import { PaymentWrapper } from './components/PaymentWrapper';
 import { PaymentSuccessWrapper } from './components/PaymentSuccessWrapper';
+import { AuthWrapper } from './components/AuthWrapper';
+import { DashboardWrapper } from './components/Dashboardwrapper';
+import { PlayerWrapper } from './components/Playerwrapper';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'payment' | 'paymentSuccess';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -39,6 +42,13 @@ export default function App() {
         return <EventsWrapper onNavigate={handleNavigate} />;
       case 'account':
         return <ClubAccountWrapper onNavigate={handleNavigate} />;
+      case 'signin':
+      case 'signup':
+        return <AuthWrapper onNavigate={handleNavigate} />;
+      case 'dashboard':
+        return <DashboardWrapper onNavigate={handleNavigate} />;
+      case 'player':
+        return <PlayerWrapper onNavigate={handleNavigate} />;
       case 'coaches':
         return <CoachesWrapper onNavigate={handleNavigate} />;
       case 'contact':

@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import Homepage from '../imports/Homepage';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess';
 
 interface HomepageWrapperProps {
   onNavigate: (page: Page) => void;
@@ -50,8 +50,12 @@ export function HomepageWrapper({ onNavigate }: HomepageWrapperProps) {
       onNavigate('clubs');
     } else if (normalizedText === 'Coaches') {
       onNavigate('coaches');
-    } else if (normalizedText === 'Contact Us') {
+    } else if (normalizedText === 'Contact Us' || normalizedText === 'Contact') {
       onNavigate('contact');
+    } else if (normalizedText === 'Log In' || normalizedText === 'Login') {
+      onNavigate('signin');
+    } else if (normalizedText === 'Sign Up' || normalizedText === 'Signup') {
+      onNavigate('signup');
     } else if (normalizedText === "Let's Play!" || text === "Let's Play!") {
       // Fallback: any Let's Play text navigates to clubs list
       onNavigate('clubsList');

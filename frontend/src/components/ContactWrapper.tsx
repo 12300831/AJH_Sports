@@ -1,6 +1,6 @@
 import { FormEvent } from 'react';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup';
 
 interface ContactWrapperProps {
   onNavigate: (page: Page) => void;
@@ -59,14 +59,14 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
             <button
               type="button"
               className="transition-opacity hover:opacity-70"
-              onClick={() => handleNavClick('account')}
+              onClick={() => handleNavClick('signin')}
             >
               Log In
             </button>
             <button
               type="button"
               className="rounded-md bg-[#878787] px-4 py-2 text-white transition hover:bg-[#6d6d6d]"
-              onClick={() => handleNavClick('account')}
+              onClick={() => handleNavClick('signup')}
             >
               Sign Up
             </button>

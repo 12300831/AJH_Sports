@@ -78,3 +78,55 @@ export const login = async (req, res) => {
   }
 };
 
+// ---------- GOOGLE OAUTH CALLBACK ----------
+export const googleCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Redirect to frontend with token
+    res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/callback?token=${token}&provider=google`
+    );
+  } catch (error) {
+    console.error("Google OAuth error:", error);
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
+  }
+};
+
+// ---------- FACEBOOK OAUTH CALLBACK ----------
+export const facebookCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Redirect to frontend with token
+    res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/callback?token=${token}&provider=facebook`
+    );
+  } catch (error) {
+    console.error("Facebook OAuth error:", error);
+    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
+  }
+};
+

@@ -15,7 +15,7 @@ const Image_tt_hero = '/images/table-tennis-hero.jpg';
 const Image_kids_hero = '/images/kids-party-hero.jpg';
 const Image_coaching_hero = '/images/coaching-hero.jpg';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'payment';
+type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'payment';
 
 interface EventsWrapperProps {
   onNavigate: (page: Page) => void;
@@ -262,13 +262,13 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           />
           <p 
             className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer"
-            onClick={() => handleNavClick('account')}
+            onClick={() => handleNavClick('signup')}
           >
             Sign Up
           </p>
           <p 
             className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors"
-            onClick={() => handleNavClick('account')}
+            onClick={() => handleNavClick('signin')}
           >
             Log In
           </p>
@@ -566,17 +566,17 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         </div>
         <div 
           className="absolute bg-[#878787] h-[50px] left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors"
-          onClick={() => handleNavClick('account')}
+          onClick={() => handleNavClick('signup')}
         />
         <p 
           className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer"
-          onClick={() => handleNavClick('account')}
+          onClick={() => handleNavClick('signup')}
         >
           Sign Up
         </p>
         <p 
           className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('account')}
+          onClick={() => handleNavClick('signin')}
         >
           Log In
         </p>
