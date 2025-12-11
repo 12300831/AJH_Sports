@@ -111,14 +111,177 @@
 
 /* MAIN HERO SECTION */
 .coaches-main {
-  padding: 60px 70px 40px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 60px 32px 40px;
 }
 
 .coaches-hero {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 40px;
+  gap: 48px;
+}
+
+.coaches-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.coaches-packages {
+  margin-top: 90px;
+  padding-top: 36px;
+  border-top: 1px solid #c5c9d2; /* subtle darker line to separate hero and packages */
+}
+
+.package-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.package-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 10px 28px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.package-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0px 14px 36px rgba(0, 0, 0, 0.1);
+}
+
+.package-image-wrapper {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.package-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.package-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #ffffff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.package-info {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.package-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.package-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444444;
+}
+
+.package-button {
+  margin-top: 4px;
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 11px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.package-button:hover {
+  opacity: 0.9;
+}
+
+.packages-heading {
+  text-align: center;
+  margin-bottom: 18px;
+  color: #1f2937;
+}
+
+.packages-kicker {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.why-choose {
+  margin-top: 72px;
+  padding: 48px 0 8px;
+}
+
+.why-choose-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.why-choose-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.why-choose-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.why-choose-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 18px;
+  text-align: center;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.06);
+}
+
+.why-choose-icon {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 2px solid #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  font-size: 22px;
+}
+
+.why-choose-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+  margin-bottom: 6px;
+}
+
+.why-choose-card p {
+  font-size: 13px;
+  color: #555555;
+  line-height: 1.5;
 }
 
 /* Text side */
@@ -130,7 +293,7 @@
 }
 
 .coaches-description {
-  max-width: 520px;
+  max-width: 640px;
   font-size: 16px;
   line-height: 1.6;
   color: #444444;
@@ -147,6 +310,11 @@
   cursor: pointer;
 }
 
+.primary-cta[disabled] {
+  cursor: default;
+  opacity: 0.8;
+}
+
 .primary-cta:hover {
   opacity: 0.9;
 }
@@ -154,8 +322,9 @@
 /* Image side */
 .coaches-image-wrapper {
   flex: 1;
+  min-width: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .coaches-image {
@@ -330,4 +499,156 @@
   height: 1px;
   margin-top: 28px;
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* LESSONS PAGE */
+.lesson-intro {
+  max-width: 960px;
+  margin: 0 auto 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lesson-back {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.lesson-back:hover {
+  text-decoration: underline;
+}
+
+.lesson-topcopy {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.lessons-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+.lesson-block {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  align-items: center;
+}
+
+.lesson-block.image-left .lesson-image-wrapper {
+  order: 0;
+}
+
+.lesson-block.image-left .lesson-content {
+  order: 1;
+}
+
+.lesson-block.image-right .lesson-image-wrapper {
+  order: 1;
+}
+
+.lesson-block.image-right .lesson-content {
+  order: 0;
+}
+
+.lesson-image-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.lesson-image {
+  width: 100%;
+  max-width: 580px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.lesson-content h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.lesson-copy {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #4b5563;
+  margin-bottom: 18px;
+  max-width: 620px;
+}
+
+.lesson-pricing {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background: #f9fafb;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.lesson-pricing-header {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background: #ededed;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  padding: 14px 12px;
+}
+
+.lesson-pricing-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 12px;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  font-size: 15px;
+  color: #4b5563;
+}
+
+.lesson-pricing-row:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.lesson-pricing-label {
+  font-weight: 600;
+  color: #111827;
+}
+
+.lesson-pricing-note {
+  font-size: 12px;
+  color: #6b7280;
+  padding: 10px 12px;
+}
+
+.lesson-cta {
+  margin-top: 12px;
+  background: #f2d123;
+  color: #111111;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.lesson-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
 }

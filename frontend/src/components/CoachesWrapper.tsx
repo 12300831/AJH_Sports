@@ -8,6 +8,7 @@ import PaymentMethod from '../Pages/Coaches/PaymentMethod';
 import PaymentSuccess from '../Pages/Coaches/PaymentSuccess';
 import PaymentHistory from '../Pages/Coaches/PaymentHistory';
 import Receipt from '../Pages/Coaches/Receipt';
+import Coaching from '../Pages/Coaches/Coaching';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
 type CoachView =
@@ -19,7 +20,8 @@ type CoachView =
   | 'paymentmethod'
   | 'paymentsuccess'
   | 'paymenthistory'
-  | 'receipt';
+  | 'receipt'
+  | 'lessons';
 
 interface CoachesWrapperProps {
   onNavigate: (page: Page) => void;
@@ -35,11 +37,6 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
 
     if (target.tagName === 'A') {
       e.preventDefault();
-    }
-
-    if (target.classList.contains('primary-cta') || normalizedText === "Let's Get Started") {
-      setView('list');
-      return;
     }
 
     if (normalizedText === 'Home') {
@@ -59,8 +56,6 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     } else if (normalizedText === 'Log In' || normalizedText === 'Sign Up') {
       onNavigate('account');
       setView('landing');
-    } else if (normalizedText === "Let's Get Started") {
-      setView('list');
     }
   };
 
@@ -68,6 +63,10 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     if (coachId === 'michael-rodriguez') {
       setView('michael');
     }
+  };
+
+  const handleBackToLanding = () => {
+    setView('landing');
   };
 
   const handleBackToList = () => {
@@ -114,6 +113,10 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     setView('receipt');
   };
 
+  const handleBookAnotherSession = () => {
+    setView('list');
+  };
+
   return (
     <div onClick={handleClick}>
       {view === 'michael' ? (
@@ -134,6 +137,7 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
           onMethod={() => setView('paymentmethod')}
           onHistory={handleGoToHistory}
           onReceipt={handleGoToReceipt}
+          onBookAnother={handleBookAnotherSession}
         />
       ) : view === 'paymenthistory' ? (
         <PaymentHistory
@@ -144,10 +148,15 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
         />
       ) : view === 'receipt' ? (
         <Receipt onBack={() => setView('paymentsuccess')} />
+      ) : view === 'lessons' ? (
+        <Coaching onBack={() => setView('landing')} />
       ) : view === 'list' ? (
-        <CoachesPage onViewProfile={handleViewProfile} />
+        <CoachesPage onViewProfile={handleViewProfile} onBack={handleBackToLanding} />
       ) : (
-        <Coaches />
+        <Coaches
+          onShowCoachesList={() => setView('list')}
+          onShowLessons={() => setView('lessons')}
+        />
       )}
     </div>
   );

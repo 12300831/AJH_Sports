@@ -1,8 +1,33 @@
 import React from "react";
 import "./Coaches.css";
 import { HomeHeader } from "../../components/HomeHeader";
+import oneOnOneImage from "./images/1on1.png";
+import groupCoachingImage from "./images/group coaching.png";
 
-const Coaches = () => {
+const Coaches = ({ onShowCoachesList, onShowLessons }) => {
+  const packages = [
+    {
+      id: "one-on-one",
+      title: "1-ON-1 Coaching",
+      price: "From $80/hr",
+      description:
+        "Personalized coaching with expert instructors tailored to your skill level and goals.",
+      image: oneOnOneImage,
+      ctaColor: "#f2d123",
+      badgeTextColor: "#f35d05",
+    },
+    {
+      id: "group",
+      title: "Group Coaching",
+      price: "From $15/hr",
+      description:
+        "Join dynamic group sessions and learn alongside other passionate players.",
+      image: groupCoachingImage,
+      ctaColor: "#f2d123",
+      badgeTextColor: "#f35d05",
+    },
+  ];
+
   return (
     <div className="coaches-page">
       {/* Header */}
@@ -19,7 +44,6 @@ const Coaches = () => {
               of lessons (1 hour/week), reduced entry to social tennis sessions,
               and catch-up group sessions for wet-weather closures.
             </p>
-            <button className="primary-cta">Let's Get Started</button>
           </div>
 
           {/* ⭐️ Updated: Your own image */}
@@ -29,6 +53,71 @@ const Coaches = () => {
               src="/images/mytennis.png"
               alt="Tennis coaching"
             />
+          </div>
+        </section>
+
+        {/* Packages section */}
+        <section className="coaches-packages">
+          <div className="packages-heading">
+            <p className="packages-kicker">Coaching Packages</p>
+          </div>
+          <div className="package-grid">
+            {packages.map((pkg) => (
+              <article key={pkg.id} className="package-card">
+                <div className="package-image-wrapper">
+                  <img
+                    src={pkg.image}
+                    alt={pkg.title}
+                    className="package-image"
+                    style={pkg.id === "one-on-one" ? { objectPosition: "50% 28%" } : undefined}
+                  />
+                  <span className="package-badge" style={{ color: pkg.badgeTextColor }}>
+                    {pkg.price}
+                  </span>
+                </div>
+                <div className="package-info">
+              <h3 className="package-title">{pkg.title}</h3>
+              <p className="package-description">{pkg.description}</p>
+              <button
+                className="package-button"
+                type="button"
+                style={{ backgroundColor: pkg.ctaColor }}
+                onClick={
+                  pkg.id === "one-on-one"
+                    ? () => onShowCoachesList?.()
+                    : pkg.id === "group"
+                    ? () => onShowLessons?.()
+                    : undefined
+                }
+              >
+                {pkg.id === "one-on-one" ? "View Our Coaches" : "View Tennis Lessons"}
+              </button>
+            </div>
+          </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Why Choose Us - pulled from Events page */}
+        <section className="why-choose">
+          <div className="why-choose-header">
+            <h2>Why Choose Us?</h2>
+          </div>
+          <div className="why-choose-grid">
+            {[
+              { icon: "🎯", title: "Expert Coaching", desc: "40+ years experience" },
+              { icon: "👥", title: "All Levels", desc: "Beginner to advanced" },
+              { icon: "🤝", title: "Community", desc: "Friendly environment" },
+              { icon: "🏆", title: "Quality", desc: "Modern facilities" },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="why-choose-card">
+                <div className="why-choose-icon">
+                  <span>{icon}</span>
+                </div>
+                <h3>{title}</h3>
+                <p>{desc}</p>
+              </div>
+            ))}
           </div>
         </section>
       </main>
