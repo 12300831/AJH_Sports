@@ -9,11 +9,16 @@ const Image_kids_in_sports = '/images/KidsSports.png';
 const Image_coaching = '/images/OneonOneCoaching.png';
 const imgAjhSportsLogo = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 
-// Hero images for event detail pages - Save the uploaded images with these names
-const Image_tennis_hero = '/images/tennis-open-hero.jpg';
-const Image_tt_hero = '/images/table-tennis-hero.jpg';
-const Image_kids_hero = '/images/kids-party-hero.jpg';
-const Image_coaching_hero = '/images/coaching-hero.jpg';
+// Hero images for event detail pages - High quality images
+// Save these images in public/images/ folder:
+// 1. Tennis ball against blue sky -> tennis-ball-hero.jpg
+// 2. Table tennis players in room -> table-tennis-players-hero.jpg
+// 3. Kids tug-of-war -> kids-tug-of-war-hero.jpg
+// 4. Tennis court scene -> tennis-court-hero.jpg
+const Image_tennis_hero = '/images/tennis-ball-hero.jpg';
+const Image_tt_hero = '/images/table-tennis-players-hero.jpg';
+const Image_kids_hero = '/images/kids-tug-of-war-hero.jpg';
+const Image_coaching_hero = '/images/tennis-court-hero.jpg';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'payment';
 
@@ -190,25 +195,36 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         <style>{`
           @media (max-width: 1440px) {
             .detail-container { width: 100% !important; }
-            .detail-hero { height: 50vw !important; max-height: 500px !important; }
+            .detail-hero { height: 55vw !important; max-height: 600px !important; }
             .detail-content { padding-left: 6% !important; padding-right: 6% !important; }
             .detail-info-grid { gap: 40px !important; flex-wrap: wrap !important; }
           }
           @media (max-width: 1024px) {
-            .detail-hero { height: 45vw !important; min-height: 300px !important; }
+            .detail-hero { height: 50vw !important; min-height: 350px !important; }
             .detail-info-grid { gap: 30px !important; }
             .detail-info-item { min-width: 200px !important; }
           }
           @media (max-width: 768px) {
-            .detail-hero { height: 60vw !important; min-height: 250px !important; }
+            .detail-hero { height: 65vw !important; min-height: 300px !important; }
             .detail-info-grid { flex-direction: column !important; gap: 20px !important; }
             .detail-description { max-width: 100% !important; }
             .nav-items { display: none !important; }
             .footer-columns { flex-wrap: wrap !important; gap: 30px !important; }
           }
           @media (max-width: 480px) {
-            .detail-hero { height: 70vw !important; }
+            .detail-hero { height: 75vw !important; min-height: 250px !important; }
             .back-button { font-size: 12px !important; padding: 8px 12px !important; }
+          }
+          
+          /* Image Quality Improvements */
+          .detail-hero img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: auto;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            will-change: transform;
           }
         `}</style>
 
@@ -274,12 +290,14 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           </p>
         </div>
 
-        {/* Hero Image Section */}
-        <div className="detail-hero w-full h-[500px] relative overflow-hidden">
+        {/* Hero Image Section - High Quality */}
+        <div className="detail-hero w-full h-[600px] relative overflow-hidden">
           <img 
             src={selectedEvent.heroImage} 
             alt={selectedEvent.alt}
             className="w-full h-full object-cover object-center"
+            loading="eager"
+            decoding="async"
             onError={(e) => {
               // Fallback to regular image if hero image fails to load
               (e.target as HTMLImageElement).src = selectedEvent.image;
