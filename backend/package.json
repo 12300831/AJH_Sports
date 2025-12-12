@@ -13,6 +13,13 @@
     "mysql2": "^3.9.1",
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "stripe": "^14.9.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "kill-port": "lsof -ti:5001 | xargs kill -9 2>/dev/null || echo 'Port 5001 is free'",
+    "restart": "npm run kill-port && sleep 1 && npm start"
   }
 }
