@@ -167,6 +167,11 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   };
 
   const handleViewDetails = (event: Event) => {
+    // If it's "1-ON-1 Coaching", navigate to coaches page instead
+    if (event.title === '1-ON-1 Coaching') {
+      handleNavClick('coaches');
+      return;
+    }
     setSelectedEvent(event);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -527,7 +532,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           
           <button
             onClick={handleBackToEvents}
-            className="absolute top-4 left-4 md:top-6 md:left-10 flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-lg bg-white/95 backdrop-blur-sm text-black font-['Inter:Medium',sans-serif] font-medium text-sm md:text-base hover:bg-white transition-all shadow-lg"
+            className="absolute top-4 left-4 md:top-6 md:left-10 flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-white/95 backdrop-blur-sm text-black font-['Inter:Medium',sans-serif] font-medium text-[16px] hover:bg-white transition-all shadow-lg"
           >
             <span>←</span>
             <span className="hidden sm:inline">Back to Events</span>
