@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import imgAjhSportsLogoNoOutline11 from "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 import img256941 from "../assets/5e80db934d6a91b9278c5c40d1cc305b8b64ad1b.png";
 
-const navsportsUrl = 'https://navsports.com';
+const navsportsUrl = 'https://navsports.com/sport-businesses/ajh-sports/';
 
 function NavSportsWordmark() {
   return (

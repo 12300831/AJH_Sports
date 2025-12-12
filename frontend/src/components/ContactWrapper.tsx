@@ -86,11 +86,11 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
             <dl className="mt-8 grid gap-6 text-[#222] md:grid-cols-2">
               <div>
                 <dt className="text-sm font-semibold text-[#7a7a7a]">Phone</dt>
-                <dd className="text-xl font-bold">+1 (555) 012-2334</dd>
+                <dd className="text-xl font-bold">0447827788</dd>
               </div>
               <div>
                 <dt className="text-sm font-semibold text-[#7a7a7a]">Email</dt>
-                <dd className="text-xl font-bold">support@navsports.com</dd>
+                <dd className="text-xl font-bold">info@starstv.com.au</dd>
               </div>
             </dl>
           </div>
@@ -137,15 +137,16 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
               title: 'Join our Adult Club',
               copy: 'Stay competitive, find new teammates, and keep your passion for sport thriving all year.',
             },
-          ].map(({ title, copy }) => (
+            ].map(({ title, copy }) => (
             <div key={title} className="rounded-3xl bg-white p-8 shadow-lg">
-              <p className="text-sm uppercase tracking-[0.3em] text-[#e0cb23]">Membership</p>
+          
               <h3 className="mt-3 text-2xl font-semibold text-black">{title}</h3>
               <p className="mt-4 text-base text-[#555]">{copy}</p>
               <div className="mt-6 flex items-center gap-4">
+      
                 <button
                   type="button"
-                  className="rounded-xl bg-[#e0cb23] px-6 py-3 text-base font-semibold text-black transition hover:bg-[#cdb720]"
+                 className="rounded-xl bg-[#e0cb23] px-6 py-3 text-base font-semibold text-black transition hover:bg-[#cdb720]"
                   onClick={() => handleNavClick('account')}
                 >
                   Join Us

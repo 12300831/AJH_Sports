@@ -43,7 +43,7 @@ export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
   };
 
   return (
-    <div onClick={handleClick}>
+    <div onClick={handleClick} className="flex flex-col flex-1 w-full min-h-screen">
       <style>{`
         [data-name="Our Clubs"] p {
           cursor: pointer;

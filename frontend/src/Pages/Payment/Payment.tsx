@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Payment.css";
 import svgPaths from "../../utils/svgPaths";
+import { createCheckoutSession } from "../../services/paymentService";
 
 const LOGO_SRC = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 
@@ -17,6 +18,8 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
   const [cvv, setCvv] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [email, setEmail] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleBackToEvents = () => {
     if (onBack) {
@@ -33,15 +36,39 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
     setEmail("");
   };
 
-  const handlePayment = (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle payment submission
-    console.log("Payment submitted");
-    // Navigate to payment success page
-    if (onPaymentSuccess) {
-      onPaymentSuccess();
-    } else if (onNavigate) {
-      onNavigate("paymentSuccess");
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      // Get event details from URL params or state
+      // For now, using placeholder values - you should get these from your event context
+      const eventId = new URLSearchParams(window.location.search).get('eventId') || '1';
+      const eventName = new URLSearchParams(window.location.search).get('eventName') || 'Tennis Event';
+      const amount = parseFloat(new URLSearchParams(window.location.search).get('amount') || '75.00');
+
+      // Create checkout session
+      const response = await createCheckoutSession({
+        eventId,
+        eventName,
+        amount,
+        currency: 'usd',
+        customerEmail: email || undefined,
+        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/payment?canceled=true`,
+      });
+
+      // Redirect to Stripe Checkout
+      if (response.url) {
+        window.location.href = response.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      setError(err.message || 'Failed to process payment. Please try again.');
+      setIsProcessing(false);
     }
   };
 
@@ -153,6 +180,13 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
               </button>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
             {/* Payment Form */}
             {paymentMethod === "credit-card" && (
               <form onSubmit={handlePayment} className="space-y-4">
@@ -224,9 +258,10 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
                   </button>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#191919] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition"
+                    disabled={isProcessing}
+                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#191919] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    $ Pay $75.00
+                    {isProcessing ? 'Processing...' : '$ Pay $75.00'}
                   </button>
                 </div>
               </form>
@@ -252,9 +287,10 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
                   <button
                     type="button"
                     onClick={handlePayment}
-                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-black px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition"
+                    disabled={isProcessing}
+                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-black px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Pay with Apple Pay
+                    {isProcessing ? 'Processing...' : 'Pay with Apple Pay'}
                   </button>
                 </div>
               </div>
@@ -283,10 +319,11 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
                   <button
                     type="button"
                     onClick={handlePayment}
-                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-white border-2 border-gray-300 px-6 py-3 text-gray-700 font-semibold text-[15px] shadow-sm hover:bg-gray-50 transition flex items-center justify-center gap-2"
+                    disabled={isProcessing}
+                    className="w-full sm:w-auto min-w-[180px] rounded-md bg-white border-2 border-gray-300 px-6 py-3 text-gray-700 font-semibold text-[15px] shadow-sm hover:bg-gray-50 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="text-gray-700 font-bold">G</span>
-                    Pay with Google Pay
+                    {isProcessing ? 'Processing...' : 'Pay with Google Pay'}
                   </button>
                 </div>
               </div>
