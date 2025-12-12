@@ -83,7 +83,7 @@ export default function BookingSummary({ onBack, onProceed }) {
 
                 <div className="mt-6 pt-4 border-t border-[#e5e7eb] flex items-center justify-between text-base font-semibold">
                   <span>Total Amount:</span>
-                  <span className="text-[#111] text-xl">$75.00</span>
+                  <span className="text-[#111] text-xl">$80.00</span>
                 </div>
               </div>
 

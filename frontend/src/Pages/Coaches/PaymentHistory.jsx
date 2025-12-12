@@ -8,7 +8,7 @@ export default function PaymentHistory({ onSummary, onMethod, onSuccess, onRecei
       date: "Jun 15, 2025",
       description: "Advanced Tennis Clinic - Michael Rodriguez",
       ref: "AJH-TN-230615-08",
-      amount: "$75.00",
+      amount: "$80.00",
       method: "Visa ••••3456",
       status: { label: "Paid", color: "bg-[#dcfce7] text-[#166534]" },
     },

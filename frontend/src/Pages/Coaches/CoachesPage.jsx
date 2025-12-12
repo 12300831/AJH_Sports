@@ -1,4 +1,3 @@
-// src/pages/CoachesPage.jsx
 import React from "react";
 import "./Coaches.css";
 import { HomeHeader } from "../../components/HomeHeader";
@@ -68,7 +67,7 @@ function CoachCard({ coach, onViewProfile }) {
       {/* View profile button */}
       <button
         onClick={() => onViewProfile?.(coach.id)}
-        className="border border-[#2f68ff] text-[#2f68ff] text-[12px] px-6 py-2 rounded-[4px] hover:bg-[#2f68ff] hover:text-white transition"
+        className="border border-black text-black text-[12px] px-6 py-2 rounded-[4px] hover:bg-black hover:text-white transition"
       >
         View Profile
       </button>
@@ -76,13 +75,22 @@ function CoachCard({ coach, onViewProfile }) {
   );
 }
 
-export default function CoachesPage({ onViewProfile }) {
+export default function CoachesPage({ onViewProfile, onBack }) {
   return (
     <div className="min-h-screen bg-[#f5f7fb] flex flex-col">
       <HomeHeader />
 
       {/* Main content */}
       <main className="flex-1 max-w-6xl mx-auto pt-16 pb-12 px-4 md:px-0">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mb-6 text-sm font-semibold text-black hover:underline"
+          >
+            ← Back
+          </button>
+        )}
         <h1 className="text-[28px] md:text-[32px] font-semibold text-center mb-12">
           Our tennis Coaches
         </h1>

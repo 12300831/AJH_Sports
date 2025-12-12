@@ -13,7 +13,7 @@ export default function Michael({ onBack, onBookNow }) {
           <button
             type="button"
             onClick={() => onBack?.()}
-            className="mt-8 mb-6 text-sm font-semibold text-[#2f68ff] hover:underline"
+            className="mt-8 mb-6 text-sm font-semibold text-black hover:underline"
           >
             ← Back to Coaches
           </button>
@@ -51,7 +51,7 @@ export default function Michael({ onBack, onBookNow }) {
               <p>
                 Availability: Mon–Fri 5:00–9:00 pm, Sat 8:00 am–12:00 pm
               </p>
-              <p>Location: Denistone courts | Rate: $75/hr</p>
+              <p>Location: Denistone courts | Rate: $80/hr</p>
               <p>Language: English</p>
             </div>
 

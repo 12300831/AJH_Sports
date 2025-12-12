@@ -60,11 +60,11 @@ export default function Receipt({ onBack }) {
                   <p className="text-xs text-[#6b7280]">Coach: Michael Rodriguez | 2 hr session</p>
                 </div>
                 <div>1</div>
-                <div className="text-right">$75.00</div>
+                <div className="text-right">$80.00</div>
               </div>
               <div className="px-4 py-3 text-sm text-[#111] border-t border-[#e5e7eb] grid grid-cols-4 bg-[#fbfcff]">
                 <div className="col-span-3 text-right font-semibold">Total Paid</div>
-                <div className="text-right font-bold">$75.00</div>
+                <div className="text-right font-bold">$80.00</div>
               </div>
             </div>
 

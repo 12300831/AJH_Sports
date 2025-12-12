@@ -2,7 +2,13 @@ import React from "react";
 import "./Coaches.css";
 import { HomeHeader } from "../../components/HomeHeader";
 
-export default function PaymentSuccess({ onSummary, onMethod, onHistory, onReceipt }) {
+export default function PaymentSuccess({
+  onSummary,
+  onMethod,
+  onHistory,
+  onReceipt,
+  onBookAnother,
+}) {
   return (
     <div className="min-h-screen bg-[#f5f7fb] flex flex-col">
       <HomeHeader />
@@ -84,7 +90,7 @@ export default function PaymentSuccess({ onSummary, onMethod, onHistory, onRecei
                   </div>
                   <div>
                     <p className="text-[#6b7280]">Amount Paid:</p>
-                    <p className="font-semibold">$75.00</p>
+                    <p className="font-semibold">$80.00</p>
                   </div>
                   <div>
                     <p className="text-[#6b7280]">Confirmation Code:</p>
@@ -105,6 +111,7 @@ export default function PaymentSuccess({ onSummary, onMethod, onHistory, onRecei
               <button
                 type="button"
                 className="w-full sm:w-auto min-w-[200px] rounded-md bg-[#0f243f] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition cursor-pointer"
+                onClick={() => (onBookAnother ? onBookAnother() : onSummary?.())}
               >
                 Book Another Session
               </button>

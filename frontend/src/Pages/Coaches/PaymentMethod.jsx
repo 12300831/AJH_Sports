@@ -100,7 +100,7 @@ export default function PaymentMethod({ onBack, onPay, onSummary }) {
 
             <div className="mt-6 pt-4 border-t border-[#e5e7eb] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-sm font-semibold text-[#111]">Total Amount:</div>
-              <div className="text-2xl font-bold text-[#111]">$75.00</div>
+              <div className="text-2xl font-bold text-[#111]">$80.00</div>
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-end">
@@ -116,7 +116,7 @@ export default function PaymentMethod({ onBack, onPay, onSummary }) {
                 className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#0f243f] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition cursor-pointer"
                 onClick={() => onPay?.()}
               >
-                $ Pay $75.00
+                $ Pay $80.00
               </button>
             </div>
           </section>
