@@ -530,7 +530,45 @@
 .lesson-topcopy {
   font-size: 15px;
   line-height: 1.6;
-  color: #4b5563;
+  color: #f5f6fb; /* match background to hide text */
+}
+
+.lesson-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+
+.lesson-nav.lesson-nav-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f5f6fb;
+  padding: 12px 0 10px;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+}
+
+.lesson-nav button {
+  border: 1px solid #e5e7eb;
+  background: #f5f6fb;
+  color: #1f2937;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.lesson-nav button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
 }
 
 .lessons-stack {
@@ -544,6 +582,24 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 32px;
   align-items: center;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06);
+}
+
+.lesson-block.tennis {
+  background: linear-gradient(135deg, #fffbea 0%, #fefbf4 100%);
+  border: 1px solid #f5e6a3;
+}
+
+.lesson-block.table-tennis {
+  background: linear-gradient(135deg, #eef4ff 0%, #f7faff 100%);
+  border: 1px solid #cfe0ff;
+}
+
+.lesson-block.modified {
+  background: linear-gradient(135deg, #e8f9f1 0%, #f4fdf8 100%);
+  border: 1px solid #c9eedc;
 }
 
 .lesson-block.image-left .lesson-image-wrapper {
@@ -580,6 +636,19 @@
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 16px;
+}
+
+.lesson-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: #1f2937;
+  background: rgba(17, 24, 39, 0.08);
+  margin-bottom: 10px;
 }
 
 .lesson-copy {

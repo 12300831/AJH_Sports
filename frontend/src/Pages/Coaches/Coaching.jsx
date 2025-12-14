@@ -82,6 +82,15 @@ const PricingTable = ({ rows }) => {
 };
 
 const Coaching = ({ onBack }) => {
+  const sectionRefs = React.useRef({});
+
+  const scrollToSection = (id) => {
+    const el = sectionRefs.current[id];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="coaches-page">
       <HomeHeader />
@@ -100,20 +109,41 @@ const Coaching = ({ onBack }) => {
             options to fit your needs. Every 10-week package includes reduced social session
             entry and catchup group sessions for wet weather.
           </p>
+          <div className="lesson-nav lesson-nav-fixed">
+            <button type="button" onClick={() => scrollToSection("junior-tennis")}>
+              Tennis
+            </button>
+            <button type="button" onClick={() => scrollToSection("junior-tt")}>
+              Table Tennis
+            </button>
+            <button type="button" onClick={() => scrollToSection("modified-sport")}>
+              Modified Sports
+            </button>
+          </div>
         </div>
 
         <div className="lessons-stack">
           {lessons.map((lesson, index) => {
             const imageFirst = lesson.imageLeft;
+            const isTableTennis = lesson.id.includes("tt");
+            const isModified = lesson.id.includes("modified");
             return (
               <section
                 key={lesson.id}
-                className={`lesson-block ${imageFirst ? "image-left" : "image-right"}`}
+                ref={(el) => {
+                  sectionRefs.current[lesson.id] = el;
+                }}
+                className={`lesson-block ${imageFirst ? "image-left" : "image-right"} ${
+                  isTableTennis ? "table-tennis" : isModified ? "modified" : "tennis"
+                }`}
               >
                 <div className="lesson-image-wrapper">
                   <img src={lesson.image} alt={lesson.title} className="lesson-image" />
                 </div>
                 <div className="lesson-content">
+                  <span className="lesson-pill">
+                    {isTableTennis ? "Table Tennis" : isModified ? "Modified Sports" : "Tennis"}
+                  </span>
                   <h2>{lesson.title}</h2>
                   <p className="lesson-copy">{lesson.copy}</p>
                   <PricingTable rows={lesson.pricing} />

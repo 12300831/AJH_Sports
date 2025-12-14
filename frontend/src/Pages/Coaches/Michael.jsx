@@ -73,9 +73,6 @@ export default function Michael({ onBack, onBookNow }) {
               >
                 Book Now!
               </button>
-              <button className="w-full sm:w-auto min-w-[140px] rounded-md border border-gray-400 px-6 py-3 text-[15px] font-medium text-[#1f1f1f] hover:bg-gray-50 transition">
-                Learn More
-              </button>
             </div>
           </section>
         </div>
