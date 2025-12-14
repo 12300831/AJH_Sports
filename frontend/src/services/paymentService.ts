@@ -71,14 +71,26 @@ export const createCheckoutSession = async (
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create checkout session');
+      let errorMessage = 'Failed to create checkout session';
+      try {
+        const error = await response.json();
+        errorMessage = error.message || errorMessage;
+      } catch (e) {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
     const result = await response.json();
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating checkout session:', error);
+    
+    // Provide more helpful error messages
+    if (error.message && error.message.includes('Failed to fetch')) {
+      throw new Error('Cannot connect to payment server. Please check if the backend is running on port 5001.');
+    }
+    
     throw error;
   }
 };

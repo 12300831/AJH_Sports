@@ -8,12 +8,13 @@ import imgAjhSportsLogoNoOutline13 from "../assets/e8dadc63068e8cb8da040a6443512
 export default function OurClubs() {
   return (
     <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Our Clubs">
-      {/* Header */}
-      <div className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px]">
+      {/* Header - Same as Homepage */}
+      <header className="relative bg-black text-white h-auto min-h-[124.5px] w-full pb-4 md:pb-0 md:h-[124.5px]" data-name="Homepage-Header">
         {/* Logo */}
         <div 
           className="absolute h-[53px] left-[20px] md:left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[20px] md:top-[43px] w-[80px] cursor-pointer z-10"
           data-name="AJHSports-Logo-no-outline-1 1"
+          aria-label="AJH Sports"
         >
           <img 
             alt="AJH Sports Logo" 
@@ -22,17 +23,17 @@ export default function OurClubs() {
           />
         </div>
         
-        {/* Desktop Navigation */}
-        <div className="hidden md:block">
+        {/* Desktop navigation */}
+        <div className="hidden lg:block">
           <button 
-            className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px] hover:text-[#e0cb23] transition-colors"
+            className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px] hover:text-[#e0cb23] transition-colors"
           >
             <p className="leading-[normal]">Home</p>
           </button>
           <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px] cursor-pointer hover:text-[#e0cb23] transition-colors">
             Events
           </p>
-          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-[#e0cb23] top-[54px] w-[71px] cursor-pointer">
+          <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-[#e0cb23] top-[54px] w-[71px] cursor-pointer hover:text-white transition-colors">
             Clubs
           </p>
           <p className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px] cursor-pointer hover:text-[#e0cb23] transition-colors">
@@ -42,32 +43,53 @@ export default function OurClubs() {
             Contact Us
           </p>
         </div>
-        
-        {/* Sign Up Button */}
-        <div 
-          className="absolute bg-[#878787] h-[50px] left-[1327.25px] md:left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden md:block"
-        />
-        <p 
-          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] md:left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden md:block"
-        >
+
+        {/* Tablet navigation */}
+        <div className="hidden md:flex lg:hidden absolute left-[120px] top-[56px] gap-4 md:gap-6">
+          <button className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+            <p>Home</p>
+          </button>
+          <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Events
+          </p>
+          <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-[#e0cb23] cursor-pointer hover:text-white transition-colors">
+            Clubs
+          </p>
+          <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Coaches
+          </p>
+          <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Contact
+          </p>
+        </div>
+
+        {/* Sign Up Button - Desktop */}
+        <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block" />
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block">
           Sign Up
         </p>
-        
-        {/* Log In */}
-        <p 
-          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] md:left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden md:block"
-        >
+
+        {/* Log In - Desktop */}
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block">
           Log In
         </p>
-        
-        {/* Mobile Navigation */}
+
+        {/* Tablet/Mobile Auth Buttons */}
+        <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors">Log In</p>
+          <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white">Sign Up</p>
+          </div>
+        </div>
+
+        {/* Mobile Menu Button and Auth */}
         <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
           <p className="font-semibold text-xs text-white cursor-pointer">Log In</p>
           <div className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors">
             <p className="font-semibold text-xs text-white">Sign Up</p>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
       <div className="flex-1 flex-grow">
@@ -213,10 +235,10 @@ export default function OurClubs() {
           </form>
           
           {/* Vertical Divider Line - Desktop */}
-          <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E]" />
+          <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
           
           {/* About Section - Desktop */}
-          <div className="absolute left-[753px] top-[30px]">
+          <div className="absolute left-[753px] top-[30px] hidden lg:block">
             <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
             <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
               <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
@@ -227,7 +249,7 @@ export default function OurClubs() {
           </div>
           
           {/* Community Section - Desktop */}
-          <div className="absolute left-[957.29px] top-[30px]">
+          <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
             <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
             <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
               <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
@@ -238,7 +260,7 @@ export default function OurClubs() {
           </div>
           
           {/* Contact Section - Desktop */}
-          <div className="absolute left-[1162px] top-[30px]">
+          <div className="absolute left-[1162px] top-[30px] hidden lg:block">
             <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
             <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
               <p>ajhsports.com.au</p>
@@ -327,35 +349,30 @@ export default function OurClubs() {
             </div>
           </form>
           
-          {/* Footer Links - Mobile - Stacked Vertically */}
+          {/* Footer Links - Mobile/Tablet */}
           <div className="mb-6 px-4">
-            <div className="flex flex-col gap-6">
-              {/* About Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
               <div>
-                <p className="font-semibold text-base text-white mb-3">About</p>
-                <div className="font-medium text-sm text-slate-200 space-y-2">
+                <p className="font-semibold text-sm text-white mb-3">About</p>
+                <div className="font-medium text-xs text-slate-200 space-y-2">
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
                 </div>
               </div>
-              
-              {/* Community Section */}
               <div>
-                <p className="font-semibold text-base text-white mb-3">Community</p>
-                <div className="font-medium text-sm text-slate-200 space-y-2">
+                <p className="font-semibold text-sm text-white mb-3">Community</p>
+                <div className="font-medium text-xs text-slate-200 space-y-2">
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
                   <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
                 </div>
               </div>
-              
-              {/* Contact Us Section */}
               <div>
-                <p className="font-semibold text-base text-white mb-3">Contact Us</p>
-                <div className="font-medium text-sm text-slate-200 space-y-2">
+                <p className="font-semibold text-sm text-white mb-3">Contact Us</p>
+                <div className="font-medium text-xs text-slate-200 space-y-2">
                   <p>ajhsports.com.au</p>
                   <p>+61 0412345678</p>
                   <p>123 Ave, Sydney, NSW</p>
@@ -372,40 +389,30 @@ export default function OurClubs() {
             </div>
           </div>
           
-          {/* Bottom Divider */}
-          <div className="w-full h-[1px] bg-[#807E7E] mb-6 mx-4" />
+          {/* Bottom Divider - Mobile */}
+          <div className="mx-4 mb-4 h-[1px] bg-[#807E7E]" />
           
-          {/* Footer Bottom Section - Mobile */}
-          <div className="px-4 pb-4">
-            {/* Social Icons - Centered */}
-            <div className="flex items-center justify-center gap-[20px] mb-4">
-              <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-                <span className="text-[10px] text-white">f</span>
-              </div>
-              <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-                <span className="text-[10px] text-white">𝕏</span>
-              </div>
-              <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-                <span className="text-[10px] text-white">in</span>
-              </div>
+          {/* Social Icons - Mobile */}
+          <div className="flex justify-center gap-4 mb-4">
+            <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+              <span className="text-[10px] text-white">f</span>
             </div>
-            
-            {/* Copyright and Legal Links */}
-            <div className="flex flex-col gap-3">
-              {/* Copyright - Left aligned */}
-              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[11px] text-slate-200 tracking-[-0.22px] text-left">
-                ©2025 Company Name. All rights reserved
-              </p>
-              
-              {/* Privacy & Terms - Right aligned */}
-              <div className="flex gap-4 justify-end">
-                <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">
-                  Privacy & Policy
-                </p>
-                <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[11px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">
-                  Terms & Condition
-                </p>
-              </div>
+            <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+              <span className="text-[10px] text-white">𝕏</span>
+            </div>
+            <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+              <span className="text-[10px] text-white">in</span>
+            </div>
+          </div>
+          
+          {/* Copyright & Privacy - Mobile */}
+          <div className="px-4 pb-4">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[10px] text-slate-200 text-center mb-2 tracking-[-0.22px]">
+              ©2025 Company Name. All rights reserved
+            </p>
+            <div className="flex justify-center gap-4">
+              <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
+              <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
             </div>
           </div>
         </div>

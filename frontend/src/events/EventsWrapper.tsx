@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { createCheckoutSession } from '../services/paymentService';
 
 // Images are served from the public folder at the root path (/images/...)
 const Image_tennis = '/images/TT.png';
@@ -151,6 +152,8 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const [hoveredEvent, setHoveredEvent] = useState<number | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const handleNavClick = (page: Page) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -180,8 +183,50 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
     setSelectedEvent(null);
   };
 
-  const handleRegisterNow = () => {
-    onNavigate('payment');
+  const handleRegisterNow = async () => {
+    if (!selectedEvent) return;
+
+    setIsProcessingPayment(true);
+    setPaymentError(null);
+
+    try {
+      // Parse the price from the event
+      // Handle formats like "$30", "$35", "$25/child", "From $60/hr"
+      const priceMatch = selectedEvent.price.match(/\$(\d+(?:\.\d+)?)/);
+      if (!priceMatch) {
+        throw new Error('Invalid price format');
+      }
+      const amount = parseFloat(priceMatch[1]);
+
+      // Create checkout session and redirect to Stripe
+      const response = await createCheckoutSession({
+        eventId: selectedEvent.id.toString(),
+        eventName: selectedEvent.title,
+        amount: amount,
+        currency: 'aud',
+        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/events?canceled=true`,
+      });
+
+      if (response.url) {
+        // Redirect directly to Stripe Checkout
+        window.location.href = response.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      let errorMessage = 'Failed to process payment. Please try again.';
+      if (err.message) {
+        if (err.message.includes('Failed to fetch') || err.message.includes('Cannot connect')) {
+          errorMessage = 'Cannot connect to payment server. Please check if the backend is running on port 5001.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      setPaymentError(errorMessage);
+      setIsProcessingPayment(false);
+    }
   };
 
   const filteredEvents =
@@ -607,11 +652,19 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
               </p>
             </div>
             
+            {/* Error Message */}
+            {paymentError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{paymentError}</p>
+              </div>
+            )}
+            
             <button
               onClick={handleRegisterNow}
-              className="bg-black text-white font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg hover:bg-[#333] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto"
+              disabled={isProcessingPayment}
+              className="bg-black text-white font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg hover:bg-[#333] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Register Now
+              {isProcessingPayment ? 'Processing...' : 'Register Now'}
             </button>
           </div>
         </div>

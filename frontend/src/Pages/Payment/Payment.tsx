@@ -53,7 +53,7 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
         eventId,
         eventName,
         amount,
-        currency: 'usd',
+        currency: 'aud', // Changed to AUD as per backend controller
         customerEmail: email || undefined,
         successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${window.location.origin}/payment?canceled=true`,
@@ -67,7 +67,21 @@ export default function Payment({ onBack, onNavigate, onPaymentSuccess }: Paymen
       }
     } catch (err: any) {
       console.error('Payment error:', err);
-      setError(err.message || 'Failed to process payment. Please try again.');
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to process payment. Please try again.';
+      
+      if (err.message) {
+        if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+          errorMessage = 'Cannot connect to payment server. Please ensure the backend is running on port 5001.';
+        } else if (err.message.includes('Cannot connect')) {
+          errorMessage = err.message;
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
       setIsProcessing(false);
     }
   };
