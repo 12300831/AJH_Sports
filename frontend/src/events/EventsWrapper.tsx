@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { createCheckoutSession } from '../services/paymentService';
 
 // Images are served from the public folder at the root path (/images/...)
@@ -154,6 +154,13 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  
+  // Google Calendar slot availability state (only for Tennis Open 2025)
+  const [availableSlots, setAvailableSlots] = useState<Array<{ start: string; end: string; id: string }>>([]);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+  const [gapiLoaded, setGapiLoaded] = useState(false);
 
   const handleNavClick = (page: Page) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -181,7 +188,196 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
 
   const handleBackToEvents = () => {
     setSelectedEvent(null);
+    setSelectedSlot(null);
+    setAvailableSlots([]);
   };
+
+  // Initialize Google API Client Library
+  // CONFIGURATION: Replace YOUR_GOOGLE_CLIENT_ID with your actual Google OAuth 2.0 Client ID
+  // Get your Client ID from: https://console.cloud.google.com/apis/credentials
+  // Make sure to enable "Calendar API" in your Google Cloud Console
+  useEffect(() => {
+    const initGapi = async () => {
+      if (typeof window === 'undefined' || !(window as any).gapi) {
+        return;
+      }
+
+      const gapi = (window as any).gapi;
+      
+      // CONFIGURATION: Replace with your Google OAuth 2.0 Client ID
+      const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+      
+      // CONFIGURATION: Add your API key if using API key instead of OAuth
+      // For public calendars, you can use API key instead of OAuth
+      const API_KEY = import.meta.env.VITE_GOOGLE_CALENDAR_API_KEY || '';
+
+      try {
+        // Load the client library
+        await gapi.load('client', async () => {
+          // Initialize the client with API key (for public calendar access)
+          // For private calendars, you'll need OAuth authentication
+          if (API_KEY) {
+            await gapi.client.init({
+              apiKey: API_KEY,
+              discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+            });
+          } else if (CLIENT_ID) {
+            // Initialize with OAuth (for private calendars)
+            await gapi.client.init({
+              clientId: CLIENT_ID,
+              discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+              scope: 'https://www.googleapis.com/auth/calendar.readonly',
+            });
+          }
+          
+          setGapiLoaded(true);
+        });
+      } catch (error) {
+        console.error('Error initializing Google API:', error);
+      }
+    };
+
+    // Check if gapi is already loaded
+    if ((window as any).gapi && (window as any).gapi.load) {
+      initGapi();
+    } else {
+      // Wait for gapi to load
+      const checkGapi = setInterval(() => {
+        if ((window as any).gapi && (window as any).gapi.load) {
+          clearInterval(checkGapi);
+          initGapi();
+        }
+      }, 100);
+
+      // Cleanup after 10 seconds
+      setTimeout(() => clearInterval(checkGapi), 10000);
+    }
+  }, []);
+
+  // Fetch available slots from Google Calendar using gapi client library
+  // CONFIGURATION: 
+  // 1. Add VITE_GOOGLE_CLIENT_ID to your .env file (for OAuth) OR
+  // 2. Add VITE_GOOGLE_CALENDAR_API_KEY to your .env file (for API key - public calendars only)
+  // 3. Add VITE_GOOGLE_CALENDAR_ID to your .env file (e.g., 'primary' or specific calendar ID)
+  const fetchAvailableSlots = async () => {
+    if (!selectedEvent || selectedEvent.title !== 'Tennis Open 2025') return;
+    if (!gapiLoaded || !(window as any).gapi?.client) {
+      setSlotsError('Google Calendar API is not loaded. Please refresh the page.');
+      return;
+    }
+
+    setIsLoadingSlots(true);
+    setSlotsError(null);
+
+    try {
+      const gapi = (window as any).gapi;
+      
+      // CONFIGURATION: Replace with your actual Google Calendar ID
+      // Use 'primary' for your primary calendar, or a specific calendar ID
+      // To find calendar IDs: https://developers.google.com/calendar/api/v3/reference/calendarList/list
+      const CALENDAR_ID = import.meta.env.VITE_GOOGLE_CALENDAR_ID || 'primary';
+      
+      // CONFIGURATION: Adjust time range for available slots
+      // timeMin: Start date for slot availability (default: now)
+      // timeMax: End date for slot availability (default: 30 days from now)
+      const now = new Date();
+      const timeMin = now.toISOString();
+      const timeMax = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days from now
+      
+      // Use gapi client to query free/busy information
+      const response = await gapi.client.calendar.freebusy.query({
+        timeMin: timeMin,
+        timeMax: timeMax,
+        items: [{ id: CALENDAR_ID }],
+      });
+
+      const freebusyData = response.result;
+      const busyPeriods = freebusyData.calendars[CALENDAR_ID]?.busy || [];
+
+      // CONFIGURATION: Adjust slot generation parameters
+      // slotDuration: Duration of each slot in minutes (default: 60 minutes)
+      // startHour: Starting hour for slots (24-hour format, default: 9 = 9 AM)
+      // endHour: Ending hour for slots (24-hour format, default: 18 = 6 PM)
+      // daysToShow: Number of days ahead to show slots (default: 30 days)
+      const slotDuration = 60; // 60 minutes per slot
+      const startHour = 9; // 9 AM
+      const endHour = 18; // 6 PM
+      const daysToShow = 30; // Show slots for next 30 days
+      const slots: Array<{ start: string; end: string; id: string }> = [];
+
+      // Generate time slots and filter out busy ones
+      for (let day = 0; day < daysToShow; day++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() + day);
+        date.setHours(startHour, 0, 0, 0);
+
+        for (let hour = startHour; hour < endHour; hour++) {
+          const slotStart = new Date(date);
+          slotStart.setHours(hour, 0, 0, 0);
+          
+          const slotEnd = new Date(slotStart);
+          slotEnd.setMinutes(slotEnd.getMinutes() + slotDuration);
+
+          // Check if this slot overlaps with any busy period
+          // Only free slots (not overlapping with busy periods) are added
+          const isBusy = busyPeriods.some((busy: { start: string; end: string }) => {
+            const busyStart = new Date(busy.start);
+            const busyEnd = new Date(busy.end);
+            return slotStart < busyEnd && slotEnd > busyStart;
+          });
+
+          // Only add free slots that are in the future
+          if (!isBusy && slotStart > now) {
+            slots.push({
+              start: slotStart.toISOString(),
+              end: slotEnd.toISOString(),
+              id: `slot-${slotStart.getTime()}`,
+            });
+          }
+        }
+      }
+
+      setAvailableSlots(slots);
+    } catch (error: any) {
+      console.error('Error fetching calendar slots:', error);
+      
+      // Provide helpful error messages
+      if (error.status === 403) {
+        setSlotsError('Access denied. Please check your Google Calendar API permissions.');
+      } else if (error.status === 404) {
+        setSlotsError('Calendar not found. Please check your Calendar ID.');
+      } else {
+        setSlotsError('Failed to load available slots. Please try again later.');
+      }
+      
+      // In development, show mock data for testing
+      if (import.meta.env.DEV) {
+        console.warn('Using mock slots for development');
+        const mockSlots = [];
+        for (let i = 1; i <= 10; i++) {
+          const date = new Date();
+          date.setDate(date.getDate() + i);
+          date.setHours(9 + (i % 8), 0, 0, 0);
+          mockSlots.push({
+            start: date.toISOString(),
+            end: new Date(date.getTime() + 60 * 60 * 1000).toISOString(),
+            id: `mock-slot-${i}`,
+          });
+        }
+        setAvailableSlots(mockSlots);
+      }
+    } finally {
+      setIsLoadingSlots(false);
+    }
+  };
+
+  // Fetch slots when Tennis Open 2025 is selected and gapi is loaded
+  useEffect(() => {
+    if (selectedEvent?.title === 'Tennis Open 2025' && gapiLoaded) {
+      fetchAvailableSlots();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEvent, gapiLoaded]);
 
   const handleRegisterNow = async () => {
     if (!selectedEvent) return;
@@ -606,6 +802,80 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
               </p>
             </div>
             
+            {/* Slot Selection - Only for Tennis Open 2025 */}
+            {selectedEvent.title === 'Tennis Open 2025' && (
+              <div className="mb-6 md:mb-8">
+                <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-base md:text-lg text-black mb-4">
+                  Select Available Time Slot
+                </h3>
+                
+                {isLoadingSlots ? (
+                  <div className="p-6 text-center">
+                    <p className="font-['Inter:Regular',sans-serif] text-sm text-[#666]">Loading available slots...</p>
+                  </div>
+                ) : slotsError ? (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+                    <p className="font-['Inter:Regular',sans-serif] text-sm text-yellow-800">{slotsError}</p>
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="font-['Inter:Regular',sans-serif] text-sm text-[#666]">No available slots found. Please check back later.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
+                      {availableSlots.map((slot) => {
+                        const slotDate = new Date(slot.start);
+                        const slotTime = slotDate.toLocaleTimeString('en-US', { 
+                          hour: 'numeric', 
+                          minute: '2-digit',
+                          hour12: true 
+                        });
+                        const slotDateStr = slotDate.toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric'
+                        });
+                        const isSelected = selectedSlot === slot.id;
+
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            onClick={() => setSelectedSlot(slot.id)}
+                            disabled={false} // Only free slots are shown, so all are selectable
+                            className={`p-3 md:p-4 rounded-lg border-2 text-left transition-all font-['Inter:Medium',sans-serif] font-medium text-sm ${
+                              isSelected
+                                ? 'border-black bg-black text-white'
+                                : 'border-gray-300 bg-white text-black hover:border-black hover:bg-gray-50'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            <div className="font-semibold">{slotTime}</div>
+                            <div className="text-xs mt-1 opacity-80">{slotDateStr}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedSlot && (
+                      <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="font-['Inter:Regular',sans-serif] text-sm text-black">
+                          <span className="font-semibold">Selected:</span>{' '}
+                          {new Date(availableSlots.find(s => s.id === selectedSlot)?.start || '').toLocaleString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Error Message */}
             {paymentError && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -615,10 +885,10 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
             
             <button
               onClick={handleRegisterNow}
-              disabled={isProcessingPayment}
+              disabled={isProcessingPayment || (selectedEvent.title === 'Tennis Open 2025' && !selectedSlot)}
               className="bg-black text-white font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg hover:bg-[#333] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isProcessingPayment ? 'Processing...' : 'Register Now'}
+              {isProcessingPayment ? 'Processing...' : selectedEvent.title === 'Tennis Open 2025' && !selectedSlot ? 'Please Select a Time Slot' : 'Register Now'}
             </button>
           </div>
         </div>

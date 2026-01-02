@@ -20,6 +20,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "kill-port": "lsof -ti:5001 | xargs kill -9 2>/dev/null || echo 'Port 5001 is free'",
-    "restart": "npm run kill-port && sleep 1 && npm start"
+    "restart": "npm run kill-port && sleep 1 && npm start",
+    "db:setup": "node database/setup.js",
+    "db:start": "powershell -ExecutionPolicy Bypass -File database/start-mysql.ps1"
   }
 }
