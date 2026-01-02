@@ -39,15 +39,22 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
+    // Explicitly select all columns including role
+    const [rows] = await pool.query(
+      "SELECT id, name, email, phone, location, password, role, created_at, updated_at FROM users WHERE email = ?",
+      [email]
+    );
 
     if (rows.length === 0) {
       return res.status(400).json({ message: "Email not found" });
     }
 
     const user = rows[0];
+
+    // Debug: Log the raw user object from DB
+    console.log('Login - Raw user from DB:', JSON.stringify(user, null, 2));
+    console.log('Login - User role value:', user.role);
+    console.log('Login - User role type:', typeof user.role);
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
@@ -60,17 +67,32 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    return res.json({
+    // Ensure role is set - explicitly check for null/undefined/empty string
+    let userRole = user.role;
+    if (!userRole || userRole === null || userRole === undefined || userRole === '') {
+      userRole = 'user';
+    }
+    console.log('Login - Final user role:', userRole);
+    console.log('Login - User role after processing:', typeof userRole, userRole);
+
+    const response = {
       message: "Login success",
       token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
-        location: user.location,
+        phone: user.phone || null,
+        location: user.location || null,
+        role: String(userRole), // Explicitly convert to string
       },
-    });
+    };
+
+    console.log('Login - Response being sent:');
+    console.log(JSON.stringify(response, null, 2));
+    console.log('Login - Response user.role specifically:', response.user.role);
+    
+    return res.json(response);
 
   } catch (error) {
     console.log(error);

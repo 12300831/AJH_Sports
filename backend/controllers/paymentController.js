@@ -1,4 +1,5 @@
 import stripe from '../config/stripe.js';
+import { handleBookingPaymentSuccess } from './bookingPaymentController.js';
 
 /**
  * Create a Stripe Checkout Session
@@ -146,11 +147,11 @@ export const handleWebhook = async (req, res) => {
     case 'checkout.session.completed':
       const session = event.data.object;
       console.log('Payment successful for session:', session.id);
-      // Here you can:
-      // - Save payment to database
-      // - Send confirmation email
-      // - Update booking status
-      // - etc.
+      
+      // Handle booking payments (event or coach bookings)
+      if (session.metadata && (session.metadata.booking_type === 'event' || session.metadata.booking_type === 'coach')) {
+        await handleBookingPaymentSuccess(session);
+      }
       break;
     
     case 'payment_intent.succeeded':

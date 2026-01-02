@@ -4,8 +4,9 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
+import { toast } from 'sonner';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player';
+type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
 interface SignInProps {
   onNavigate: (page: Page) => void;
@@ -14,14 +15,74 @@ interface SignInProps {
 const LOGO_SRC = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 const AJH_SPORTS_IMAGE = '/images/ajhsports.png';
 
+// Get API URL
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  }
+  return 'http://localhost:5001/api';
+};
+
+const API_URL = getApiUrl();
+
 export function SignIn({ onNavigate }: SignInProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Connect to backend
-    onNavigate('player');
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Debug: Log the response to see what we're getting
+      console.log('🔍 Login response:', data);
+      console.log('🔍 User object:', data.user);
+      console.log('🔍 User role:', data.user?.role);
+      console.log('🔍 Role type:', typeof data.user?.role);
+      console.log('🔍 Role === "admin":', data.user?.role === 'admin');
+
+      // Store token and user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      toast.success('Login successful!');
+
+      // Check if user is admin and redirect accordingly
+      // Handle both string comparison and case-insensitive check
+      const userRole = data.user?.role?.toLowerCase?.() || data.user?.role || '';
+      console.log('🔍 Normalized role:', userRole);
+      
+      if (userRole === 'admin') {
+        console.log('✅ Redirecting to admin portal');
+        onNavigate('admin');
+      } else {
+        console.log('❌ Redirecting to player profile (role:', userRole, ')');
+        onNavigate('player');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Failed to log in. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNavClick = (page: Page) => {
@@ -57,7 +118,10 @@ export function SignIn({ onNavigate }: SignInProps) {
                 type="email"
                 placeholder="Enter your email"
                 className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -68,7 +132,10 @@ export function SignIn({ onNavigate }: SignInProps) {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   className="w-full bg-white pr-10 border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -101,8 +168,9 @@ export function SignIn({ onNavigate }: SignInProps) {
             <Button
               type="submit"
               className="w-full bg-[#e0cb23] text-black hover:bg-[#cdb720] font-semibold h-12 text-base shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+              disabled={loading}
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
 

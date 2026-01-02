@@ -11,21 +11,86 @@ import { PaymentSuccessWrapper } from './components/PaymentSuccessWrapper';
 import { AuthWrapper } from './components/AuthWrapper';
 import { DashboardWrapper } from './components/Dashboardwrapper';
 import { PlayerWrapper } from './components/Playerwrapper';
+import { AdminWrapper } from './components/admin/AdminWrapper';
+import { Toaster } from './components/ui/sonner';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
-  // Ensure the app always starts on the home view when it first loads
+  // Map URL paths to page states
+  const pathToPage: Record<string, Page> = {
+    '/': 'home',
+    '/home': 'home',
+    '/clubs': 'clubs',
+    '/clubsList': 'clubsList',
+    '/account': 'account',
+    '/events': 'events',
+    '/coaches': 'coaches',
+    '/contact': 'contact',
+    '/signin': 'signin',
+    '/signup': 'signup',
+    '/dashboard': 'dashboard',
+    '/player': 'player',
+    '/payment': 'payment',
+    '/paymentSuccess': 'paymentSuccess',
+    '/admin': 'admin',
+    '/admin/events': 'adminEvents',
+    '/admin/coaches': 'adminCoaches',
+    '/admin/users': 'adminUsers',
+    '/admin/bookings': 'adminBookings',
+  };
+
+  // Map page states to URL paths
+  const pageToPath: Record<Page, string> = {
+    home: '/',
+    clubs: '/clubs',
+    clubsList: '/clubsList',
+    account: '/account',
+    events: '/events',
+    coaches: '/coaches',
+    contact: '/contact',
+    signin: '/signin',
+    signup: '/signup',
+    dashboard: '/dashboard',
+    player: '/player',
+    payment: '/payment',
+    paymentSuccess: '/paymentSuccess',
+    admin: '/admin',
+    adminEvents: '/admin/events',
+    adminCoaches: '/admin/coaches',
+    adminUsers: '/admin/users',
+    adminBookings: '/admin/bookings',
+  };
+
+  // Handle URL-based routing on initial load and URL changes
   useEffect(() => {
-    setCurrentPage('home');
+    const path = window.location.pathname;
+    const page = pathToPage[path] || 'home';
+    setCurrentPage(page);
+  }, []);
+
+  // Listen for browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      const page = pathToPage[path] || 'home';
+      setCurrentPage(page);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const handleNavigate = (page: Page) => {
     // Scroll to top on page change
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentPage(page);
+    
+    // Update URL without page reload
+    const path = pageToPath[page] || '/';
+    window.history.pushState({ page }, '', path);
   };
 
   const renderPage = () => {
@@ -57,6 +122,12 @@ export default function App() {
         return <PaymentWrapper onNavigate={handleNavigate} />;
       case 'paymentSuccess':
         return <PaymentSuccessWrapper onNavigate={handleNavigate} />;
+      case 'admin':
+      case 'adminEvents':
+      case 'adminCoaches':
+      case 'adminUsers':
+      case 'adminBookings':
+        return <AdminWrapper onNavigate={handleNavigate} />;
       default:
         return <ClubMainWrapper onNavigate={handleNavigate} />;
     }
@@ -67,6 +138,7 @@ export default function App() {
       <div className="w-full relative flex-1 flex flex-col">
         {renderPage()}
       </div>
+      <Toaster />
     </div>
   );
 }
