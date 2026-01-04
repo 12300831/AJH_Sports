@@ -29,19 +29,27 @@ import {
   type EventBooking,
   type CoachBooking,
 } from '../../services/adminService';
+import { AdminLayout } from './AdminLayout';
 import { toast } from 'sonner';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
+type AdminPage = 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
+
 interface AdminBookingsProps {
-  onNavigate: (page: Page) => void;
+  onNavigate: (page: AdminPage) => void;
 }
 
 export function AdminBookings({ onNavigate }: AdminBookingsProps) {
   const [eventBookings, setEventBookings] = useState<EventBooking[]>([]);
   const [coachBookings, setCoachBookings] = useState<CoachBooking[]>([]);
+  const [filteredEventBookings, setFilteredEventBookings] = useState<EventBooking[]>([]);
+  const [filteredCoachBookings, setFilteredCoachBookings] = useState<CoachBooking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   useEffect(() => {
     loadBookings();
@@ -56,12 +64,45 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
       ]);
       setEventBookings(events);
       setCoachBookings(coaches);
+      setFilteredEventBookings(events);
+      setFilteredCoachBookings(coaches);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load bookings');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let filteredEvents = eventBookings;
+    let filteredCoaches = coachBookings;
+
+    // Apply search filter
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      filteredEvents = eventBookings.filter(
+        (b) =>
+          b.event_name?.toLowerCase().includes(query) ||
+          b.user_name?.toLowerCase().includes(query) ||
+          b.user_email?.toLowerCase().includes(query)
+      );
+      filteredCoaches = coachBookings.filter(
+        (b) =>
+          b.coach_name?.toLowerCase().includes(query) ||
+          b.user_name?.toLowerCase().includes(query) ||
+          b.user_email?.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filteredEvents = filteredEvents.filter((b) => b.status === statusFilter);
+      filteredCoaches = filteredCoaches.filter((b) => b.status === statusFilter);
+    }
+
+    setFilteredEventBookings(filteredEvents);
+    setFilteredCoachBookings(filteredCoaches);
+  }, [searchQuery, statusFilter, eventBookings, coachBookings]);
 
   const handleStatusChange = async (
     bookingId: number,
@@ -103,36 +144,49 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#f7f7f7]">
-      {/* Header */}
-      <div className="bg-[#030213] text-white py-6 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Manage Bookings</h1>
-            <p className="text-gray-300 mt-1">View and update booking status</p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => onNavigate('admin')}
-            className="bg-white text-[#030213] hover:bg-gray-100"
-          >
-            Back to Dashboard
-          </Button>
-        </div>
-      </div>
+  const handlePageNavigate = (page: Page) => {
+    window.location.href = '/';
+  };
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+  return (
+    <AdminLayout
+      title="Manage Bookings"
+      description="View and update booking status"
+      currentPage="adminBookings"
+      onNavigate={handlePageNavigate}
+      onAdminNavigate={onNavigate}
+    >
+      <div>
         <Tabs defaultValue="events" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="events">
-              Event Bookings ({eventBookings.length})
-            </TabsTrigger>
-            <TabsTrigger value="coaches">
-              Coach Bookings ({coachBookings.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="events">
+                Event Bookings ({eventBookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="coaches">
+                Coach Bookings ({coachBookings.length})
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                placeholder="Search bookings..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-64"
+              />
+            </div>
+          </div>
 
           <TabsContent value="events">
             <Card>
@@ -143,9 +197,9 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
               <CardContent>
                 {loading ? (
                   <div className="text-center py-8">Loading bookings...</div>
-                ) : eventBookings.length === 0 ? (
+                ) : filteredEventBookings.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    No event bookings found.
+                    {searchQuery || statusFilter !== 'all' ? 'No bookings found matching your filters.' : 'No event bookings found.'}
                   </div>
                 ) : (
                   <Table>
@@ -162,7 +216,7 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {eventBookings.map((booking) => (
+                      {filteredEventBookings.map((booking) => (
                         <TableRow key={booking.id}>
                           <TableCell>{booking.id}</TableCell>
                           <TableCell className="font-medium">
@@ -222,9 +276,9 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
               <CardContent>
                 {loading ? (
                   <div className="text-center py-8">Loading bookings...</div>
-                ) : coachBookings.length === 0 ? (
+                ) : filteredCoachBookings.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    No coach bookings found.
+                    {searchQuery || statusFilter !== 'all' ? 'No bookings found matching your filters.' : 'No coach bookings found.'}
                   </div>
                 ) : (
                   <Table>
@@ -240,7 +294,7 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {coachBookings.map((booking) => (
+                      {filteredCoachBookings.map((booking) => (
                         <TableRow key={booking.id}>
                           <TableCell>{booking.id}</TableCell>
                           <TableCell className="font-medium">
@@ -292,7 +346,7 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 

@@ -17,6 +17,15 @@ interface AdminWrapperProps {
 
 type AdminPage = 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
+// Map URL paths to admin pages
+const pathToAdminPage: Record<string, AdminPage> = {
+  '/admin': 'admin',
+  '/admin/events': 'adminEvents',
+  '/admin/coaches': 'adminCoaches',
+  '/admin/users': 'adminUsers',
+  '/admin/bookings': 'adminBookings',
+};
+
 export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
   const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>('admin');
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
@@ -24,6 +33,22 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
 
   useEffect(() => {
     checkAdminAccess();
+    // Sync with URL on mount
+    const path = window.location.pathname;
+    const page = pathToAdminPage[path] || 'admin';
+    setCurrentAdminPage(page);
+  }, []);
+
+  // Listen for URL changes
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      const page = pathToAdminPage[path] || 'admin';
+      setCurrentAdminPage(page);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const checkAdminAccess = async () => {
@@ -40,7 +65,6 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
-          console.log('🔍 Stored user from localStorage:', user);
           if (user.role === 'admin') {
             setIsAuthorized(true);
             setLoading(false);
@@ -53,15 +77,10 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
 
       // If not in localStorage or not admin, check via API
       const user = await getUserProfile();
-      console.log('🔍 User from API:', user);
-      
-      // Check if user is admin
       const userRole = user.role || (user as any)?.role;
-      console.log('🔍 User role:', userRole);
       
       if (userRole === 'admin') {
         setIsAuthorized(true);
-        // Update localStorage with fresh user data
         localStorage.setItem('user', JSON.stringify(user));
       } else {
         setIsAuthorized(false);
@@ -83,12 +102,23 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
   const handleAdminNavigate = (page: AdminPage) => {
     setCurrentAdminPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Update URL
+    const pathMap: Record<AdminPage, string> = {
+      admin: '/admin',
+      adminEvents: '/admin/events',
+      adminCoaches: '/admin/coaches',
+      adminUsers: '/admin/users',
+      adminBookings: '/admin/bookings',
+    };
+    window.history.pushState({ page }, '', pathMap[page]);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
         <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#030213] mx-auto mb-4"></div>
           <div className="text-lg font-medium text-[#030213]">Checking access...</div>
         </div>
       </div>
@@ -149,4 +179,3 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
 
   return renderAdminPage();
 }
-

@@ -72,6 +72,8 @@ export interface Event {
   time: string;
   max_players: number;
   price: number;
+  location?: string;
+  status?: 'active' | 'cancelled' | 'completed';
   created_at?: string;
 }
 
@@ -82,6 +84,8 @@ export interface CreateEventData {
   time: string;
   max_players: number;
   price: number;
+  location?: string;
+  status?: 'active' | 'cancelled' | 'completed';
 }
 
 export const getEvents = async (): Promise<Event[]> => {
@@ -121,16 +125,22 @@ export interface Coach {
   id: number;
   name: string;
   specialty: string;
+  email?: string;
+  phone?: string;
   availability: string | Array<{ day: string; start: string; end: string }>;
   hourly_rate: number;
+  status?: 'active' | 'inactive';
   created_at?: string;
 }
 
 export interface CreateCoachData {
   name: string;
   specialty: string;
+  email?: string;
+  phone?: string;
   availability: Array<{ day: string; start: string; end: string }>;
   hourly_rate: number;
+  status?: 'active' | 'inactive';
 }
 
 export const getCoaches = async (): Promise<Coach[]> => {

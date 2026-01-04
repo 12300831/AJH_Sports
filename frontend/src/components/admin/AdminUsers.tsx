@@ -14,18 +14,24 @@ import {
   deleteUser,
   type User,
 } from '../../services/adminService';
+import { AdminLayout } from './AdminLayout';
 import { toast } from 'sonner';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
+type AdminPage = 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
+
 interface AdminUsersProps {
-  onNavigate: (page: Page) => void;
+  onNavigate: (page: AdminPage) => void;
 }
 
 export function AdminUsers({ onNavigate }: AdminUsersProps) {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -36,12 +42,30 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       setLoading(true);
       const data = await getAllUsers();
       setUsers(data);
+      setFilteredUsers(data);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load users');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredUsers(users);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredUsers(
+        users.filter(
+          (user) =>
+            user.name.toLowerCase().includes(query) ||
+            user.email.toLowerCase().includes(query) ||
+            (user.phone && user.phone.includes(query)) ||
+            (user.location && user.location.toLowerCase().includes(query))
+        )
+      );
+    }
+  }, [searchQuery, users]);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
@@ -55,38 +79,44 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#f7f7f7]">
-      {/* Header */}
-      <div className="bg-[#030213] text-white py-6 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Manage Users</h1>
-            <p className="text-gray-300 mt-1">View and manage user accounts</p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => onNavigate('admin')}
-            className="bg-white text-[#030213] hover:bg-gray-100"
-          >
-            Back to Dashboard
-          </Button>
-        </div>
-      </div>
+  const handlePageNavigate = (page: Page) => {
+    window.location.href = '/';
+  };
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+  return (
+    <AdminLayout
+      title="Manage Users"
+      description="View and manage user accounts"
+      currentPage="adminUsers"
+      onNavigate={handlePageNavigate}
+      onAdminNavigate={onNavigate}
+    >
+      <div>
         <Card>
           <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>Total users: {users.length}</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>
+                  Showing {filteredUsers.length} of {users.length} users
+                </CardDescription>
+              </div>
+              <div className="w-64">
+                <Input
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8">Loading users...</div>
-            ) : users.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No users found.
+                {searchQuery ? 'No users found matching your search.' : 'No users found.'}
               </div>
             ) : (
               <Table>
@@ -102,7 +132,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>{user.id}</TableCell>
                       <TableCell className="font-medium">{user.name}</TableCell>
@@ -132,7 +162,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
 
