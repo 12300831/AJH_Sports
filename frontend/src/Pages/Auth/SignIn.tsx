@@ -46,10 +46,19 @@ export function SignIn({ onNavigate }: SignInProps) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      // Try to parse JSON, but handle errors gracefully
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error(`Server returned invalid response (status ${response.status}). Please check if the backend server is running.`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        const errorMessage = data.message || data.error || `Login failed (${response.status})`;
+        console.error('Login error response:', data);
+        throw new Error(errorMessage);
       }
 
       // Debug: Log the response to see what we're getting

@@ -38,6 +38,14 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
+  // Validate JWT_SECRET before processing
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set in environment variables');
+    return res.status(500).json({ 
+      message: "Server configuration error: JWT_SECRET is missing"
+    });
+  }
+
   try {
     // Explicitly select all columns including role
     const [rows] = await pool.query(
@@ -95,8 +103,23 @@ export const login = async (req, res) => {
     return res.json(response);
 
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Server error" });
+    console.error('Login error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Check for common issues
+    if (!process.env.JWT_SECRET) {
+      console.error('❌ JWT_SECRET is not set in environment variables');
+      return res.status(500).json({ 
+        message: "Server configuration error: JWT_SECRET is missing",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
+    return res.status(500).json({ 
+      message: "Server error",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
