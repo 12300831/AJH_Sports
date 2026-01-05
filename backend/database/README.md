@@ -66,9 +66,13 @@ Make sure your `backend/.env` file has the correct MySQL credentials:
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASS=your_mysql_password
+DB_PASS=ajhsports2024
 DB_NAME=ajh_sports
 ```
+
+**Note:** The default password for this project is `ajhsports2024`. If your MySQL root password is different, you'll need to either:
+- Set your MySQL root password to match: `ajhsports2024`
+- Or update `DB_PASS` in your `.env` file to match your MySQL root password
 
 ### Default MySQL Settings
 

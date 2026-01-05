@@ -35,7 +35,7 @@ Create or update `backend/.env` with the following:
 # Database Configuration
 DB_HOST=localhost
 DB_USER=root
-DB_PASS=your_mysql_password
+DB_PASS=ajhsports2024
 DB_NAME=ajh_sports
 
 # JWT Secret (IMPORTANT - must be set!)
@@ -72,7 +72,7 @@ brew services start mysql
 sudo /usr/local/mysql/support-files/mysql.server start
 ```
 
-## Step 5: Set Up Database (if not already done)
+## Step 6: Set Up Database (if not already done)
 
 ```bash
 cd backend
@@ -80,7 +80,7 @@ npm run db:setup
 npm run db:setup-extended
 ```
 
-## Step 6: Start the Backend Server
+## Step 7: Start the Backend Server
 
 ```bash
 cd backend
@@ -93,7 +93,7 @@ You should see:
 🌍 Environment: development
 ```
 
-## Step 7: Start the Frontend
+## Step 8: Start the Frontend
 
 Open a new terminal window:
 
@@ -102,7 +102,7 @@ cd frontend
 npm run dev
 ```
 
-## Step 8: Test Admin Login
+## Step 9: Test Admin Login
 
 1. Open your browser and go to: `http://localhost:3000/signin` (or the port shown in the terminal)
 2. Try logging in with admin credentials
@@ -115,6 +115,8 @@ npm run dev
 1. **Check backend terminal logs** - Look for detailed error messages that will now be displayed
 2. **Verify JWT_SECRET is set** - Check your `backend/.env` file
 3. **Check database connection** - Make sure MySQL is running and credentials are correct
+   - **Verify MySQL password** - The password should be `ajhsports2024` (or match what's in your `.env` file)
+   - Test connection: `mysql -u root -p` (use password: `ajhsports2024`)
 4. **Check if backend is running** - Make sure the backend server started successfully on port 5001
 
 ### Common Issues:
