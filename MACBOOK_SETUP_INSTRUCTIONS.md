@@ -72,6 +72,31 @@ brew services start mysql
 sudo /usr/local/mysql/support-files/mysql.server start
 ```
 
+## Step 5: Set MySQL Root Password
+
+The project uses a standard password: `ajhsports2024`
+
+**Set the MySQL root password to match the .env file:**
+
+### Option A: Using MySQL Command Line
+```bash
+# Connect to MySQL (you may need to enter your current password or press Enter if no password)
+mysql -u root -p
+
+# Once connected, run:
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'ajhsports2024';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### Option B: Using the Setup Script (if you can connect without password)
+```bash
+cd backend/database
+node set-mysql-password.js
+```
+
+**Note:** Make sure your `backend/.env` file has `DB_PASS=ajhsports2024` (it should already be set from the pull).
+
 ## Step 6: Set Up Database (if not already done)
 
 ```bash
