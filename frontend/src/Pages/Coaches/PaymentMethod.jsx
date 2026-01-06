@@ -1,8 +1,53 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Coaches.css";
 import { HomeHeader } from "../../components/HomeHeader";
+import { createCheckoutSession } from "../../services/paymentService";
 
-export default function PaymentMethod({ onBack, onPay, onSummary }) {
+export default function PaymentMethod({ onBack, onSummary }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handlePayment = async () => {
+    setError(null);
+    setIsProcessing(true);
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const amount = parseFloat(params.get("amount") || "80.00");
+      const bookingName = params.get("bookingName") || "Coaching Session";
+      const bookingId = params.get("bookingId") || "coach-booking";
+
+      const response = await createCheckoutSession({
+        eventId: bookingId,
+        eventName: bookingName,
+        amount,
+        currency: "aud",
+        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/coaches?canceled=true`,
+      });
+
+      if (response.url) {
+        window.location.href = response.url;
+        return;
+      }
+
+      throw new Error("No checkout URL received");
+    } catch (err) {
+      console.error("Payment error:", err);
+      let errorMessage = "Failed to process payment. Please try again.";
+      if (err?.message) {
+        if (err.message.includes("Failed to fetch") || err.message.includes("Cannot connect")) {
+          errorMessage =
+            "Cannot connect to payment server. Please check if the backend is running on port 5001.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      setError(errorMessage);
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f7fb] flex flex-col">
       <HomeHeader />
@@ -46,6 +91,12 @@ export default function PaymentMethod({ onBack, onPay, onSummary }) {
               <span className="text-[#111]">💳</span>
               <span className="text-[#111]">Payment Method</span>
             </div>
+
+            {error && (
+              <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               <button className="w-full h-11 rounded-md border border-[#0f243f] bg-white text-sm font-semibold text-[#0f243f] shadow-sm cursor-pointer">
@@ -113,10 +164,11 @@ export default function PaymentMethod({ onBack, onPay, onSummary }) {
               </button>
               <button
                 type="button"
-                className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#0f243f] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition cursor-pointer"
-                onClick={() => onPay?.()}
+                className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#0f243f] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handlePayment}
+                disabled={isProcessing}
               >
-                $ Pay $80.00
+                {isProcessing ? "Processing..." : "$ Pay $80.00"}
               </button>
             </div>
           </section>

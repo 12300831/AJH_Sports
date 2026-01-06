@@ -10,7 +10,7 @@ import PaymentHistory from '../Pages/Coaches/PaymentHistory';
 import Receipt from '../Pages/Coaches/Receipt';
 import Coaching from '../Pages/Coaches/Coaching';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup';
 type CoachView =
   | 'landing'
   | 'list'
@@ -50,11 +50,14 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
       setView('landing');
     } else if (normalizedText === 'Coaches') {
       onNavigate('coaches');
-    } else if (normalizedText === 'Contact Us') {
+    } else if (normalizedText === 'Contact Us' || normalizedText === 'Contact') {
       onNavigate('contact');
       setView('landing');
-    } else if (normalizedText === 'Log In' || normalizedText === 'Sign Up') {
-      onNavigate('account');
+    } else if (normalizedText === 'Log In' || normalizedText === 'Login') {
+      onNavigate('signin');
+      setView('landing');
+    } else if (normalizedText === 'Sign Up' || normalizedText === 'Signup') {
+      onNavigate('signup');
       setView('landing');
     }
   };
@@ -97,10 +100,6 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     setView('bookingsummary');
   };
 
-  const handlePay = () => {
-    setView('paymentsuccess');
-  };
-
   const handleGoToHistory = () => {
     setView('paymenthistory');
   };
@@ -128,7 +127,6 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
       ) : view === 'paymentmethod' ? (
         <PaymentMethod
           onBack={handleBackToSummary}
-          onPay={handlePay}
           onSummary={handleBackToSummary}
         />
       ) : view === 'paymentsuccess' ? (

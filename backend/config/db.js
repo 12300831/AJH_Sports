@@ -11,12 +11,17 @@ const envPath = join(__dirname, "..", ".env");
 // Explicitly load .env from the correct path
 dotenv.config({ path: envPath });
 
+// Database connection configuration
+// Uses TCP connection (more reliable across platforms)
+// Socket path can be added if needed via environment variable
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASS || "",
   database: process.env.DB_NAME || "ajh_sports",
-  socketPath: "/tmp/mysql.sock", // Use socket for local connections on macOS
+  port: process.env.DB_PORT || 3306,
+  // socketPath can be set via DB_SOCKET_PATH if needed
+  ...(process.env.DB_SOCKET_PATH && { socketPath: process.env.DB_SOCKET_PATH }),
 });
 
 export default pool;
