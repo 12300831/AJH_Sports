@@ -129,6 +129,13 @@ app.get('/api', (req, res) => {
         webhook: 'POST /api/payments/webhook',
         eventBooking: 'POST /api/booking-payments/event (auth)',
         coachBooking: 'POST /api/booking-payments/coach (auth)'
+      },
+      contact: {
+        submitMessage: 'POST /api/contact',
+        getMessages: 'GET /api/contact (admin)',
+        getMessage: 'GET /api/contact/:id (admin)',
+        updateMessage: 'PUT /api/contact/:id (admin)',
+        deleteMessage: 'DELETE /api/contact/:id (admin)'
       }
     },
     timestamp: new Date().toISOString()

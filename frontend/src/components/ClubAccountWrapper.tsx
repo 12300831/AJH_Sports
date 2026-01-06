@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import ClubAccountOriginal from '../imports/ClubAccount';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
 interface ClubAccountWrapperProps {
   onNavigate: (page: Page) => void;
@@ -30,16 +30,8 @@ export function ClubAccountWrapper({ onNavigate }: ClubAccountWrapperProps) {
       onNavigate('coaches');
       return;
     }
-    if (normalizedText === 'Contact Us' || normalizedText === 'Contact') {
+    if (normalizedText === 'Contact Us') {
       onNavigate('contact');
-      return;
-    }
-    if (normalizedText === 'Log In' || normalizedText === 'Login') {
-      onNavigate('signin');
-      return;
-    }
-    if (normalizedText === 'Sign Up' || normalizedText === 'Signup') {
-      onNavigate('signup');
       return;
     }
 

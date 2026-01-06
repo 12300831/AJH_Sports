@@ -1,4 +1,4 @@
-import pool from '../config/db.js';
+import db from '../config/db.js';
 
 /**
  * Submit a contact message
@@ -24,7 +24,7 @@ export const submitContactMessage = async (req, res) => {
     }
 
     // Insert message into database
-    const [result] = await pool.execute(
+    const [result] = await db.execute(
       'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
       [name.trim(), email.trim(), message.trim()]
     );
@@ -61,7 +61,7 @@ export const getContactMessages = async (req, res) => {
     query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
 
-    const [messages] = await pool.execute(query, params);
+    const [messages] = await db.execute(query, params);
 
     res.json({
       messages,
@@ -84,7 +84,7 @@ export const getContactMessage = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [messages] = await pool.execute(
+    const [messages] = await db.execute(
       'SELECT * FROM contact_messages WHERE id = ?',
       [id]
     );
@@ -138,7 +138,7 @@ export const updateContactMessage = async (req, res) => {
     query += ' WHERE id = ?';
     params.push(id);
 
-    const [result] = await pool.execute(query, params);
+    const [result] = await db.execute(query, params);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -166,7 +166,7 @@ export const deleteContactMessage = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [result] = await pool.execute(
+    const [result] = await db.execute(
       'DELETE FROM contact_messages WHERE id = ?',
       [id]
     );

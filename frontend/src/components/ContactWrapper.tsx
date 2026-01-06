@@ -1,5 +1,4 @@
-import { FormEvent, useState, useRef } from 'react';
-import { toast } from 'sonner';
+import { FormEvent, useState } from 'react';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup';
 
@@ -9,21 +8,8 @@ interface ContactWrapperProps {
 
 const LOGO_SRC = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 
-// Get API URL
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
-
-const API_URL = getApiUrl();
-
 export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
 
   const handleNavClick = (page: Page) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -31,55 +17,13 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
     setIsMobileMenuOpen(false);
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsSubmitting(true);
-
-    const form = event.currentTarget || formRef.current;
-    if (!form) {
-      console.error('Form element not found');
-      setIsSubmitting(false);
-      return;
-    }
-
-    const formData = new FormData(form);
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const message = formData.get('message') as string;
-
-    try {
-      const response = await fetch(`${API_URL}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          message: message.trim(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send message');
-      }
-
-      toast.success(data.message || 'Thank you for your message! We\'ll get back to you within 24 hours.');
-      
-      // Reset form safely
-      if (formRef.current) {
-        formRef.current.reset();
-      } else if (form) {
-        form.reset();
-      }
-    } catch (error: any) {
-      console.error('Error submitting contact form:', error);
-      toast.error(error.message || 'Failed to send message. Please try again later.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    const formData = new FormData(event.currentTarget);
+    const name = formData.get('name');
+    // eslint-disable-next-line no-alert
+    alert(`Thanks for reaching out${name ? `, ${name}` : ''}! We'll be in touch soon.`);
+    event.currentTarget.reset();
   };
 
   return (
@@ -290,7 +234,7 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
           <div className="rounded-3xl bg-white p-8 shadow-lg">
             <h2 className="text-2xl font-semibold text-black">Quick message</h2>
             <p className="mt-2 text-sm text-[#5c5c5c]">Send us a note and we&apos;ll reply in under 24 hours.</p>
-            <form ref={formRef} className="mt-6 flex flex-col gap-4" onSubmit={handleFormSubmit}>
+            <form className="mt-6 flex flex-col gap-4" onSubmit={handleFormSubmit}>
               <input
                 name="name"
                 className="rounded-xl border border-black/10 px-4 py-3 text-base outline-none transition focus:border-[#e0cb23]"
@@ -312,10 +256,9 @@ export function ContactWrapper({ onNavigate }: ContactWrapperProps) {
               />
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="rounded-xl bg-[#e0cb23] px-4 py-3 text-base font-semibold text-black transition hover:bg-[#cdb720] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl bg-[#e0cb23] px-4 py-3 text-base font-semibold text-black transition hover:bg-[#cdb720]"
               >
-                {isSubmitting ? 'Sending...' : 'Send message'}
+                Send message
               </button>
             </form>
           </div>
