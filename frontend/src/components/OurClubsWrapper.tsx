@@ -1,7 +1,7 @@
 import { MouseEvent } from 'react';
 import OurClubsOriginal from '../imports/OurClubs';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup';
 
 interface OurClubsWrapperProps {
   onNavigate: (page: Page) => void;
@@ -34,8 +34,12 @@ export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
       onNavigate('clubs');
     } else if (normalizedText === 'Coaches') {
       onNavigate('coaches');
-    } else if (normalizedText === 'Contact Us') {
+    } else if (normalizedText === 'Contact Us' || normalizedText === 'Contact') {
       onNavigate('contact');
+    } else if (normalizedText === 'Log In' || normalizedText === 'Login') {
+      onNavigate('signin');
+    } else if (normalizedText === 'Sign Up' || normalizedText === 'Signup') {
+      onNavigate('signup');
     } else if (normalizedText === 'Join Us') {
       // Redirect to account page when clicking Join Us buttons
       onNavigate('account');

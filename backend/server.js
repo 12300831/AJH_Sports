@@ -10,6 +10,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import coachRoutes from "./routes/coachRoutes.js";
 import bookingPaymentRoutes from "./routes/bookingPaymentRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 // Middleware imports
 import { logger } from "./middleware/logger.js";
@@ -82,6 +83,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/coaches", coachRoutes);
 app.use("/api/booking-payments", bookingPaymentRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Root API endpoint - shows available routes
 app.get('/api', (req, res) => {
