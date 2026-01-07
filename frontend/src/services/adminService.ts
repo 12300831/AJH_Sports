@@ -90,7 +90,20 @@ export interface CreateEventData {
 
 export const getEvents = async (): Promise<Event[]> => {
   const response = await apiCall('/events');
-  return response.json();
+  const data = await response.json();
+  // Handle different response formats
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (data.events && Array.isArray(data.events)) {
+    return data.events;
+  }
+  if (data.data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  // If it's an object but not an array, return empty array
+  console.warn('getEvents: Expected array but got:', typeof data, data);
+  return [];
 };
 
 export const getEventById = async (id: number): Promise<Event> => {

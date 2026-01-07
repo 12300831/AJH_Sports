@@ -19,8 +19,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "kill-port": "lsof -ti:5001 | xargs kill -9 2>/dev/null || echo 'Port 5001 is free'",
-    "restart": "npm run kill-port && sleep 1 && npm start",
+    "kill-port": "powershell -ExecutionPolicy Bypass -File kill-port.ps1",
+    "restart": "powershell -ExecutionPolicy Bypass -File restart.ps1",
     "db:setup": "node database/setup.js",
     "db:setup-extended": "node database/setup-extended.js",
     "db:start": "powershell -ExecutionPolicy Bypass -File database/start-mysql.ps1",

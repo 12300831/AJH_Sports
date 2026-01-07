@@ -81,6 +81,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
   const [mockEvents, setMockEvents] = useState<MockEvent[]>([]);
   const [allEvents, setAllEvents] = useState<ExtendedEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
@@ -115,21 +116,31 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
   const [viewMode, setViewMode] = useState<'all' | 'backend' | 'mock'>('all');
 
   useEffect(() => {
-    // Load mock events immediately (synchronous)
-    const mockData = getMockEvents();
-    console.log('🚀 Initial mock events load:', mockData.length, mockData);
-    setMockEvents(mockData);
-    
-    // Then load all events (including backend)
-    loadEvents();
+    try {
+      // Load mock events immediately (synchronous)
+      const mockData = getMockEvents();
+      console.log('🚀 Initial mock events load:', mockData.length, mockData);
+      setMockEvents(mockData || []);
+      
+      // Then load all events (including backend)
+      loadEvents();
+    } catch (err: any) {
+      console.error('Error in AdminEvents useEffect:', err);
+      setError(err.message || 'Failed to load events');
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    // Combine backend and mock events
-    console.log('🔄 Combining events - backendEvents:', backendEvents.length, 'mockEvents:', mockEvents.length);
-    
-    const backendEventsList = backendEvents.map(e => ({ ...e, isMockEvent: false }));
-    const mockEventsList = mockEvents.map(m => ({
+    try {
+      // Ensure both are arrays before processing
+      const safeBackendEvents = Array.isArray(backendEvents) ? backendEvents : [];
+      const safeMockEvents = Array.isArray(mockEvents) ? mockEvents : [];
+      
+      console.log('🔄 Combining events - backendEvents:', safeBackendEvents.length, 'mockEvents:', safeMockEvents.length);
+      
+      const backendEventsList = safeBackendEvents.map(e => ({ ...e, isMockEvent: false }));
+      const mockEventsList = safeMockEvents.map(m => ({
       id: m.id + 10000, // Offset mock event IDs to avoid conflicts
       title: m.title,
       name: m.title,
@@ -161,11 +172,15 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
       ...mockEventsList,
     ];
     
-    console.log('✅ Combined events total:', combined.length, 'Backend:', backendEventsList.length, 'Mock:', mockEventsList.length);
-    if (mockEventsList.length > 0) {
-      console.log('📋 Mock events:', mockEventsList.map(e => e.title));
+      console.log('✅ Combined events total:', combined.length, 'Backend:', backendEventsList.length, 'Mock:', mockEventsList.length);
+      if (mockEventsList.length > 0) {
+        console.log('📋 Mock events:', mockEventsList.map(e => e.title));
+      }
+      setAllEvents(combined);
+    } catch (err: any) {
+      console.error('Error combining events:', err);
+      setError(err.message || 'Failed to combine events');
     }
-    setAllEvents(combined);
   }, [backendEvents, mockEvents]);
 
   const loadEvents = async () => {
@@ -174,7 +189,10 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
       // Load backend events
       try {
         const backendData = await getEvents();
-        setBackendEvents(backendData || []);
+        // Ensure backendData is always an array
+        const eventsArray = Array.isArray(backendData) ? backendData : [];
+        console.log('📥 Backend events loaded:', eventsArray.length, eventsArray);
+        setBackendEvents(eventsArray);
       } catch (error) {
         console.error('Error loading backend events:', error);
         setBackendEvents([]);
@@ -460,6 +478,41 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     window.location.href = '/';
   };
 
+  // Debug: Log component render
+  console.log('🎨 AdminEvents rendering - loading:', loading, 'allEvents:', allEvents.length, 'error:', error);
+
+  // Ensure we always render something
+  if (error && !loading) {
+    return (
+      <AdminLayout
+        title="Manage Events"
+        description="Create, edit, and delete events"
+        currentPage="adminEvents"
+        onNavigate={handlePageNavigate}
+        onAdminNavigate={onNavigate}
+      >
+        <Card className="border-red-300 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="text-red-700 text-center">
+              <p className="font-semibold text-lg mb-2">⚠️ Error Loading Events</p>
+              <p className="mb-4">{error}</p>
+              <Button
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  loadEvents();
+                }}
+                className="bg-[#e0cb23] text-[#030213] hover:bg-[#d4ba1f]"
+              >
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout
       title="Manage Events"
@@ -476,6 +529,25 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         </Button>
       }
     >
+      {error && (
+        <Card className="mb-6 border-red-300 bg-red-50">
+          <CardContent className="pt-6">
+            <div className="text-red-700">
+              <p className="font-semibold">Error: {error}</p>
+              <Button
+                onClick={() => {
+                  setError(null);
+                  loadEvents();
+                }}
+                className="mt-2"
+                variant="outline"
+              >
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useState, useEffect } from 'react';
 import Coaches from '../Pages/Coaches/Coaches';
 import CoachesPage from '../Pages/Coaches/CoachesPage';
 import Michael from '../Pages/Coaches/Michael';
@@ -29,6 +29,11 @@ interface CoachesWrapperProps {
 
 export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
   const [view, setView] = useState<CoachView>('landing');
+
+  // Ensure page scrolls to top when component mounts or view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view]);
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;

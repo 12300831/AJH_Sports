@@ -339,7 +339,7 @@ function CopyWhyChooseUs() {
     <div className="relative bg-white w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12" data-name="Copy - Why Choose Us">
       <div className="max-w-7xl mx-auto flex flex-col gap-12 md:gap-16 lg:gap-20 items-center">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="font-['Inter:Bold',sans-serif] font-bold text-2xl md:text-3xl lg:text-[24px] text-black">Why Choose Us?</h2>
+          <h2 className="font-['Inter:Bold',sans-serif] font-bold text-3xl md:text-4xl lg:text-[32px] text-black">Why Choose Us?</h2>
         </div>
         
         <div className="flex flex-wrap justify-center gap-8 md:gap-12 lg:gap-[60px] w-full">
@@ -350,11 +350,11 @@ function CopyWhyChooseUs() {
             { icon: '🏆', title: 'Quality', desc: 'Modern facilities' },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="text-center flex-shrink-0">
-              <div className="w-[50px] h-[50px] mx-auto mb-[10px] rounded-full bg-white border-2 border-black flex items-center justify-center">
-                <span className="text-[22px]">{icon}</span>
+              <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] mx-auto mb-4 rounded-full bg-white border-2 border-black flex items-center justify-center">
+                <span className="text-4xl md:text-5xl">{icon}</span>
               </div>
-              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base lg:text-[14px] text-black mb-[2px]">{title}</h3>
-              <p className="font-['Inter:Regular',sans-serif] text-xs md:text-sm lg:text-[12px] text-[#666]">{desc}</p>
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-lg md:text-xl lg:text-[20px] text-black mb-2">{title}</h3>
+              <p className="font-['Inter:Regular',sans-serif] text-base md:text-lg lg:text-[16px] text-[#666]">{desc}</p>
             </div>
           ))}
         </div>
@@ -368,24 +368,75 @@ function About() {
     <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="About">
       <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">About</div>
       <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
-        <p className="cursor-pointer hover:text-white transition-colors">Why Choose Us?</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Featured</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Partnership</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Our Team</p>
+        <p 
+          className="cursor-pointer hover:text-white transition-colors"
+          onClick={() => {
+            setTimeout(() => {
+              const element = document.querySelector('[data-name="Copy - Why Choose Us"]');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }}
+        >
+          Why Choose Us?
+        </p>
+        <p 
+          className="cursor-pointer hover:text-white transition-colors"
+          onClick={() => {
+            const event = new CustomEvent('navigate', { detail: 'events' });
+            window.dispatchEvent(event);
+          }}
+        >
+          Events
+        </p>
+        <p 
+          className="cursor-pointer hover:text-white transition-colors"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            window.history.pushState({ page: 'coaches' }, '', '/coaches');
+            window.dispatchEvent(new PopStateEvent('popstate'));
+          }}
+        >
+          1-ON-1 Coaching
+        </p>
+        <p 
+          className="cursor-pointer hover:text-white transition-colors"
+          onClick={() => {
+            setTimeout(() => {
+              const element = document.querySelector('[data-name="Our Lovely Team"]');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }, 100);
+          }}
+        >
+          Our Team
+        </p>
       </div>
     </div>
   );
 }
 
-function Community() {
+function WetWeather() {
   return (
-    <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="Community">
-      <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">Community</div>
-      <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
-        <p className="cursor-pointer hover:text-white transition-colors">Events</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Blog</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Podcast</p>
-        <p className="cursor-pointer hover:text-white transition-colors">Invite a friend</p>
+    <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="Wet Weather">
+      <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-2 flex items-center gap-2">
+        <span>🌧️</span>
+        <span>Wet Weather</span>
+      </div>
+      <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-3">
+        <p>
+          Keep up to date with our weather notifications by following our{' '}
+          <a 
+            href="https://x.com/starstv" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[#e0cb23] hover:text-[#d4ba1f] underline transition-colors font-semibold"
+          >
+            Twitter page
+          </a>.
+        </p>
       </div>
     </div>
   );
@@ -396,9 +447,9 @@ function Socials() {
     <div className="relative flex flex-col gap-3 md:gap-4 text-center sm:text-left" data-name="Socials">
       <div className="font-semibold text-lg md:text-xl lg:text-[20px] text-white mb-1">Contact Us</div>
       <div className="flex flex-col font-medium leading-relaxed text-slate-200 text-sm md:text-base lg:text-[16px] gap-2">
-        <p>ajhsports.com.au</p>
-        <p>{`+61  0412345678`}</p>
-        <p>123 Ave, Sydney, NSW</p>
+        <p>ajh@ajhsports.com.au</p>
+        <p>0447827788</p>
+        <p>22 Salter Cres, Denistone East NSW 2112</p>
       </div>
     </div>
   );
@@ -536,77 +587,134 @@ function Main() {
     <div className="w-full bg-black relative" data-name="MAIN">
       {/* Desktop Layout */}
       <div className="hidden md:block relative min-h-[364px]">
-        {/* Logo */}
-        <div 
-          className="absolute h-[31px] left-[30px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[30px] w-[47px] cursor-pointer z-10"
-          data-name="AJHSports-Logo-no-outline-1 3"
-        >
-          <img 
-            alt="AJH Sports Logo" 
-            className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
-            src={imgAjhSportsLogoNoOutline11} 
-          />
+        {/* Newsletter Section - Left Side (matching coaches page) */}
+        <div className="absolute left-[30px] top-[30px] flex flex-col gap-[14px] max-w-[520px] text-white">
+          {/* Logo */}
+          <div 
+            className="w-[48px] h-[32px] cursor-pointer"
+            data-name="AJHSports-Logo-no-outline-1 3"
+          >
+            <img 
+              alt="AJH Sports Logo" 
+              className="w-full h-full object-contain" 
+              src={imgAjhSportsLogoNoOutline11} 
+            />
+          </div>
+          
+          {/* Newsletter Title */}
+          <h3 className="text-[24px] font-bold m-0 text-white">
+            Join Our Newsletter
+          </h3>
+          
+          {/* Newsletter Description */}
+          <p className="text-[14px] text-[#e8e8e8] m-0 mb-2">
+            Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+          </p>
+          
+          {/* Email Input Form */}
+          <form className="flex gap-[10px]">
+            <input
+              type="email"
+              name="email"
+              placeholder="Your email"
+              required
+              className="flex-1 px-4 py-[14px] rounded-[6px] border-none bg-white text-black text-[14px] outline-none placeholder:text-[#6b6b6b]"
+            />
+            <button
+              type="submit"
+              className="bg-[#4a4a4a] text-white rounded-[24px] border-none px-[22px] py-3 text-[14px] font-bold cursor-pointer min-w-[120px] hover:opacity-90 transition-opacity duration-150"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
         
-        {/* Newsletter Title */}
-        <p className="absolute font-['Inter:Bold',sans-serif] font-bold h-[25px] leading-[40px] left-[335.5px] lg:left-[335.5px] text-[24px] text-white text-center top-[57px] tracking-[-0.24px] translate-x-[-50%] w-[407px]">
-          Join Our Newsletter
-        </p>
-        
-        {/* Newsletter Description */}
-        <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[33px] leading-[20px] left-[327px] lg:left-[327px] text-[14px] text-slate-200 text-center top-[113px] translate-x-[-50%] w-[470px]">
-          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
-        </p>
-        
-        {/* Email Input Form - Desktop */}
-        <form className="absolute left-[92px] top-[183px]">
-          <input
-            type="email"
-            name="email"
-            placeholder="Your email"
-            required
-            className="w-[316px] h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-[16px] outline-none"
-          />
-          <button
-            type="submit"
-            className="absolute left-[358px] top-[-2px] h-[49px] w-[151px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-[14px] text-white hover:bg-[#333] transition-colors"
-          >
-            Subscribe
-          </button>
-        </form>
-        
         {/* Vertical Divider Line - Desktop */}
-        <div className="absolute left-[654px] top-[42px] w-[1px] h-[213px] bg-[#807E7E] hidden lg:block" />
+        <div className="absolute left-[654px] top-[42px] w-[1px] h-[180px] bg-[#807E7E] hidden lg:block" />
         
         {/* About Section - Desktop */}
-        <div className="absolute left-[753px] top-[30px] hidden lg:block">
+        <div className="absolute left-[753px] top-[30px] hidden lg:block w-[180px]">
           <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">About</p>
           <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+            <p 
+              className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+              onClick={() => {
+                setTimeout(() => {
+                  const element = document.querySelector('[data-name="Copy - Why Choose Us"]');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
+            >
+              Why Choose Us?
+            </p>
+            <p 
+              className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+              onClick={() => {
+                window.location.href = '/#events';
+                const event = new CustomEvent('navigate', { detail: 'events' });
+                window.dispatchEvent(event);
+              }}
+            >
+              Events
+            </p>
+            <p 
+              className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                window.history.pushState({ page: 'coaches' }, '', '/coaches');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+            >
+              1-ON-1 Coaching
+            </p>
+            <p 
+              className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+              onClick={() => {
+                setTimeout(() => {
+                  const element = document.querySelector('[data-name="Our Lovely Team"]');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }, 100);
+              }}
+            >
+              Our Team
+            </p>
           </div>
         </div>
         
-        {/* Community Section - Desktop */}
-        <div className="absolute left-[957.29px] top-[30px] hidden lg:block">
-          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Community</p>
-          <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
-            <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+        {/* Wet Weather Section - Desktop */}
+        <div className="absolute left-[960px] top-[30px] hidden lg:block w-[200px]">
+          <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">
+            Wet Weather
+          </p>
+          <div className="flex flex-col gap-3">
+            <p className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[1.6] tracking-[-0.32px]">
+              Follow us on Twitter for weather updates
+            </p>
+            <a 
+              href="https://x.com/starstv" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1A202C] hover:bg-[#e0cb23] text-white hover:text-black rounded-lg transition-all duration-300 w-fit group"
+            >
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span className="font-['Inter:Medium',sans-serif] font-medium text-xs">Follow @starstv</span>
+            </a>
           </div>
         </div>
         
         {/* Contact Section - Desktop */}
-        <div className="absolute left-[1162px] top-[30px] hidden lg:block">
+        <div className="absolute left-[1167px] top-[30px] hidden lg:block w-[180px]">
           <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-[20px] text-white tracking-[-0.4px] mb-[16px]">Contact Us</p>
           <div className="font-['Inter:Medium',sans-serif] font-medium text-[16px] text-slate-200 leading-[2.2] tracking-[-0.32px]">
-            <p>ajhsports.com.au</p>
-            <p>+61 0412345678</p>
-            <p>123 Ave, Sydney, NSW</p>
+            <p>ajh@ajhsports.com.au</p>
+            <p>0447827788</p>
+            <p>22 Salter Cres, Denistone East NSW 2112</p>
           </div>
         </div>
         
@@ -628,119 +736,203 @@ function Main() {
         
         {/* Social Icons - Desktop */}
         <div className="absolute left-[646px] top-[320px] flex gap-[20px]">
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+          <a 
+            href="https://www.facebook.com/aussiestarstv/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+            aria-label="Facebook"
+          >
             <span className="text-[10px] text-white">f</span>
-          </div>
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+          </a>
+          <a 
+            href="https://x.com/starstv" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+            aria-label="Twitter"
+          >
             <span className="text-[10px] text-white">𝕏</span>
-          </div>
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
+          </a>
+          <a 
+            href="https://www.linkedin.com/in/starstv/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+            aria-label="LinkedIn"
+          >
             <span className="text-[10px] text-white">in</span>
-          </div>
+          </a>
         </div>
       </div>
 
       {/* Mobile/Tablet Layout */}
-      <div className="md:hidden relative py-8 px-4">
-        {/* Logo */}
-        <div 
-          className="flex justify-center mb-6"
-          data-name="AJHSports-Logo-no-outline-1 3"
-        >
-          <div className="h-[31px] w-[47px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
-            <img 
-              alt="AJH Sports Logo" 
-              className="w-full h-full object-cover pointer-events-none" 
-              src={imgAjhSportsLogoNoOutline11} 
-            />
+      <div className="md:hidden relative py-8 px-4 md:px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Newsletter Section - Mobile (matching coaches page) */}
+          <div className="flex flex-col gap-[14px] max-w-[520px] mx-auto text-white mb-8" data-name="AJHSports-Logo-no-outline-1 3">
+            {/* Logo */}
+            <div className="w-[48px] h-[32px] cursor-pointer">
+              <img 
+                alt="AJH Sports Logo" 
+                className="w-full h-full object-contain" 
+                src={imgAjhSportsLogoNoOutline11} 
+              />
+            </div>
+            
+            {/* Newsletter Title */}
+            <h3 className="text-[24px] font-bold m-0 text-white">
+              Join Our Newsletter
+            </h3>
+            
+            {/* Newsletter Description */}
+            <p className="text-[14px] text-[#e8e8e8] m-0 mb-2">
+              Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
+            </p>
+            
+            {/* Email Input Form */}
+            <form className="flex gap-[10px]">
+              <input
+                type="email"
+                name="email"
+                placeholder="Your email"
+                required
+                className="flex-1 px-4 py-[14px] rounded-[6px] border-none bg-white text-black text-[14px] outline-none placeholder:text-[#6b6b6b]"
+              />
+              <button
+                type="submit"
+                className="bg-[#4a4a4a] text-white rounded-[24px] border-none px-[22px] py-3 text-[14px] font-bold cursor-pointer min-w-[120px] hover:opacity-90 transition-opacity duration-150"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
-        </div>
-        
-        {/* Newsletter Title */}
-        <p className="font-['Inter:Bold',sans-serif] font-bold text-xl text-white text-center mb-2">
-          Join Our Newsletter
-        </p>
-        
-        {/* Newsletter Description */}
-        <p className="font-['Inter:Regular',sans-serif] font-normal text-xs text-slate-200 text-center mb-6 px-4">
-          Subscribe to our newsletter to be the first to know about new sessions, competitions and events.
-        </p>
-        
-        {/* Email Input Form - Mobile */}
-        <form className="mb-8 px-4">
-          <div className="flex flex-col gap-3">
-            <input
-              type="email"
-              name="email"
-              placeholder="Your email"
-              required
-              className="w-full h-[47px] px-[15px] rounded-[4px] bg-white border border-white text-black font-['Rubik',sans-serif] text-base outline-none"
-            />
-            <button
-              type="submit"
-              className="w-full h-[49px] bg-[#191919] rounded-[100px] font-['Inter:Bold',sans-serif] font-bold text-sm text-white hover:bg-[#333] transition-colors"
-            >
-              Subscribe
-            </button>
-          </div>
-        </form>
-        
-        {/* Footer Links - Mobile/Tablet */}
-        <div className="mb-6 px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+          
+          {/* Footer Links - Mobile/Tablet */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-[#807E7E]">
             <div>
-              <p className="font-semibold text-sm text-white mb-3">About</p>
-              <div className="font-medium text-xs text-slate-200 space-y-2">
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Why Choose Us?</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Featured</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Partnership</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Our Team</p>
+              <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-lg text-white mb-3 text-center sm:text-left">About</p>
+              <div className="font-['Inter:Medium',sans-serif] font-medium text-sm text-slate-200 space-y-2 text-center sm:text-left">
+                <p 
+                  className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+                  onClick={() => {
+                    setTimeout(() => {
+                      const element = document.querySelector('[data-name="Copy - Why Choose Us"]');
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  Why Choose Us?
+                </p>
+                <p 
+                  className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+                  onClick={() => {
+                    const event = new CustomEvent('navigate', { detail: 'events' });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  Events
+                </p>
+                <p 
+                  className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                    window.history.pushState({ page: 'coaches' }, '', '/coaches');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                >
+                  1-ON-1 Coaching
+                </p>
+                <p 
+                  className="cursor-pointer hover:text-[#e0cb23] transition-colors"
+                  onClick={() => {
+                    setTimeout(() => {
+                      const element = document.querySelector('[data-name="Our Lovely Team"]');
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  Our Team
+                </p>
               </div>
             </div>
             <div>
-              <p className="font-semibold text-sm text-white mb-3">Community</p>
-              <div className="font-medium text-xs text-slate-200 space-y-2">
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Events</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Blog</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Podcast</p>
-                <p className="cursor-pointer hover:text-[#e0cb23] transition-colors">Invite a friend</p>
+              <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-lg text-white mb-3 text-center sm:text-left">
+                Wet Weather
+              </p>
+              <div className="flex flex-col gap-3 items-center sm:items-start">
+                <p className="font-['Inter:Medium',sans-serif] font-medium text-sm text-slate-200 text-center sm:text-left">
+                  Follow us on Twitter for weather updates
+                </p>
+                <a 
+                  href="https://x.com/starstv" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1A202C] hover:bg-[#e0cb23] text-white hover:text-black rounded-lg transition-all duration-300 w-fit group"
+                >
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  <span className="font-['Inter:Medium',sans-serif] font-medium text-[11px]">Follow @starstv</span>
+                </a>
               </div>
             </div>
             <div>
-              <p className="font-semibold text-sm text-white mb-3">Contact Us</p>
-              <div className="font-medium text-xs text-slate-200 space-y-2">
-                <p>ajhsports.com.au</p>
-                <p>+61 0412345678</p>
-                <p>123 Ave, Sydney, NSW</p>
+              <p className="font-['Plus_Jakarta_Sans:SemiBold',sans-serif] font-semibold text-lg text-white mb-3 text-center sm:text-left">Contact Us</p>
+              <div className="font-['Inter:Medium',sans-serif] font-medium text-sm text-slate-200 space-y-2 text-center sm:text-left">
+                <p>ajh@ajhsports.com.au</p>
+                <p>0447827788</p>
+                <p>22 Salter Cres, Denistone East NSW 2112</p>
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Bottom Divider - Mobile */}
-        <div className="mx-4 mb-4 h-[1px] bg-[#807E7E]" />
-        
-        {/* Social Icons - Mobile */}
-        <div className="flex justify-center gap-4 mb-4">
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-            <span className="text-[10px] text-white">f</span>
-          </div>
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-            <span className="text-[10px] text-white">𝕏</span>
-          </div>
-          <div className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-colors">
-            <span className="text-[10px] text-white">in</span>
-          </div>
-        </div>
-        
-        {/* Copyright & Privacy - Mobile */}
-        <div className="px-4 pb-4">
-          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[10px] text-slate-200 text-center mb-2 tracking-[-0.22px]">
-            ©2025 Company Name. All rights reserved
-          </p>
-          <div className="flex justify-center gap-4">
-            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Privacy & Policy</p>
-            <p className="font-semibold text-[10px] text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">Terms & Condition</p>
+          
+          {/* Bottom Section */}
+          <div className="mt-8 pt-6 border-t border-[#807E7E] flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-slate-200 text-center sm:text-left">
+              ©2025 Company Name. All rights reserved
+            </p>
+            <div className="flex items-center gap-4">
+              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">
+                Privacy & Policy
+              </p>
+              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-slate-200 cursor-pointer hover:text-[#e0cb23] transition-colors">
+                Terms & Condition
+              </p>
+            </div>
+            <div className="flex gap-5">
+              <a 
+                href="https://www.facebook.com/aussiestarstv/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+                aria-label="Facebook"
+              >
+                <span className="text-[10px] text-white">f</span>
+              </a>
+              <a 
+                href="https://x.com/starstv" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+                aria-label="Twitter"
+              >
+                <span className="text-[10px] text-white">𝕏</span>
+              </a>
+              <a 
+                href="https://www.linkedin.com/in/starstv/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-[22px] h-[22px] bg-[#1A202C] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#e0cb23]/20 transition-all hover:scale-110"
+                aria-label="LinkedIn"
+              >
+                <span className="text-[10px] text-white">in</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -749,11 +941,43 @@ function Main() {
 }
 
 function Top() {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col items-center w-full" data-name="Top">
-      <p className="font-bold leading-tight text-4xl md:text-5xl lg:text-[42px] text-[#21272a] text-center">
+    <div 
+      ref={ref}
+      className={`flex flex-col items-center w-full transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 -translate-y-4'
+      }`}
+      data-name="Top"
+    >
+      <h2 className="font-['Inter:Bold',sans-serif] font-bold text-3xl md:text-4xl lg:text-[32px] text-black text-center">
         Our Team
-      </p>
+      </h2>
     </div>
   );
 }
@@ -1223,23 +1447,75 @@ function TeamMember3() {
   );
 }
 
-function Images() {
+function TeamDescription() {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 w-full" data-name="Images">
-      <TeamMember />
-      <TeamMember1 />
-      <TeamMember2 />
-      <TeamMember3 />
+    <div 
+      ref={ref}
+      className={`w-full max-w-4xl mx-auto transition-all duration-1000 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      data-name="Team Description"
+    >
+      <div className="flex flex-col gap-6 md:gap-8">
+        <p className="text-base md:text-lg lg:text-xl text-[#21272a] leading-relaxed text-center">
+          Our team undergo weekly training sessions led by Andrew Hill. These sessions cover what that week's lessons should be focusing on, techniques used to benefit clients and also drills for players of varying levels. These sessions have proven to keep our tennis coaches on their toes and up to date with the latest coaching techniques to enable them to teach clients more effectively.
+        </p>
+        <div 
+          className={`flex justify-center items-center gap-3 pt-4 transition-all duration-1000 delay-300 ease-out ${
+            isVisible 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-4'
+          }`}
+        >
+          <a 
+            href="https://www.linkedin.com/in/starstv/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-[#0077b5] hover:text-[#005885] transition-all duration-300 font-medium hover:scale-110 transform"
+          >
+            <div className="w-6 h-6 transition-transform duration-300 hover:rotate-12">
+              <IconJamIconsOutlineLogosLinkedin />
+            </div>
+            <span className="text-sm md:text-base">Connect with Andrew Hill</span>
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
 
 function OurLovelyTeam() {
   return (
-    <div className="relative bg-white w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12" data-name="Our Lovely Team">
+    <div className="relative bg-white w-full py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 xl:px-12 overflow-hidden" data-name="Our Lovely Team">
       <div className="max-w-7xl mx-auto flex flex-col gap-12 md:gap-16 items-center">
         <SectionText />
-        <Images />
+        <TeamDescription />
       </div>
     </div>
   );
@@ -1270,16 +1546,16 @@ function Group1() {
         </svg>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] left-[230px] text-[18px] text-center text-white top-[356.17px] translate-x-[-50%] translate-y-[-50%] w-[112px]">
-        <p className="leading-[30px]">Viezh Robert</p>
+        <p className="leading-[30px]">Sarah Mitchell</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[14px] justify-center leading-[0] left-[210px] text-[#eaeaea] text-[10px] text-center top-[373px] translate-x-[-50%] translate-y-[-50%] w-[132px]">
-        <p className="leading-[30px]">Warsaw, Poland</p>
+        <p className="leading-[30px]">Ryde, NSW</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[100px] justify-center leading-[0] left-[104px] text-[14px] text-white top-[460.67px] translate-y-[-50%] w-[340px]">
-        <p className="leading-[30px] whitespace-pre-wrap">{`Really well organized event by  AJH Sports. Great communication, smooth scheduling, and everything ran on time. Only a couple of small areas for improvement, but overall an excellent experience.`}</p>
+        <p className="leading-[30px] whitespace-pre-wrap">{`My daughter has been attending the STARS holiday camps for two years now. Andrew and his team are fantastic - the kids stay active, learn proper technique, and have so much fun. Highly recommend!`}</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[16px] justify-center leading-[0] left-[394px] text-[16px] text-white top-[366.02px] translate-y-[-50%] w-[24px]">
-        <p className="leading-[30px]">4.5</p>
+        <p className="leading-[30px]">5.0</p>
       </div>
       <div className="absolute left-[115px] size-[40px] top-[340.22px]">
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 40 40">
@@ -1301,13 +1577,13 @@ function Group2() {
         </svg>
       </div>
       <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] left-[676px] not-italic text-[18px] text-center text-white top-[356.5px] translate-x-[-50%] translate-y-[-50%] w-[112px]">
-        <p className="leading-[30px]">Viezh Robert</p>
+        <p className="leading-[30px]">James Chen</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[14px] justify-center leading-[0] left-[656px] text-[10px] text-center text-white top-[373px] translate-x-[-50%] translate-y-[-50%] w-[132px]">
-        <p className="leading-[30px]">Warsaw, Poland</p>
+        <p className="leading-[30px]">Denistone, NSW</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[100px] justify-center leading-[0] left-[550px] text-[14px] text-white top-[461px] translate-y-[-50%] w-[340px]">
-        <p className="leading-[30px]">“Very well organised sports event. The team was helpful, schedules were clear, and the atmosphere was great. With small improvements, it could easily be a 5-star experience.”</p>
+        <p className="leading-[30px]">"I've been taking tennis lessons at King's Park for 6 months. The coaching is excellent and the facilities are well-maintained. My game has improved significantly thanks to the structured approach."</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[16px] justify-center leading-[0] left-[840px] text-[16px] text-white top-[366.35px] translate-y-[-50%] w-[24px]">
         <p className="leading-[30px]">4.5</p>
@@ -1332,13 +1608,13 @@ function Group3() {
         </svg>
       </div>
       <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] left-[1122px] not-italic text-[18px] text-center text-white top-[356.5px] translate-x-[-50%] translate-y-[-50%] w-[112px]">
-        <p className="leading-[30px]">Viezh Robert</p>
+        <p className="leading-[30px]">Emma Thompson</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[14px] justify-center leading-[0] left-[1102px] text-[10px] text-center text-white top-[373px] translate-x-[-50%] translate-y-[-50%] w-[132px]">
-        <p className="leading-[30px]">Warsaw, Poland</p>
+        <p className="leading-[30px]">Marsfield, NSW</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[100px] justify-center leading-[0] left-[996px] text-[16px] text-white top-[461px] translate-y-[-50%] w-[340px]">
-        <p className="leading-[30px]">“Had a great time! Everything was well set up and ran smoothly. Just a couple of little things that could’ve been better, but overall, awesome job by AJH Sports.”</p>
+        <p className="leading-[30px]">"The table tennis tournament was brilliantly organised. Great atmosphere, fair competition, and the staff were super helpful throughout. Will definitely be back for more events!"</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[16px] justify-center leading-[0] left-[1286px] text-[16px] text-white top-[366.35px] translate-y-[-50%] w-[24px]">
         <p className="leading-[30px]">4.5</p>
@@ -1417,13 +1693,13 @@ function Group5() {
         </svg>
       </div>
       <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] left-[676px] not-italic text-[18px] text-center text-white top-[356.5px] translate-x-[-50%] translate-y-[-50%] w-[112px]">
-        <p className="leading-[30px]">Viezh Robert</p>
+        <p className="leading-[30px]">James Chen</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[14px] justify-center leading-[0] left-[656px] text-[10px] text-center text-white top-[373px] translate-x-[-50%] translate-y-[-50%] w-[132px]">
-        <p className="leading-[30px]">Warsaw, Poland</p>
+        <p className="leading-[30px]">Denistone, NSW</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[100px] justify-center leading-[0] left-[550px] text-[14px] text-white top-[461px] translate-y-[-50%] w-[340px]">
-        <p className="leading-[30px]">“Very well organised sports event. The team was helpful, schedules were clear, and the atmosphere was great. With small improvements, it could easily be a 5-star experience.”</p>
+        <p className="leading-[30px]">"I've been taking tennis lessons at King's Park for 6 months. The coaching is excellent and the facilities are well-maintained. My game has improved significantly thanks to the structured approach."</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[16px] justify-center leading-[0] left-[840px] text-[16px] text-white top-[366.35px] translate-y-[-50%] w-[24px]">
         <p className="leading-[30px]">4.5</p>
@@ -1443,13 +1719,13 @@ function Group6() {
         </svg>
       </div>
       <div className="absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium h-[18px] justify-center leading-[0] left-[1122px] not-italic text-[18px] text-center text-white top-[356.5px] translate-x-[-50%] translate-y-[-50%] w-[112px]">
-        <p className="leading-[30px]">Viezh Robert</p>
+        <p className="leading-[30px]">Emma Thompson</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[14px] justify-center leading-[0] left-[1102px] text-[10px] text-center text-white top-[373px] translate-x-[-50%] translate-y-[-50%] w-[132px]">
-        <p className="leading-[30px]">Warsaw, Poland</p>
+        <p className="leading-[30px]">Marsfield, NSW</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[100px] justify-center leading-[0] left-[996px] text-[16px] text-white top-[461px] translate-y-[-50%] w-[340px]">
-        <p className="leading-[30px]">“Had a great time! Everything was well set up and ran smoothly. Just a couple of little things that could’ve been better, but overall, awesome job by AJH Sports.”</p>
+        <p className="leading-[30px]">"The table tennis tournament was brilliantly organised. Great atmosphere, fair competition, and the staff were super helpful throughout. Will definitely be back for more events!"</p>
       </div>
       <div className="absolute flex flex-col font-['Rubik:Regular',sans-serif] font-normal h-[16px] justify-center leading-[0] left-[1286px] text-[16px] text-white top-[366.35px] translate-y-[-50%] w-[24px]">
         <p className="leading-[30px]">4.5</p>
@@ -1500,34 +1776,34 @@ function TrustedByThousand() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg">
-            <p className="text-sm md:text-base leading-relaxed mb-6">"Really well organized event by AJH Sports. Great communication, smooth scheduling, and everything ran on time."</p>
+            <p className="text-sm md:text-base leading-relaxed mb-6">"My daughter has been attending the STARS holiday camps for two years now. Andrew and his team are fantastic - the kids stay active, learn proper technique, and have so much fun. Highly recommend!"</p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
               <div className="flex-1">
-                <p className="font-medium text-base">Viezh Robert</p>
-                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+                <p className="font-medium text-base">Sarah Mitchell</p>
+                <p className="text-xs text-gray-300">Ryde, NSW</p>
               </div>
-              <p className="text-base font-semibold">4.5</p>
+              <p className="text-base font-semibold">5.0</p>
             </div>
           </div>
           <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg">
-            <p className="text-sm md:text-base leading-relaxed mb-6">"Very well organised sports event. The team was helpful, schedules were clear, and the atmosphere was great."</p>
+            <p className="text-sm md:text-base leading-relaxed mb-6">"I've been taking tennis lessons at King's Park for 6 months. The coaching is excellent and the facilities are well-maintained. My game has improved significantly thanks to the structured approach."</p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
               <div className="flex-1">
-                <p className="font-medium text-base">Viezh Robert</p>
-                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+                <p className="font-medium text-base">James Chen</p>
+                <p className="text-xs text-gray-300">Denistone, NSW</p>
               </div>
               <p className="text-base font-semibold">4.5</p>
             </div>
           </div>
           <div className="bg-[#6b6b6b] rounded-xl p-6 md:p-8 text-white shadow-lg md:col-span-2 lg:col-span-1">
-            <p className="text-sm md:text-base leading-relaxed mb-6">"Had a great time! Everything was well set up and ran smoothly. Awesome job by AJH Sports."</p>
+            <p className="text-sm md:text-base leading-relaxed mb-6">"The table tennis tournament was brilliantly organised. Great atmosphere, fair competition, and the staff were super helpful throughout. Will definitely be back for more events!"</p>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gray-400 flex-shrink-0"></div>
               <div className="flex-1">
-                <p className="font-medium text-base">Viezh Robert</p>
-                <p className="text-xs text-gray-300">Warsaw, Poland</p>
+                <p className="font-medium text-base">Emma Thompson</p>
+                <p className="text-xs text-gray-300">Marsfield, NSW</p>
               </div>
               <p className="text-base font-semibold">4.5</p>
             </div>

@@ -84,13 +84,18 @@ export default function App() {
   }, []);
 
   const handleNavigate = (page: Page) => {
-    // Scroll to top on page change
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll to top on page change (use instant for immediate scroll)
+    window.scrollTo({ top: 0, behavior: 'instant' });
     setCurrentPage(page);
     
     // Update URL without page reload
     const path = pageToPath[page] || '/';
     window.history.pushState({ page }, '', path);
+    
+    // Ensure scroll after a brief delay to handle any async rendering
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 0);
   };
 
   const renderPage = () => {
