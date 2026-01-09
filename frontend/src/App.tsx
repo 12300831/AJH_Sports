@@ -99,8 +99,14 @@ export default function App() {
     setCurrentPage(page);
     
     // Update URL without page reload
+    // Preserve query parameters if they exist (they might have been set before navigation)
     const path = pageToPath[page] || '/';
-    window.history.pushState({ page }, '', path);
+    const currentSearch = window.location.search;
+    const finalPath = currentSearch ? `${path}${currentSearch}` : path;
+    // Only update if the path is different to avoid unnecessary history entries
+    if (window.location.pathname !== path || window.location.search !== currentSearch) {
+      window.history.pushState({ page }, '', finalPath);
+    }
     
     // Ensure scroll after a brief delay to handle any async rendering
     setTimeout(() => {

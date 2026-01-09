@@ -130,7 +130,14 @@ ajh@ajhsports.com.au
 
   const handleBookAnother = () => {
     if (paymentDetails?.metadata.booking_type === 'coach') {
-      if (onNavigate) onNavigate('coaches');
+      if (onNavigate) {
+        // Update URL first to include view=list parameter
+        window.history.pushState({}, '', '/coaches?view=list');
+        // Then navigate to coaches page - this will trigger the CoachesWrapper to show list view
+        onNavigate('coaches');
+        // Dispatch locationchange event to ensure CoachesWrapper picks up the URL change
+        window.dispatchEvent(new Event('locationchange'));
+      }
     } else {
       if (onNavigate) onNavigate('events');
     }

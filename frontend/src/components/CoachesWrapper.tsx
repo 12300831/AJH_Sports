@@ -28,11 +28,42 @@ interface CoachesWrapperProps {
 }
 
 export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
-  const [view, setView] = useState<CoachView>('landing');
+  // Check URL for view parameter to determine initial view
+  const getInitialView = (): CoachView => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('view') === 'list') {
+      return 'list';
+    }
+    return 'landing';
+  };
+
+  const [view, setView] = useState<CoachView>(getInitialView());
 
   // Ensure page scrolls to top when component mounts or view changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [view]);
+
+  // Listen for URL changes to update view if needed
+  useEffect(() => {
+    const checkUrl = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('view') === 'list' && view !== 'list') {
+        setView('list');
+      } else if (!urlParams.get('view') && view === 'list') {
+        // If URL doesn't have view=list but we're on list view, keep it
+        // This prevents switching back to landing when URL is cleaned up
+      }
+    };
+
+    checkUrl();
+    window.addEventListener('popstate', checkUrl);
+    window.addEventListener('locationchange', checkUrl);
+    
+    return () => {
+      window.removeEventListener('popstate', checkUrl);
+      window.removeEventListener('locationchange', checkUrl);
+    };
   }, [view]);
 
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
