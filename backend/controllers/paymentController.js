@@ -1,4 +1,3 @@
-import stripe from '../config/stripe.js';
 import { handleBookingPaymentSuccess } from './bookingPaymentController.js';
 
 /**
@@ -14,7 +13,10 @@ export const createCheckoutSession = async (req, res) => {
       currency = 'AUD',
       customerEmail,
       successUrl,
-      cancelUrl 
+      cancelUrl,
+      bookingType = 'event', // 'event' or 'coach'
+      coachId,
+      bookingId
     } = req.body;
 
     // Validate required fields
@@ -34,6 +36,71 @@ export const createCheckoutSession = async (req, res) => {
       });
     }
 
+    // Check if we're in development mode (no Stripe key)
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const isDevelopmentMode = process.env.NODE_ENV === 'development' && 
+                              (!stripeKey || stripeKey.includes('placeholder') || stripeKey.trim() === '');
+
+    if (isDevelopmentMode) {
+      // Mock payment for development (no Stripe key needed)
+      console.log('⚠️  Development Mode: Using mock payment (Stripe key not configured)');
+      
+      // Build mock session response
+      const mockSessionId = `cs_mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Build metadata
+      const metadata = {
+        eventId: eventId.toString(),
+        eventName: eventName,
+        booking_type: bookingType,
+      };
+      
+      if (bookingType === 'coach') {
+        if (coachId) metadata.coach_id = coachId.toString();
+        if (bookingId) metadata.booking_id = bookingId.toString();
+      }
+
+      // Return mock response that redirects directly to success page
+      // In development, we'll simulate successful payment
+      const finalSuccessUrl = (successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/paymentSuccess?session_id={CHECKOUT_SESSION_ID}`)
+        .replace('{CHECKOUT_SESSION_ID}', mockSessionId);
+      
+      return res.json({
+        success: true,
+        sessionId: mockSessionId,
+        url: finalSuccessUrl, // Redirect directly to success page
+        mock: true, // Indicate this is a mock payment
+        message: 'Development Mode: Payment simulated successfully. Add STRIPE_SECRET_KEY to use real payments.'
+      });
+    }
+
+    // Production/Real Stripe Mode - Only import Stripe if we have a valid key
+    if (!stripeKey || stripeKey.trim() === '' || stripeKey.includes('placeholder')) {
+      return res.status(500).json({
+        success: false,
+        message: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to your .env file.'
+      });
+    }
+
+    // Import and initialize Stripe
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: '2024-11-20.acacia',
+    });
+
+    // Build metadata based on booking type
+    const metadata = {
+      eventId: eventId.toString(),
+      eventName: eventName,
+      booking_type: bookingType,
+    };
+
+    // Add coach-specific metadata if it's a coach booking
+    if (bookingType === 'coach') {
+      if (coachId) metadata.coach_id = coachId.toString();
+      if (bookingId) metadata.booking_id = bookingId.toString();
+    }
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -43,7 +110,9 @@ export const createCheckoutSession = async (req, res) => {
             currency: currency.toLowerCase(),
             product_data: {
               name: eventName,
-              description: `Registration for ${eventName}`,
+              description: bookingType === 'coach' 
+                ? `Coaching session: ${eventName}` 
+                : `Registration for ${eventName}`,
             },
             unit_amount: amountInCents,
           },
@@ -54,10 +123,7 @@ export const createCheckoutSession = async (req, res) => {
       success_url: successUrl || `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/payment?canceled=true`,
       customer_email: customerEmail,
-      metadata: {
-        eventId: eventId.toString(),
-        eventName: eventName,
-      },
+      metadata: metadata,
       // Enable automatic tax calculation if needed
       // automatic_tax: { enabled: true },
     });
@@ -93,6 +159,38 @@ export const getCheckoutSession = async (req, res) => {
       });
     }
 
+    // Check if this is a mock session (development mode)
+    if (sessionId.startsWith('cs_mock_')) {
+      // Return mock session data
+      return res.json({
+        success: true,
+        session: {
+          id: sessionId,
+          payment_status: 'paid',
+          customer_email: null,
+          amount_total: 0,
+          currency: 'aud',
+          metadata: {},
+        }
+      });
+    }
+
+    // Real Stripe session - get Stripe key
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey || stripeKey.includes('placeholder') || stripeKey.trim() === '') {
+      return res.status(500).json({
+        success: false,
+        message: 'Stripe is not configured. Cannot retrieve session details.'
+      });
+    }
+
+    // Import and initialize Stripe
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: '2024-11-20.acacia',
+    });
+
+    // Retrieve session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     res.json({
@@ -103,7 +201,7 @@ export const getCheckoutSession = async (req, res) => {
         customer_email: session.customer_email,
         amount_total: session.amount_total,
         currency: session.currency,
-        metadata: session.metadata,
+        metadata: session.metadata || {},
       }
     });
   } catch (error) {
@@ -130,7 +228,18 @@ export const handleWebhook = async (req, res) => {
   try {
     // Verify webhook signature (important for security)
     if (webhookSecret) {
-      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      // Import and initialize Stripe for webhook verification
+      const stripeKey = process.env.STRIPE_SECRET_KEY;
+      if (!stripeKey || stripeKey.includes('placeholder') || stripeKey.trim() === '') {
+        console.warn('⚠️  Stripe key not configured. Skipping webhook verification.');
+        event = req.body;
+      } else {
+        const Stripe = (await import('stripe')).default;
+        const stripe = new Stripe(stripeKey, {
+          apiVersion: '2024-11-20.acacia',
+        });
+        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+      }
     } else {
       // In development, you might skip signature verification
       // NEVER do this in production
@@ -171,4 +280,3 @@ export const handleWebhook = async (req, res) => {
   // Return a response to acknowledge receipt of the event
   res.json({ received: true });
 };
-

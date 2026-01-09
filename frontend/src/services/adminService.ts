@@ -158,24 +158,46 @@ export interface CreateCoachData {
 
 export const getCoaches = async (): Promise<Coach[]> => {
   const response = await apiCall('/coaches');
-  const coaches = await response.json();
-  // Parse availability if it's a JSON string
-  return coaches.map((coach: Coach) => ({
-    ...coach,
-    availability: typeof coach.availability === 'string' 
-      ? JSON.parse(coach.availability) 
-      : coach.availability,
-  }));
+  const result = await response.json();
+  // Backend returns { success: true, coaches: [...] }
+  const coaches = result.coaches || result || [];
+  // Parse availability if it's a JSON string, otherwise keep as string or array
+  return coaches.map((coach: Coach) => {
+    let availability = coach.availability;
+    if (typeof coach.availability === 'string') {
+      // Try to parse as JSON, if it fails, keep as string
+      try {
+        availability = JSON.parse(coach.availability);
+      } catch (e) {
+        // If parsing fails, it's a plain string - keep it as is
+        availability = coach.availability;
+      }
+    }
+    return {
+      ...coach,
+      availability,
+    };
+  });
 };
 
 export const getCoachById = async (id: number): Promise<Coach> => {
   const response = await apiCall(`/coaches/${id}`);
-  const coach = await response.json();
+  const result = await response.json();
+  // Backend returns { success: true, coach: {...} }
+  const coach = result.coach || result;
+  let availability = coach.availability;
+  if (typeof coach.availability === 'string') {
+    // Try to parse as JSON, if it fails, keep as string
+    try {
+      availability = JSON.parse(coach.availability);
+    } catch (e) {
+      // If parsing fails, it's a plain string - keep it as is
+      availability = coach.availability;
+    }
+  }
   return {
     ...coach,
-    availability: typeof coach.availability === 'string' 
-      ? JSON.parse(coach.availability) 
-      : coach.availability,
+    availability,
   };
 };
 

@@ -1,5 +1,5 @@
 import { MouseEvent } from 'react';
-import PaymentSuccess from '../Pages/Payment/PaymentSuccess';
+import PaymentSuccessNew from '../Pages/Payment/PaymentSuccessNew';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'payment' | 'paymentSuccess';
 
@@ -33,7 +33,7 @@ export function PaymentSuccessWrapper({ onNavigate }: PaymentSuccessWrapperProps
 
   return (
     <div onClick={handleClick}>
-      <PaymentSuccess onNavigate={onNavigate} onBookAnother={handleBookAnother} />
+      <PaymentSuccessNew onNavigate={onNavigate} onBookAnother={handleBookAnother} />
     </div>
   );
 }

@@ -74,12 +74,24 @@ export const createCoach = async (req, res) => {
       });
     }
 
+    // Convert availability array to JSON string if it's an array
+    let availabilityString = availability;
+    if (Array.isArray(availability)) {
+      availabilityString = JSON.stringify(availability);
+    } else if (typeof availability === 'string' && availability.trim() !== '') {
+      // If it's already a string, use it as is
+      availabilityString = availability;
+    } else {
+      // Default to empty string if not provided
+      availabilityString = '';
+    }
+
     const coachId = await Coach.create({
       name,
       specialty,
       email,
       phone,
-      availability,
+      availability: availabilityString,
       hourly_rate: hourly_rate || 0,
       status: status || "active"
     });
@@ -114,12 +126,29 @@ export const updateCoach = async (req, res) => {
       });
     }
 
+    // Convert availability array to JSON string if it's an array
+    let availabilityString = availability;
+    if (availability !== undefined) {
+      if (Array.isArray(availability)) {
+        availabilityString = JSON.stringify(availability);
+      } else if (typeof availability === 'string' && availability.trim() !== '') {
+        // If it's already a string, use it as is
+        availabilityString = availability;
+      } else {
+        // Default to empty string if not provided
+        availabilityString = '';
+      }
+    } else {
+      // Keep existing availability if not provided
+      availabilityString = coach.availability;
+    }
+
     const updated = await Coach.update(id, {
       name: name || coach.name,
       specialty: specialty !== undefined ? specialty : coach.specialty,
       email: email !== undefined ? email : coach.email,
       phone: phone !== undefined ? phone : coach.phone,
-      availability: availability !== undefined ? availability : coach.availability,
+      availability: availabilityString,
       hourly_rate: hourly_rate !== undefined ? hourly_rate : coach.hourly_rate,
       status: status || coach.status
     });

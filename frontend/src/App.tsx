@@ -66,21 +66,31 @@ export default function App() {
 
   // Handle URL-based routing on initial load and URL changes
   useEffect(() => {
-    const path = window.location.pathname;
-    const page = pathToPage[path] || 'home';
-    setCurrentPage(page);
-  }, []);
-
-  // Listen for browser back/forward navigation
-  useEffect(() => {
-    const handlePopState = () => {
+    const updatePageFromPath = () => {
       const path = window.location.pathname;
       const page = pathToPage[path] || 'home';
       setCurrentPage(page);
     };
 
+    updatePageFromPath();
+
+    // Listen for browser back/forward navigation
+    const handlePopState = () => {
+      updatePageFromPath();
+    };
+
+    // Listen for custom location change events
+    const handleLocationChange = () => {
+      updatePageFromPath();
+    };
+
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('locationchange', handleLocationChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('locationchange', handleLocationChange);
+    };
   }, []);
 
   const handleNavigate = (page: Page) => {

@@ -27,6 +27,9 @@ export interface CreateCheckoutSessionRequest {
   customerEmail?: string;
   successUrl?: string;
   cancelUrl?: string;
+  bookingType?: 'event' | 'coach'; // Type of booking
+  coachId?: string; // Coach ID for coach bookings
+  bookingId?: string; // Booking ID if booking already exists
 }
 
 export interface CreateCheckoutSessionResponse {

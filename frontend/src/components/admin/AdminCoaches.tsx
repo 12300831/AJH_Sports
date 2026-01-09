@@ -77,8 +77,24 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
     try {
       setLoading(true);
       const data = await getCoaches();
-      setCoaches(data);
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        // Filter to only show the 4 specific coaches: Michael Rodriguez, James Wilson, Mark Leo, Kristin Russell
+        const targetCoaches = data.filter((coach: Coach) => 
+          coach.name === 'Michael Rodriguez' ||
+          coach.name === 'James Wilson' ||
+          coach.name === 'Mark Leo' ||
+          coach.name === 'Kristin Russell'
+        );
+        setCoaches(targetCoaches);
+      } else {
+        console.error('getCoaches returned non-array:', data);
+        setCoaches([]);
+        toast.error('Invalid coaches data received');
+      }
     } catch (error: any) {
+      console.error('Error loading coaches:', error);
+      setCoaches([]);
       toast.error(error.message || 'Failed to load coaches');
     } finally {
       setLoading(false);
@@ -105,11 +121,16 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
   const handleOpenDialog = (coach?: Coach) => {
     if (coach) {
       setEditingCoach(coach);
-      const availability = Array.isArray(coach.availability) 
-        ? coach.availability 
-        : typeof coach.availability === 'string' 
-          ? JSON.parse(coach.availability) 
-          : [];
+      let availability: any[] = [];
+      if (Array.isArray(coach.availability)) {
+        availability = coach.availability;
+      } else if (typeof coach.availability === 'string' && coach.availability.trim() !== '') {
+        try {
+          availability = JSON.parse(coach.availability);
+        } catch (e) {
+          availability = [];
+        }
+      }
       setFormData({
         name: coach.name,
         specialty: coach.specialty || '',
@@ -246,6 +267,9 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
     window.location.href = '/';
   };
 
+  // Debug logging
+  console.log('AdminCoaches render - loading:', loading, 'coaches:', coaches.length);
+
   return (
     <AdminLayout
       title="Manage Coaches"
@@ -304,7 +328,7 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
                   <div className="text-sm text-gray-600 mb-1">Avg. Hourly Rate</div>
                   <div className="text-2xl font-bold text-[#030213]">
                     ${coaches.length > 0 
-                      ? (coaches.reduce((sum, c) => sum + c.hourly_rate, 0) / coaches.length).toFixed(2)
+                      ? (coaches.reduce((sum, c) => sum + parseFloat(c.hourly_rate?.toString() || '0'), 0) / coaches.length).toFixed(2)
                       : '0.00'}
                   </div>
                 </CardContent>
@@ -314,11 +338,16 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
                   <div className="text-sm text-gray-600 mb-1">Total Availability Slots</div>
                   <div className="text-2xl font-bold text-[#030213]">
                     {coaches.reduce((sum, c) => {
-                      const av = Array.isArray(c.availability) 
-                        ? c.availability 
-                        : typeof c.availability === 'string' 
-                          ? JSON.parse(c.availability) 
-                          : [];
+                      let av: any[] = [];
+                      if (Array.isArray(c.availability)) {
+                        av = c.availability;
+                      } else if (typeof c.availability === 'string' && c.availability.trim() !== '') {
+                        try {
+                          av = JSON.parse(c.availability);
+                        } catch (e) {
+                          av = [];
+                        }
+                      }
                       return sum + av.length;
                     }, 0)}
                   </div>
@@ -329,11 +358,17 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
             {/* Coaches Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
               {coaches.map((coach) => {
-                const availability = Array.isArray(coach.availability)
-                  ? coach.availability
-                  : typeof coach.availability === 'string'
-                    ? JSON.parse(coach.availability)
-                    : [];
+                let availability: any[] = [];
+                if (Array.isArray(coach.availability)) {
+                  availability = coach.availability;
+                } else if (typeof coach.availability === 'string' && coach.availability.trim() !== '') {
+                  try {
+                    availability = JSON.parse(coach.availability);
+                  } catch (e) {
+                    // If parsing fails, it's a plain string - set empty array
+                    availability = [];
+                  }
+                }
                 return (
                   <Card
                     key={coach.id}
@@ -394,7 +429,7 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
                       {/* Rate */}
                       <div className="text-center mb-3 pb-3 border-b border-gray-100">
                         <p className="text-lg font-bold text-[#030213]">
-                          ${coach.hourly_rate.toFixed(2)}/hr
+                          ${parseFloat(coach.hourly_rate?.toString() || '0').toFixed(2)}/hr
                         </p>
                       </div>
 
@@ -445,7 +480,7 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle className="text-2xl">
               {editingCoach ? 'Edit Coach' : 'Create New Coach'}
@@ -454,7 +489,7 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
               {editingCoach ? 'Update the coach details below' : 'Fill in all the details to create a new coach'}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" onClick={(e) => e.stopPropagation()}>
             <div>
               <label className="text-sm font-medium mb-1 block">
                 Coach Name <span className="text-red-500">*</span>
@@ -588,8 +623,12 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={addAvailability}
-                className="mb-3"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addAvailability();
+                }}
+                className="mb-3 cursor-pointer z-10 relative"
               >
                 + Add Availability Slot
               </Button>

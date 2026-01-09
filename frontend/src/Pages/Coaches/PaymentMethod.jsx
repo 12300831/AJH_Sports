@@ -1,48 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Coaches.css";
 import { HomeHeader } from "../../components/HomeHeader";
 import { createCheckoutSession } from "../../services/paymentService";
+import { getCoachById } from "../../services/adminService";
 
-export default function PaymentMethod({ onBack, onSummary }) {
+export default function PaymentMethod({ onBack, onSummary, coachId: propCoachId, coachData }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [coach, setCoach] = useState(coachData || null);
+  const [loading, setLoading] = useState(!coachData);
+
+  useEffect(() => {
+    // Fetch coach data if not provided and coachId is available
+    const fetchCoachData = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const idFromUrl = params.get("coachId") || propCoachId;
+      
+      if (!coach && idFromUrl) {
+        try {
+          setLoading(true);
+          const coachData = await getCoachById(idFromUrl);
+          setCoach(coachData);
+        } catch (err) {
+          console.error("Error fetching coach:", err);
+          setError("Failed to load coach information");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchCoachData();
+  }, [coach, propCoachId]);
 
   const handlePayment = async () => {
     setError(null);
     setIsProcessing(true);
 
     try {
+      // Get data from props, state, or URL params
       const params = new URLSearchParams(window.location.search);
-      const amount = parseFloat(params.get("amount") || "80.00");
-      const bookingName = params.get("bookingName") || "Coaching Session";
-      const bookingId = params.get("bookingId") || "coach-booking";
+      const coachId = propCoachId || params.get("coachId") || coach?.id;
+      const amount = coach?.hourly_rate 
+        ? parseFloat(coach.hourly_rate.toString()) 
+        : parseFloat(params.get("amount") || "80.00");
+      const coachName = coach?.name || params.get("coachName") || "Coach";
+      const bookingName = `Coaching Session with ${coachName}`;
+      const bookingId = params.get("bookingId") || `coach-${coachId || 'booking'}`;
 
+      // Validate required fields
+      if (!coachId) {
+        throw new Error("Coach ID is required");
+      }
+
+      if (!amount || amount <= 0) {
+        throw new Error("Invalid amount");
+      }
+
+      // Create checkout session using the API
       const response = await createCheckoutSession({
         eventId: bookingId,
         eventName: bookingName,
-        amount,
+        amount: amount,
         currency: "aud",
-        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        bookingType: "coach", // Mark as coach booking
+        coachId: coachId.toString(),
+        bookingId: bookingId !== `coach-${coachId}` ? bookingId : undefined,
+        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&type=coach&coachId=${coachId}`,
         cancelUrl: `${window.location.origin}/coaches?canceled=true`,
       });
 
       if (response.url) {
+        // Redirect to Stripe checkout
         window.location.href = response.url;
         return;
       }
 
-      throw new Error("No checkout URL received");
+      throw new Error("No checkout URL received from payment server");
     } catch (err) {
       console.error("Payment error:", err);
       let errorMessage = "Failed to process payment. Please try again.";
+      
       if (err?.message) {
-        if (err.message.includes("Failed to fetch") || err.message.includes("Cannot connect")) {
-          errorMessage =
-            "Cannot connect to payment server. Please check if the backend is running on port 5001.";
+        if (err.message.includes("Failed to fetch") || err.message.includes("Cannot connect") || err.message.includes("NetworkError")) {
+          errorMessage = "Cannot connect to payment server. Please check if the backend is running on port 5001.";
+        } else if (err.message.includes("Invalid API Key")) {
+          errorMessage = "Payment service is not configured. Please contact support.";
         } else {
           errorMessage = err.message;
         }
       }
+      
       setError(errorMessage);
       setIsProcessing(false);
     }
@@ -91,6 +141,23 @@ export default function PaymentMethod({ onBack, onSummary }) {
               <span className="text-[#111]">💳</span>
               <span className="text-[#111]">Payment Method</span>
             </div>
+
+            {loading && (
+              <div className="mb-4 text-center py-8">
+                <div className="text-lg text-gray-600">Loading coach information...</div>
+              </div>
+            )}
+
+            {coach && !loading && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-sm font-semibold text-blue-900 mb-2">Booking Details:</div>
+                <div className="text-sm text-blue-800">
+                  <div><strong>Coach:</strong> {coach.name}</div>
+                  {coach.specialty && <div><strong>Specialty:</strong> {coach.specialty}</div>}
+                  <div><strong>Rate:</strong> ${parseFloat(coach.hourly_rate?.toString() || '0').toFixed(2)}/hr</div>
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -151,7 +218,10 @@ export default function PaymentMethod({ onBack, onSummary }) {
 
             <div className="mt-6 pt-4 border-t border-[#e5e7eb] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-sm font-semibold text-[#111]">Total Amount:</div>
-              <div className="text-2xl font-bold text-[#111]">$80.00</div>
+              <div className="text-2xl font-bold text-[#111]">
+                ${loading ? '...' : (coach?.hourly_rate ? parseFloat(coach.hourly_rate.toString()).toFixed(2) : '80.00')}
+                {!loading && coach?.hourly_rate && ' /hr'}
+              </div>
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-end">
@@ -166,9 +236,9 @@ export default function PaymentMethod({ onBack, onSummary }) {
                 type="button"
                 className="w-full sm:w-auto min-w-[180px] rounded-md bg-[#0f243f] px-6 py-3 text-white font-semibold text-[15px] shadow-sm hover:opacity-95 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || loading || !coach}
               >
-                {isProcessing ? "Processing..." : "$ Pay $80.00"}
+                {isProcessing ? "Processing..." : loading ? "Loading..." : `Pay $${coach?.hourly_rate ? parseFloat(coach.hourly_rate.toString()).toFixed(2) : '80.00'}`}
               </button>
             </div>
           </section>
