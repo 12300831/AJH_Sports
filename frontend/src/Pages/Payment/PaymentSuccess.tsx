@@ -89,39 +89,37 @@ export default function PaymentSuccess({ onNavigate, onBookAnother }: PaymentSuc
           </p>
         </div>
         
-        {/* Sign Up Button */}
-        <div 
-          className="absolute bg-[#878787] h-[50px] left-[1327.25px] md:left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden md:block"
-          onClick={() => handleNavClick("account")}
-        />
-        <p 
-          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] md:left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden md:block"
-          onClick={() => handleNavClick("account")}
-        >
-          Sign Up
-        </p>
-        
-        {/* Log In */}
-        <p 
-          className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] md:left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden md:block"
-          onClick={() => handleNavClick("account")}
-        >
-          Log In
-        </p>
+        {/* Desktop Auth Buttons - Right */}
+        <div className="hidden md:flex absolute right-[39px] top-[46px] items-center gap-4">
+          <button 
+            onClick={() => handleNavClick("signin")}
+            className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+          >
+            Log In
+          </button>
+          <div 
+            className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center"
+            onClick={() => handleNavClick("signup")}
+          >
+            <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
+              Sign Up
+            </span>
+          </div>
+        </div>
         
         {/* Mobile Navigation */}
         <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
-          <p 
+          <button 
             className="font-semibold text-xs text-white cursor-pointer"
-            onClick={() => handleNavClick("account")}
+            onClick={() => handleNavClick("signin")}
           >
             Log In
-          </p>
+          </button>
           <div 
             className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
-            onClick={() => handleNavClick("account")}
+            onClick={() => handleNavClick("signup")}
           >
-            <p className="font-semibold text-xs text-white">Sign Up</p>
+            <span className="font-semibold text-xs text-white">Sign Up</span>
           </div>
         </div>
       </header>

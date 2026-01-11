@@ -1,11 +1,36 @@
 import { handleBookingPaymentSuccess } from './bookingPaymentController.js';
+import { Event } from '../models/Event.js';
+import { Booking } from '../models/Booking.js';
+
+// Error codes for structured error responses
+const ERROR_CODES = {
+  AUTH_REQUIRED: 'AUTH_REQUIRED',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  EVENT_NOT_FOUND: 'EVENT_NOT_FOUND',
+  EVENT_UNAVAILABLE: 'EVENT_UNAVAILABLE',
+  EVENT_FULL: 'EVENT_FULL',
+  ALREADY_REGISTERED: 'ALREADY_REGISTERED',
+  STRIPE_CONFIG_MISSING: 'STRIPE_CONFIG_MISSING',
+  STRIPE_ERROR: 'STRIPE_ERROR',
+  SERVER_ERROR: 'SERVER_ERROR',
+};
 
 /**
  * Create a Stripe Checkout Session
  * This endpoint creates a secure payment session that redirects users to Stripe's hosted checkout page
+ * PROTECTED: Requires JWT authentication (user must be logged in)
  */
 export const createCheckoutSession = async (req, res) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        code: ERROR_CODES.AUTH_REQUIRED,
+        message: 'Authentication required. Please log in.'
+      });
+    }
+
     const { 
       eventId, 
       eventName, 
@@ -23,8 +48,52 @@ export const createCheckoutSession = async (req, res) => {
     if (!eventId || !eventName || !amount) {
       return res.status(400).json({
         success: false,
+        code: ERROR_CODES.VALIDATION_ERROR,
         message: 'Missing required fields: eventId, eventName, and amount are required'
       });
+    }
+
+    // For event bookings, validate capacity and check for duplicates
+    if (bookingType === 'event') {
+      // Check if event exists and is active
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({
+          success: false,
+          code: ERROR_CODES.EVENT_NOT_FOUND,
+          message: 'Event not found'
+        });
+      }
+      if (event.status !== 'active') {
+        return res.status(400).json({
+          success: false,
+          code: ERROR_CODES.EVENT_UNAVAILABLE,
+          message: 'This event is no longer available for registration'
+        });
+      }
+
+      // Check available spots
+      const availableSpots = await Event.getAvailableSpots(eventId);
+      if (availableSpots <= 0) {
+        return res.status(400).json({
+          success: false,
+          code: ERROR_CODES.EVENT_FULL,
+          message: 'Sorry, this event is fully booked'
+        });
+      }
+
+      // Check for existing booking (prevent duplicates)
+      const existingBookings = await Booking.getEventBookingsByEvent(eventId);
+      const userBooking = existingBookings.find(
+        b => b.user_id === userId && b.status !== 'cancelled'
+      );
+      if (userBooking) {
+        return res.status(409).json({
+          success: false,
+          code: ERROR_CODES.ALREADY_REGISTERED,
+          message: 'You have already registered for this event'
+        });
+      }
     }
 
     // Validate amount is a positive number
@@ -32,14 +101,17 @@ export const createCheckoutSession = async (req, res) => {
     if (isNaN(amountInCents) || amountInCents <= 0) {
       return res.status(400).json({
         success: false,
+        code: ERROR_CODES.VALIDATION_ERROR,
         message: 'Amount must be a positive number'
       });
     }
 
-    // Check if we're in development mode (no Stripe key)
+    // Validate Stripe configuration
     const stripeKey = process.env.STRIPE_SECRET_KEY;
-    const isDevelopmentMode = process.env.NODE_ENV === 'development' && 
-                              (!stripeKey || stripeKey.includes('placeholder') || stripeKey.trim() === '');
+    const isStripeKeyMissing = !stripeKey || stripeKey.trim() === '' || stripeKey.includes('placeholder');
+
+    // Check if we should use mock mode (development only with no key)
+    const isDevelopmentMode = process.env.NODE_ENV === 'development' && isStripeKeyMissing;
 
     if (isDevelopmentMode) {
       // Mock payment for development (no Stripe key needed)
@@ -53,6 +125,7 @@ export const createCheckoutSession = async (req, res) => {
         eventId: eventId.toString(),
         eventName: eventName,
         booking_type: bookingType,
+        user_id: userId.toString(),
       };
       
       if (bookingType === 'coach') {
@@ -60,25 +133,29 @@ export const createCheckoutSession = async (req, res) => {
         if (bookingId) metadata.booking_id = bookingId.toString();
       }
 
-      // Return mock response that redirects directly to success page
-      // In development, we'll simulate successful payment
-      const finalSuccessUrl = (successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/paymentSuccess?session_id={CHECKOUT_SESSION_ID}`)
+      // Build frontend base URL
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      
+      // Return mock response that redirects directly to events page with success params
+      const finalSuccessUrl = (successUrl || `${frontendUrl}/events?payment=success&eventId=${eventId}&session_id={CHECKOUT_SESSION_ID}`)
         .replace('{CHECKOUT_SESSION_ID}', mockSessionId);
       
       return res.json({
         success: true,
         sessionId: mockSessionId,
-        url: finalSuccessUrl, // Redirect directly to success page
-        mock: true, // Indicate this is a mock payment
+        url: finalSuccessUrl,
+        mock: true,
         message: 'Development Mode: Payment simulated successfully. Add STRIPE_SECRET_KEY to use real payments.'
       });
     }
 
-    // Production/Real Stripe Mode - Only import Stripe if we have a valid key
-    if (!stripeKey || stripeKey.trim() === '' || stripeKey.includes('placeholder')) {
+    // Production mode - Stripe key is required
+    if (isStripeKeyMissing) {
+      console.error('❌ STRIPE_SECRET_KEY is missing or invalid');
       return res.status(500).json({
         success: false,
-        message: 'Stripe is not configured. Please add STRIPE_SECRET_KEY to your .env file.'
+        code: ERROR_CODES.STRIPE_CONFIG_MISSING,
+        message: 'Payment system is not configured. Please contact support.'
       });
     }
 
@@ -93,6 +170,7 @@ export const createCheckoutSession = async (req, res) => {
       eventId: eventId.toString(),
       eventName: eventName,
       booking_type: bookingType,
+      user_id: userId.toString(), // Include user ID for webhook handler
     };
 
     // Add coach-specific metadata if it's a coach booking
@@ -101,6 +179,13 @@ export const createCheckoutSession = async (req, res) => {
       if (bookingId) metadata.booking_id = bookingId.toString();
     }
 
+    // Build frontend base URL
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    
+    // Build success and cancel URLs with query params for frontend handling
+    const defaultSuccessUrl = `${frontendUrl}/events?payment=success&eventId=${eventId}&session_id={CHECKOUT_SESSION_ID}`;
+    const defaultCancelUrl = `${frontendUrl}/events?payment=cancel&eventId=${eventId}`;
+    
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -120,12 +205,10 @@ export const createCheckoutSession = async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: successUrl || `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${process.env.FRONTEND_URL}/payment?canceled=true`,
+      success_url: successUrl || defaultSuccessUrl,
+      cancel_url: cancelUrl || defaultCancelUrl,
       customer_email: customerEmail,
       metadata: metadata,
-      // Enable automatic tax calculation if needed
-      // automatic_tax: { enabled: true },
     });
 
     // Return the session ID and URL to the frontend
@@ -136,10 +219,24 @@ export const createCheckoutSession = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating checkout session:', error);
+    
+    // Check if this is a Stripe API error
+    const isStripeError = error.type && error.type.startsWith('Stripe');
+    
+    if (isStripeError) {
+      return res.status(500).json({
+        success: false,
+        code: ERROR_CODES.STRIPE_ERROR,
+        message: 'Payment processing error. Please try again later.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
     res.status(500).json({
       success: false,
+      code: ERROR_CODES.SERVER_ERROR,
       message: 'Failed to create checkout session',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
@@ -217,66 +314,115 @@ export const getCheckoutSession = async (req, res) => {
 /**
  * Webhook endpoint for Stripe events
  * This handles asynchronous events from Stripe (payment succeeded, failed, etc.)
- * IMPORTANT: In production, verify the webhook signature
+ * 
+ * SECURITY: Signature verification is ALWAYS required (dev and prod)
+ * Use Stripe CLI for local development: stripe listen --forward-to localhost:5001/api/payments/webhook
  */
 export const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+
+  console.log('[Webhook] ────────────────────────────────────────');
+  console.log('[Webhook] Received webhook request');
 
   let event;
 
   try {
-    // Verify webhook signature (important for security)
-    if (webhookSecret) {
-      // Import and initialize Stripe for webhook verification
-      const stripeKey = process.env.STRIPE_SECRET_KEY;
-      if (!stripeKey || stripeKey.includes('placeholder') || stripeKey.trim() === '') {
-        console.warn('⚠️  Stripe key not configured. Skipping webhook verification.');
-        event = req.body;
-      } else {
-        const Stripe = (await import('stripe')).default;
-        const stripe = new Stripe(stripeKey, {
-          apiVersion: '2024-11-20.acacia',
-        });
-        event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-      }
-    } else {
-      // In development, you might skip signature verification
-      // NEVER do this in production
-      event = req.body;
-      console.warn('⚠️  Webhook signature verification skipped (development mode)');
+    // SECURITY: Always require STRIPE_WEBHOOK_SECRET (no dev bypass)
+    const hasWebhookSecret = webhookSecret && webhookSecret.trim() !== '' && !webhookSecret.includes('placeholder');
+    
+    if (!hasWebhookSecret) {
+      console.error('[Webhook] ❌ STRIPE_WEBHOOK_SECRET is not configured');
+      console.error('[Webhook] 📋 To fix this:');
+      console.error('[Webhook]    1. Install Stripe CLI: https://stripe.com/docs/stripe-cli');
+      console.error('[Webhook]    2. Run: stripe listen --forward-to localhost:5001/api/payments/webhook');
+      console.error('[Webhook]    3. Copy the webhook signing secret (whsec_...) to your .env file');
+      console.error('[Webhook]    4. Add: STRIPE_WEBHOOK_SECRET=whsec_...');
+      console.error('[Webhook]    5. Restart the backend server');
+      return res.status(500).json({
+        code: 'STRIPE_WEBHOOK_SECRET_MISSING',
+        message: 'Webhook signature verification cannot proceed. STRIPE_WEBHOOK_SECRET is not configured. See server logs for setup instructions.'
+      });
     }
+
+    // Require stripe-signature header
+    if (!sig) {
+      console.error('[Webhook] ❌ Missing stripe-signature header');
+      return res.status(400).json({
+        code: 'MISSING_SIGNATURE',
+        message: 'Missing stripe-signature header. Ensure the request is from Stripe.'
+      });
+    }
+
+    // Require STRIPE_SECRET_KEY for signature verification
+    const hasValidStripeKey = stripeKey && stripeKey.trim() !== '' && !stripeKey.includes('placeholder');
+    if (!hasValidStripeKey) {
+      console.error('[Webhook] ❌ STRIPE_SECRET_KEY is not configured');
+      return res.status(500).json({
+        code: 'STRIPE_CONFIG_MISSING',
+        message: 'Stripe is not properly configured. STRIPE_SECRET_KEY is missing.'
+      });
+    }
+
+    // Import and initialize Stripe
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(stripeKey, { apiVersion: '2024-11-20.acacia' });
+    
+    // Verify webhook signature (ALWAYS - no exceptions)
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    console.log('[Webhook] ✅ Signature verified successfully');
+
   } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error('[Webhook] ❌ Signature verification failed:', err.message);
+    return res.status(400).json({
+      code: 'SIGNATURE_VERIFICATION_FAILED',
+      message: `Webhook signature verification failed: ${err.message}`
+    });
   }
+
+  // Log event details (no secrets)
+  console.log(`[Webhook] Event type: ${event.type}`);
+  console.log(`[Webhook] Event ID: ${event.id}`);
 
   // Handle the event
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const session = event.data.object;
-      console.log('Payment successful for session:', session.id);
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        console.log(`[Webhook] checkout.session.completed - Session ID: ${session.id}`);
+        console.log(`[Webhook] Metadata: eventId=${session.metadata?.eventId}, userId=${session.metadata?.user_id}, type=${session.metadata?.booking_type}`);
+        
+        // Handle booking payments (event or coach bookings)
+        if (session.metadata && (session.metadata.booking_type === 'event' || session.metadata.booking_type === 'coach')) {
+          await handleBookingPaymentSuccess(session);
+        } else {
+          console.warn('[Webhook] Session has no valid booking_type in metadata, skipping');
+        }
+        break;
       
-      // Handle booking payments (event or coach bookings)
-      if (session.metadata && (session.metadata.booking_type === 'event' || session.metadata.booking_type === 'coach')) {
-        await handleBookingPaymentSuccess(session);
-      }
-      break;
-    
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      console.log('PaymentIntent succeeded:', paymentIntent.id);
-      break;
-    
-    case 'payment_intent.payment_failed':
-      const failedPayment = event.data.object;
-      console.log('PaymentIntent failed:', failedPayment.id);
-      break;
-    
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        console.log(`[Webhook] payment_intent.succeeded - PaymentIntent ID: ${paymentIntent.id}`);
+        break;
+      
+      case 'payment_intent.payment_failed':
+        const failedPayment = event.data.object;
+        console.log(`[Webhook] payment_intent.payment_failed - PaymentIntent ID: ${failedPayment.id}`);
+        console.log(`[Webhook] Failure reason: ${failedPayment.last_payment_error?.message || 'Unknown'}`);
+        break;
+      
+      default:
+        console.log(`[Webhook] Unhandled event type: ${event.type}`);
+    }
+  } catch (handlerError) {
+    console.error('[Webhook] ❌ Error processing event:', handlerError);
+    // Still return 200 to prevent Stripe from retrying
+    // The error is logged for investigation
   }
 
-  // Return a response to acknowledge receipt of the event
+  console.log('[Webhook] ────────────────────────────────────────');
+  
+  // Return 200 to acknowledge receipt of the event
   res.json({ received: true });
 };

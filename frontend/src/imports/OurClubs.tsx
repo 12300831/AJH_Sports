@@ -63,16 +63,17 @@ export default function OurClubs() {
           </p>
         </div>
 
-        {/* Sign Up Button - Desktop */}
-        <div className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block" />
-        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block">
-          Sign Up
-        </p>
-
-        {/* Log In - Desktop */}
-        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block">
-          Log In
-        </p>
+        {/* Desktop Auth Buttons - Right */}
+        <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors">
+            Log In
+          </p>
+          <div className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center">
+            <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
+              Sign Up
+            </span>
+          </div>
+        </div>
 
         {/* Tablet/Mobile Auth Buttons */}
         <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">

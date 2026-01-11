@@ -104,24 +104,22 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
 
         {/* Desktop Auth Buttons - Right */}
         {!showUserInfo && (
-          <>
-            <div 
-              className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block"
-              onClick={() => handleNavClick('signup')}
-            />
-            <button 
-              onClick={() => handleNavClick('signup')} 
-              className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block"
-            >
-              Sign Up
-            </button>
+          <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
             <button 
               onClick={() => handleNavClick('signin')} 
-              className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block"
+              className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
             >
               Log In
             </button>
-          </>
+            <div 
+              className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center"
+              onClick={() => handleNavClick('signup')}
+            >
+              <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
+                Sign Up
+              </span>
+            </div>
+          </div>
         )}
 
         {/* Tablet/Mobile Auth Buttons */}

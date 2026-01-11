@@ -243,31 +243,139 @@ Use any:
 6. Complete checkout
 7. Verify redirect to success page
 
-## 🔔 Webhooks (Optional - for Production)
+## 🔔 Webhooks (REQUIRED for Bookings to Work)
 
-Webhooks allow Stripe to notify your server about payment events asynchronously.
+Webhooks are **essential** for the event registration flow to work correctly. When a user pays via Stripe Checkout, the webhook handler receives the payment confirmation and creates the booking in the database.
 
-### Setup Webhooks
+### How It Works
 
-1. Go to [Stripe Dashboard](https://dashboard.stripe.com/webhooks)
-2. Click "Add endpoint"
-3. Enter your webhook URL: `https://yourdomain.com/api/payments/webhook`
-4. Select events: `checkout.session.completed`, `payment_intent.succeeded`
-5. Copy the webhook signing secret
-6. Add to `.env`: `STRIPE_WEBHOOK_SECRET=whsec_...`
+1. User clicks "Register" → Backend creates Stripe Checkout Session
+2. User completes payment on Stripe's page
+3. Stripe sends `checkout.session.completed` webhook to your server
+4. Webhook handler creates the booking with `status=confirmed`, `payment_status=paid`
+5. `available_spots` decreases automatically
 
-### Local Testing with Stripe CLI
+### Local Development with Stripe CLI (Recommended)
+
+For local development, use the Stripe CLI to forward webhooks to your local server.
+
+#### Step 1: Install Stripe CLI
+
+**Windows (using Scoop):**
+```powershell
+scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli.git
+scoop install stripe
+```
+
+**Windows (using Chocolatey):**
+```powershell
+choco install stripe-cli
+```
+
+**macOS:**
+```bash
+brew install stripe/stripe-cli/stripe
+```
+
+**Linux (Debian/Ubuntu):**
+```bash
+curl -s https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | gpg --dearmor | sudo tee /usr/share/keyrings/stripe.gpg
+echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" | sudo tee -a /etc/apt/sources.list.d/stripe.list
+sudo apt update
+sudo apt install stripe
+```
+
+#### Step 2: Login to Stripe CLI
 
 ```bash
-# Install Stripe CLI
-brew install stripe/stripe-cli/stripe
-
-# Login
 stripe login
+```
 
-# Forward webhooks to local server
+This will open a browser for authentication. Confirm the login.
+
+#### Step 3: Start the Webhook Listener
+
+```bash
 stripe listen --forward-to localhost:5000/api/payments/webhook
 ```
+
+The CLI will output something like:
+```
+Ready! You are using Stripe API Version [2024-11-20].
+Your webhook signing secret is whsec_abc123xyz789...
+```
+
+#### Step 4: Copy the Webhook Secret
+
+Copy the `whsec_...` value and add it to your `backend/.env`:
+
+```env
+STRIPE_WEBHOOK_SECRET=whsec_abc123xyz789...
+```
+
+**Important:** The webhook secret from `stripe listen` is temporary and changes each time you restart the CLI. For consistent testing, keep the CLI running.
+
+#### Step 5: Restart Backend
+
+```bash
+cd backend
+npm start
+```
+
+You should see in the logs:
+```
+💳 Stripe payments are ENABLED.
+🔗 Stripe webhooks are CONFIGURED.
+```
+
+#### Step 6: Test the Full Flow
+
+1. Start frontend: `cd frontend && npm run dev`
+2. Log in as a user
+3. Go to Events page
+4. Click "Register Now" on an event
+5. Complete payment with test card `4242 4242 4242 4242`
+6. Watch the Stripe CLI terminal for webhook delivery
+7. Verify the booking was created and `available_spots` decreased
+
+#### Webhook Events We Handle
+
+- `checkout.session.completed` - Creates/confirms booking after successful payment
+- `payment_intent.succeeded` - Logged for reference
+- `payment_intent.payment_failed` - Logged for debugging
+
+### Production Webhooks
+
+For production, set up webhooks in the Stripe Dashboard:
+
+1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+2. Click "Add endpoint"
+3. Enter your production webhook URL: `https://yourdomain.com/api/payments/webhook`
+4. Select events:
+   - `checkout.session.completed` (Required)
+   - `payment_intent.succeeded` (Optional)
+   - `payment_intent.payment_failed` (Optional)
+5. Copy the signing secret and add to production `.env`:
+   ```env
+   STRIPE_WEBHOOK_SECRET=whsec_your_production_secret
+   ```
+
+### Webhook Reliability & Idempotency
+
+Our webhook handler is designed to be **idempotent** and **reliable**:
+
+1. **Signature Verification:** Validates `stripe-signature` header using `STRIPE_WEBHOOK_SECRET`
+2. **Session ID Idempotency:** Checks if `stripe_session_id` was already processed
+3. **User+Event Idempotency:** Prevents duplicate bookings for same user+event
+4. **Capacity Check:** Re-verifies `available_spots` at booking time (race condition protection)
+5. **Structured Logging:** Clear logs for debugging:
+   ```
+   [Webhook] ────────────────────────────────────────
+   [Webhook] Received webhook request
+   [Webhook] ✅ Signature verified successfully
+   [Webhook] Event type: checkout.session.completed
+   [Webhook:BookingSuccess] ✅ Created event booking #42
+   ```
 
 ## 🚨 Common Issues
 

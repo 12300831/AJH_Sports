@@ -14,9 +14,14 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl();
 
+// Get auth token from localStorage
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('token');
+};
+
 // Log API URL in development for debugging
 if (import.meta.env.DEV) {
-  console.log('🔗 API URL:', API_URL);
+  console.log('🔗 Payment API URL:', API_URL);
 }
 
 export interface CreateCheckoutSessionRequest {
@@ -36,6 +41,26 @@ export interface CreateCheckoutSessionResponse {
   success: boolean;
   sessionId: string;
   url: string;
+  mock?: boolean;
+}
+
+// Error codes returned by the backend
+export const PAYMENT_ERROR_CODES = {
+  AUTH_REQUIRED: 'AUTH_REQUIRED',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  EVENT_NOT_FOUND: 'EVENT_NOT_FOUND',
+  EVENT_UNAVAILABLE: 'EVENT_UNAVAILABLE',
+  EVENT_FULL: 'EVENT_FULL',
+  ALREADY_REGISTERED: 'ALREADY_REGISTERED',
+  STRIPE_CONFIG_MISSING: 'STRIPE_CONFIG_MISSING',
+  STRIPE_ERROR: 'STRIPE_ERROR',
+  SERVER_ERROR: 'SERVER_ERROR',
+} as const;
+
+export interface PaymentError {
+  code: string;
+  message: string;
+  status: number;
 }
 
 export interface CheckoutSessionResponse {
@@ -53,12 +78,18 @@ export interface CheckoutSessionResponse {
 /**
  * Create a Stripe Checkout Session
  * This will return a URL that redirects the user to Stripe's hosted checkout page
+ * REQUIRES: User must be logged in (JWT token in localStorage)
  */
 export const createCheckoutSession = async (
   data: CreateCheckoutSessionRequest
 ): Promise<CreateCheckoutSessionResponse> => {
   try {
     const url = `${API_URL}/payments/create-checkout-session`;
+    const token = getAuthToken();
+    
+    if (!token) {
+      throw new Error('You must be logged in to make a payment');
+    }
     
     // Log the request in development
     if (import.meta.env.DEV) {
@@ -69,19 +100,34 @@ export const createCheckoutSession = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-      let errorMessage = 'Failed to create checkout session';
+      let errorData: any = { message: 'Failed to create checkout session' };
       try {
-        const error = await response.json();
-        errorMessage = error.message || errorMessage;
+        errorData = await response.json();
       } catch (e) {
-        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        errorData.message = `HTTP ${response.status}: ${response.statusText}`;
       }
-      throw new Error(errorMessage);
+      
+      // Create a structured error with code and status
+      const paymentError: PaymentError = {
+        code: errorData.code || 'UNKNOWN_ERROR',
+        message: errorData.message || 'An error occurred',
+        status: response.status,
+      };
+      
+      // Log the error for debugging
+      console.error('Payment API Error:', paymentError);
+      
+      // Throw error with structured data in message for parsing
+      const error = new Error(paymentError.message);
+      (error as any).code = paymentError.code;
+      (error as any).status = paymentError.status;
+      throw error;
     }
 
     const result = await response.json();

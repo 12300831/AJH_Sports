@@ -10,7 +10,6 @@ import {
   getCoachBookings 
 } from '../../services/adminService';
 import type { Event, Coach, User, EventBooking, CoachBooking } from '../../services/adminService';
-import { getMockEvents } from '../../services/mockEventsService';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
@@ -53,20 +52,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         getCoachBookings(),
       ]);
 
-      // Also load mock events to get the complete count (like AdminEvents does)
-      const mockEvents = getMockEvents();
-      
-      // Combine backend events and mock events for total count
-      const allEvents = [
-        ...events,
-        ...mockEvents.map(m => ({
-          id: m.id + 10000, // Offset to avoid conflicts
-          name: m.title,
-          status: 'active' as const, // Mock events are always active
-        }))
-      ];
-
-      const activeEvents = allEvents.filter((e: Event | any) => 
+      // Count active events from backend only
+      const activeEvents = events.filter((e: Event) => 
         e.status === 'active' || !e.status
       ).length;
       const activeCoaches = coaches.filter((c: Coach) => c.status === 'active').length;
@@ -80,7 +67,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       ].length;
 
       setStats({
-        events: allEvents.length, // Total events (backend + mock)
+        events: events.length, // Total backend events
         activeEvents,
         coaches: coaches.length,
         activeCoaches,

@@ -9,10 +9,17 @@ import { Booking } from "../models/Booking.js";
 // Get all events
 export const getEvents = async (req, res) => {
   try {
-    const { status, date, dateFrom } = req.query;
+    const { status, date, dateFrom, includeInactive } = req.query;
     const filters = {};
 
-    if (status) filters.status = status;
+    // By default, exclude inactive events for public access
+    // Admin can pass includeInactive=true to see all events
+    if (status) {
+      filters.status = status;
+    } else if (includeInactive !== 'true') {
+      // Exclude inactive events by default
+      filters.excludeInactive = true;
+    }
     if (date) filters.date = date;
     if (dateFrom) filters.dateFrom = dateFrom;
 
@@ -80,7 +87,7 @@ export const getEventById = async (req, res) => {
 // Admin: Create event
 export const createEvent = async (req, res) => {
   try {
-    const { name, description, date, time, max_players, price, location, status } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = req.body;
 
     // Validation
     if (!name || !date || !time) {
@@ -98,6 +105,8 @@ export const createEvent = async (req, res) => {
       max_players: max_players || 20,
       price: price || 0,
       location,
+      image_url: image_url || null,
+      hero_image_url: hero_image_url || null,
       status: status || "active"
     });
 
@@ -117,11 +126,11 @@ export const createEvent = async (req, res) => {
   }
 };
 
-// Admin: Update event
+// Admin: Update event (supports partial updates)
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, date, time, max_players, price, location, status } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = req.body;
 
     const event = await Event.findById(id);
     if (!event) {
@@ -131,16 +140,31 @@ export const updateEvent = async (req, res) => {
       });
     }
 
-    const updated = await Event.update(id, {
-      name: name || event.name,
-      description: description !== undefined ? description : event.description,
-      date: date || event.date,
-      time: time || event.time,
-      max_players: max_players || event.max_players,
-      price: price !== undefined ? price : event.price,
-      location: location !== undefined ? location : event.location,
-      status: status || event.status
-    });
+    // Helper: check if a string value is "provided" (not undefined, not null, not empty string)
+    const isValidString = (val) => val !== undefined && val !== null && val !== '';
+    
+    // Helper: safely parse numeric value, returns null if invalid
+    const parseNumeric = (val) => {
+      if (val === undefined || val === null || val === '') return null;
+      const num = Number(val);
+      return isNaN(num) ? null : num;
+    };
+
+    // Build update object - only overwrite if valid value provided
+    const updateData = {
+      name: isValidString(name) ? name : event.name,
+      description: description !== undefined ? description : event.description, // Allow empty string for description
+      date: isValidString(date) ? date : event.date,
+      time: isValidString(time) ? time : event.time,
+      max_players: parseNumeric(max_players) !== null ? parseNumeric(max_players) : event.max_players,
+      price: parseNumeric(price) !== null ? parseNumeric(price) : parseFloat(event.price) || 0,
+      location: location !== undefined ? location : event.location, // Allow empty string for location
+      image_url: image_url !== undefined ? (image_url || null) : event.image_url, // Allow clearing with empty string
+      hero_image_url: hero_image_url !== undefined ? (hero_image_url || null) : event.hero_image_url, // Allow clearing with empty string
+      status: isValidString(status) ? status : event.status
+    };
+
+    const updated = await Event.update(id, updateData);
 
     if (!updated) {
       return res.status(400).json({

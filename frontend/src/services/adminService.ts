@@ -73,7 +73,9 @@ export interface Event {
   max_players: number;
   price: number;
   location?: string;
-  status?: 'active' | 'cancelled' | 'completed';
+  image_url?: string | null;
+  hero_image_url?: string | null;
+  status?: 'active' | 'inactive' | 'cancelled' | 'completed';
   created_at?: string;
 }
 
@@ -85,12 +87,16 @@ export interface CreateEventData {
   max_players: number;
   price: number;
   location?: string;
-  status?: 'active' | 'cancelled' | 'completed';
+  image_url?: string;
+  hero_image_url?: string;
+  status?: 'active' | 'inactive' | 'cancelled' | 'completed';
 }
 
 export const getEvents = async (): Promise<Event[]> => {
-  const response = await apiCall('/events');
+  // Admin should see all events including inactive ones
+  const response = await apiCall('/events?includeInactive=true');
   const data = await response.json();
+  
   // Handle different response formats
   if (Array.isArray(data)) {
     return data;
@@ -102,7 +108,7 @@ export const getEvents = async (): Promise<Event[]> => {
     return data.data;
   }
   // If it's an object but not an array, return empty array
-  console.warn('getEvents: Expected array but got:', typeof data, data);
+  console.warn('getEvents: Unexpected response format:', typeof data);
   return [];
 };
 

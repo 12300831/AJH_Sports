@@ -74,6 +74,22 @@ export function SignIn({ onNavigate }: SignInProps) {
 
       toast.success('Login successful!');
 
+      // Check for pending event registration (user tried to register before logging in)
+      const pendingRegistration = sessionStorage.getItem('pendingEventRegistration');
+      if (pendingRegistration) {
+        try {
+          const pending = JSON.parse(pendingRegistration);
+          console.log('📋 Found pending event registration:', pending.eventName);
+          toast.info(`Returning to "${pending.eventName}" registration...`);
+          // Redirect to events page - EventsWrapper will handle the rest
+          onNavigate('events');
+          return;
+        } catch (e) {
+          console.error('Failed to parse pending registration:', e);
+          sessionStorage.removeItem('pendingEventRegistration');
+        }
+      }
+
       // Check if user is admin and redirect accordingly
       // Handle both string comparison and case-insensitive check
       const userRole = data.user?.role?.toLowerCase?.() || data.user?.role || '';
@@ -83,7 +99,7 @@ export function SignIn({ onNavigate }: SignInProps) {
         console.log('✅ Redirecting to admin portal');
         onNavigate('admin');
       } else {
-        console.log('❌ Redirecting to player profile (role:', userRole, ')');
+        console.log('✅ Redirecting to player profile (role:', userRole, ')');
         onNavigate('player');
       }
     } catch (error: any) {

@@ -4,25 +4,27 @@ import {
   getCheckoutSession, 
   handleWebhook 
 } from '../controllers/paymentController.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * POST /api/payments/create-checkout-session
  * Creates a Stripe Checkout Session
+ * PROTECTED - requires JWT authentication
  * 
  * Request body:
  * {
  *   eventId: string,
  *   eventName: string,
  *   amount: number (in dollars, e.g., 75.00),
- *   currency?: string (default: 'usd'),
+ *   currency?: string (default: 'aud'),
  *   customerEmail?: string,
  *   successUrl?: string,
  *   cancelUrl?: string
  * }
  */
-router.post('/create-checkout-session', createCheckoutSession);
+router.post('/create-checkout-session', authenticate, createCheckoutSession);
 
 /**
  * GET /api/payments/session/:sessionId

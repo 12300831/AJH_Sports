@@ -192,7 +192,7 @@ export const Booking = {
        FROM event_bookings eb
        JOIN events e ON eb.event_id = e.id
        JOIN users u ON eb.user_id = u.id
-       ORDER BY eb.booking_date DESC`
+       ORDER BY eb.created_at DESC`
     );
     return rows;
   },
@@ -205,7 +205,7 @@ export const Booking = {
        FROM coach_bookings cb
        JOIN coaches c ON cb.coach_id = c.id
        JOIN users u ON cb.user_id = u.id
-       ORDER BY cb.session_date DESC, cb.session_time DESC`
+       ORDER BY cb.date DESC, cb.time DESC`
     );
     return rows;
   },
@@ -218,6 +218,34 @@ export const Booking = {
       [status, bookingId]
     );
     return result.affectedRows > 0;
+  },
+
+  // Find event booking by Stripe session ID (for idempotency)
+  findEventBookingByStripeSessionId: async (stripeSessionId) => {
+    if (!stripeSessionId) return null;
+    const [rows] = await pool.query(
+      `SELECT eb.*, e.name as event_name, u.name as user_name, u.email as user_email
+       FROM event_bookings eb
+       JOIN events e ON eb.event_id = e.id
+       JOIN users u ON eb.user_id = u.id
+       WHERE eb.stripe_session_id = ?`,
+      [stripeSessionId]
+    );
+    return rows[0] || null;
+  },
+
+  // Find coach booking by Stripe session ID (for idempotency)
+  findCoachBookingByStripeSessionId: async (stripeSessionId) => {
+    if (!stripeSessionId) return null;
+    const [rows] = await pool.query(
+      `SELECT cb.*, c.name as coach_name, u.name as user_name, u.email as user_email
+       FROM coach_bookings cb
+       JOIN coaches c ON cb.coach_id = c.id
+       JOIN users u ON cb.user_id = u.id
+       WHERE cb.stripe_session_id = ?`,
+      [stripeSessionId]
+    );
+    return rows[0] || null;
   }
 };
 
