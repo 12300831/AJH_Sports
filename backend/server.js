@@ -1,9 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import session from "express-session";
+import passport from "./config/passport.js";
 dotenv.config();
 
 import authRoutes from "./routes/authRoutes.js";
+import oauthRoutes from "./routes/oauthRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
@@ -65,6 +68,24 @@ app.use(cors({
 // Request Logger Middleware
 app.use(logger);
 
+// Session middleware for Passport.js OAuth
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default_secret_change_in_production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
+
+// Initialize Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Body parser middleware (JSON)
 // Note: Webhook endpoint uses raw body, so we apply JSON parser to all routes except webhook
 app.use((req, res, next) => {
@@ -78,6 +99,7 @@ app.use((req, res, next) => {
 // Routes
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/auth", oauthRoutes); // OAuth routes (not under /api)
 app.use("/api/payments", paymentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
