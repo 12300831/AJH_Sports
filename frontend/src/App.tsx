@@ -111,6 +111,9 @@ export default function App() {
       window.history.pushState({ page }, '', finalPath);
     }
     
+    // Force a small re-render to ensure state updates
+    console.log('Navigating to:', page, 'Path:', path);
+    
     // Ensure scroll after a brief delay to handle any async rendering
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });

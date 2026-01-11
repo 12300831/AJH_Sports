@@ -3,7 +3,38 @@ import cors from "cors";
 import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport.js";
+
+// Load environment variables from .env file
 dotenv.config();
+
+// Validate required Stripe configuration at startup
+const validateStripeConfig = () => {
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  
+  const isKeyMissing = !stripeKey || stripeKey.trim() === '' || stripeKey.includes('placeholder');
+  const isWebhookMissing = !webhookSecret || webhookSecret.trim() === '' || webhookSecret.includes('placeholder');
+  
+  if (isKeyMissing) {
+    console.warn('⚠️  STRIPE_SECRET_KEY is not configured. Payments will use mock mode in development or fail in production.');
+  } else {
+    console.log('✅ STRIPE_SECRET_KEY is configured');
+  }
+  
+  if (isWebhookMissing) {
+    console.warn('⚠️  STRIPE_WEBHOOK_SECRET is not configured.');
+    console.warn('   ❌ Webhooks will be REJECTED until this is configured.');
+    console.warn('   📋 To fix: Run "stripe listen --forward-to localhost:5001/api/payments/webhook"');
+    console.warn('   📋 Then copy the webhook secret (whsec_...) to your .env file.');
+  } else {
+    console.log('✅ STRIPE_WEBHOOK_SECRET is configured');
+  }
+  
+  return { stripeConfigured: !isKeyMissing, webhookConfigured: !isWebhookMissing };
+};
+
+// Export config status for use in controllers
+export const stripeConfig = validateStripeConfig();
 
 import authRoutes from "./routes/authRoutes.js";
 import oauthRoutes from "./routes/oauthRoutes.js";
@@ -30,6 +61,8 @@ const defaultOrigins = [
   'http://127.0.0.1:5173',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'http://localhost:3002',  // Vite fallback port
+  'http://127.0.0.1:3002',
 ];
 const envOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')

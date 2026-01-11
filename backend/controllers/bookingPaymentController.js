@@ -236,28 +236,105 @@ export const createCoachBookingPayment = async (req, res) => {
 
 /**
  * Handle successful payment webhook
- * This should be called from the main payment webhook handler
+ * This is called from the main payment webhook handler when checkout.session.completed
+ * Creates the booking in the database with confirmed status
+ * 
+ * IDEMPOTENCY: Checks stripe_session_id to prevent double bookings from webhook retries
+ * CAPACITY: Re-checks available spots before creating booking to prevent race conditions
  */
 export const handleBookingPaymentSuccess = async (session) => {
-  try {
-    const { booking_id, booking_type } = session.metadata || {};
+  const stripeSessionId = session.id;
+  
+  console.log('[Webhook:BookingSuccess] ────────────────────────────────────────');
+  console.log(`[Webhook:BookingSuccess] Processing session: ${stripeSessionId}`);
 
-    if (!booking_id || !booking_type) {
+  try {
+    const { booking_type, eventId, user_id, booking_id, coach_id, eventName } = session.metadata || {};
+
+    // Validate required metadata
+    if (!booking_type || !user_id) {
+      console.error('[Webhook:BookingSuccess] ❌ Missing required metadata');
+      console.error('[Webhook:BookingSuccess] Received metadata:', JSON.stringify(session.metadata));
       return;
     }
 
-    if (booking_type === "event") {
-      // Update event booking
-      await Booking.updateEventBooking(parseInt(booking_id), {
+    console.log(`[Webhook:BookingSuccess] Type: ${booking_type}, EventId: ${eventId}, UserId: ${user_id}`);
+
+    const userId = parseInt(user_id);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // EVENT BOOKINGS
+    // ═══════════════════════════════════════════════════════════════════
+    if (booking_type === "event" && eventId) {
+      const eventIdNum = parseInt(eventId);
+
+      // IDEMPOTENCY CHECK 1: Check if this stripe_session_id was already processed
+      const existingBySession = await Booking.findEventBookingByStripeSessionId(stripeSessionId);
+      if (existingBySession) {
+        console.log(`[Webhook:BookingSuccess] ℹ️ Session ${stripeSessionId} already processed`);
+        console.log(`[Webhook:BookingSuccess] Existing booking ID: ${existingBySession.id}, status: ${existingBySession.status}`);
+        return;
+      }
+
+      // IDEMPOTENCY CHECK 2: Check if user already has a non-cancelled booking for this event
+      const existingBookings = await Booking.getEventBookingsByEvent(eventIdNum);
+      const existingUserBooking = existingBookings.find(
+        b => b.user_id === userId && b.status !== 'cancelled'
+      );
+      
+      if (existingUserBooking) {
+        console.log(`[Webhook:BookingSuccess] ℹ️ User ${userId} already has booking for event ${eventIdNum}`);
+        console.log(`[Webhook:BookingSuccess] Existing booking ID: ${existingUserBooking.id}, status: ${existingUserBooking.status}`);
+        
+        // Update the existing booking with this session ID if not already paid
+        if (existingUserBooking.payment_status !== 'paid' || existingUserBooking.status !== 'confirmed') {
+          await Booking.updateEventBooking(existingUserBooking.id, {
+            payment_status: "paid",
+            status: "confirmed",
+            stripe_session_id: stripeSessionId
+          });
+          console.log(`[Webhook:BookingSuccess] ✅ Updated existing booking ${existingUserBooking.id} to confirmed/paid`);
+        }
+        return;
+      }
+
+      // CAPACITY CHECK: Re-check available spots to prevent race conditions
+      const event = await Event.findById(eventIdNum);
+      if (!event) {
+        console.error(`[Webhook:BookingSuccess] ❌ Event ${eventIdNum} not found - cannot create booking`);
+        return;
+      }
+
+      const availableSpots = await Event.getAvailableSpots(eventIdNum);
+      console.log(`[Webhook:BookingSuccess] Event "${event.name}" - Available spots: ${availableSpots}/${event.max_players}`);
+      
+      if (availableSpots <= 0) {
+        console.error(`[Webhook:BookingSuccess] ❌ Event "${event.name}" is fully booked`);
+        console.error(`[Webhook:BookingSuccess] Payment received but no spots available - MANUAL REFUND MAY BE REQUIRED`);
+        // TODO: In production, trigger automatic refund via Stripe API
+        return;
+      }
+
+      // CREATE BOOKING
+      const bookingId = await Booking.createEventBooking({
+        event_id: eventIdNum,
+        user_id: userId,
+        status: "confirmed",
         payment_status: "paid",
-        status: "confirmed"
+        stripe_session_id: stripeSessionId
       });
 
-      // Get booking and user details for calendar
-      const booking = await Booking.getEventBookingById(parseInt(booking_id));
+      console.log(`[Webhook:BookingSuccess] ✅ Created event booking #${bookingId}`);
+      console.log(`[Webhook:BookingSuccess] Event: "${eventName || event.name}", User: ${userId}`);
+
+      // Verify available spots decreased
+      const newAvailableSpots = await Event.getAvailableSpots(eventIdNum);
+      console.log(`[Webhook:BookingSuccess] Available spots after booking: ${newAvailableSpots}/${event.max_players}`);
+
+      // Get booking details for calendar integration
+      const booking = await Booking.getEventBookingById(bookingId);
       if (booking) {
-        const event = await Event.findById(booking.event_id);
-        if (event) {
+        try {
           const calendarEventId = await createCalendarEvent({
             title: event.name,
             description: event.description || `Event booking for ${event.name}`,
@@ -269,41 +346,70 @@ export const handleBookingPaymentSuccess = async (session) => {
           });
 
           if (calendarEventId) {
-            console.log(`Calendar event created for event booking: ${calendarEventId}`);
+            console.log(`[Webhook:BookingSuccess] 📅 Calendar event created: ${calendarEventId}`);
           }
+        } catch (calendarError) {
+          console.warn(`[Webhook:BookingSuccess] ⚠️ Failed to create calendar event: ${calendarError.message}`);
         }
       }
-    } else if (booking_type === "coach") {
-      // Update coach booking
-      await Booking.updateCoachBooking(parseInt(booking_id), {
+
+    // ═══════════════════════════════════════════════════════════════════
+    // COACH BOOKINGS
+    // ═══════════════════════════════════════════════════════════════════
+    } else if (booking_type === "coach" && booking_id) {
+      const bookingIdNum = parseInt(booking_id);
+
+      // IDEMPOTENCY CHECK: Check if this stripe_session_id was already processed
+      const existingBySession = await Booking.findCoachBookingByStripeSessionId(stripeSessionId);
+      if (existingBySession) {
+        console.log(`[Webhook:BookingSuccess] ℹ️ Session ${stripeSessionId} already processed for coach booking`);
+        return;
+      }
+
+      // Update existing pending booking to confirmed
+      await Booking.updateCoachBooking(bookingIdNum, {
         payment_status: "paid",
-        status: "confirmed"
+        status: "confirmed",
+        stripe_session_id: stripeSessionId
       });
 
-      // Get booking and user details for calendar
-      const booking = await Booking.getCoachBookingById(parseInt(booking_id));
-      if (booking) {
-        const calendarEventId = await createCalendarEvent({
-          title: `Coaching Session with ${booking.coach_name}`,
-          description: `${booking.specialty} - ${booking.duration || 60} minutes`,
-          date: booking.date,
-          time: booking.time,
-          duration: booking.duration || 60,
-          userEmail: booking.user_email,
-          userName: booking.user_name
-        });
+      console.log(`[Webhook:BookingSuccess] ✅ Updated coach booking #${bookingIdNum} to confirmed/paid`);
 
-        if (calendarEventId) {
-          // Update booking with calendar event ID
-          await Booking.updateCoachBooking(parseInt(booking_id), {
-            google_calendar_event_id: calendarEventId
+      // Get booking details for calendar
+      const booking = await Booking.getCoachBookingById(bookingIdNum);
+      if (booking) {
+        try {
+          const calendarEventId = await createCalendarEvent({
+            title: `Coaching Session with ${booking.coach_name}`,
+            description: `${booking.specialty} - ${booking.duration || 60} minutes`,
+            date: booking.date,
+            time: booking.time,
+            duration: booking.duration || 60,
+            userEmail: booking.user_email,
+            userName: booking.user_name
           });
-          console.log(`Calendar event created for coach booking: ${calendarEventId}`);
+
+          if (calendarEventId) {
+            await Booking.updateCoachBooking(bookingIdNum, {
+              google_calendar_event_id: calendarEventId
+            });
+            console.log(`[Webhook:BookingSuccess] 📅 Calendar event created: ${calendarEventId}`);
+          }
+        } catch (calendarError) {
+          console.warn(`[Webhook:BookingSuccess] ⚠️ Failed to create calendar event: ${calendarError.message}`);
         }
       }
+    } else {
+      console.warn(`[Webhook:BookingSuccess] ⚠️ Unhandled booking type or missing ID`);
+      console.warn(`[Webhook:BookingSuccess] Type: ${booking_type}, EventId: ${eventId}, BookingId: ${booking_id}`);
     }
   } catch (error) {
-    console.error("Handle booking payment success error:", error);
+    console.error("[Webhook:BookingSuccess] ❌ Error processing payment success:", error);
+    console.error("[Webhook:BookingSuccess] Stack:", error.stack);
+    // Don't throw - webhook should return 200 even if processing fails
+    // The error is logged for investigation
   }
+
+  console.log('[Webhook:BookingSuccess] ────────────────────────────────────────');
 };
 

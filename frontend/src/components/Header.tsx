@@ -105,24 +105,22 @@ export function Header({ onNavigate, showUserInfo = false, currentPage }: Header
 
         {/* Desktop Auth Buttons - Right */}
         {!showUserInfo && (
-          <>
-            <div 
-              className={`absolute h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer transition-colors hidden lg:block ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
-              onClick={() => handleNavClick('signup')}
-            />
-            <button 
-              onClick={() => handleNavClick('signup')} 
-              className={`absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] top-[65px] w-[46px] cursor-pointer hidden lg:block ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}
-            >
-              Sign Up
-            </button>
+          <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
             <button 
               onClick={() => handleNavClick('signin')} 
-              className={`absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] top-[63px] w-[36px] cursor-pointer transition-colors hidden lg:block ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
+              className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] cursor-pointer transition-colors ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
             >
               Log In
             </button>
-          </>
+            <div 
+              className={`h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer transition-colors flex items-center justify-center ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
+              onClick={() => handleNavClick('signup')}
+            >
+              <span className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}>
+                Sign Up
+              </span>
+            </div>
+          </div>
         )}
 
         {/* Tablet/Mobile Auth Buttons */}

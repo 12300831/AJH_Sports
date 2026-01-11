@@ -1,5 +1,7 @@
-import { FormEvent, useState, useEffect } from 'react';
-import { createCheckoutSession } from '../services/paymentService';
+import { FormEvent, useState, useEffect, useCallback } from 'react';
+import { createCheckoutSession, PAYMENT_ERROR_CODES } from '../services/paymentService';
+import { isUserLoggedIn, getCurrentUser, fetchEvents as apiFetchEvents } from '../services/eventService';
+import { toast } from 'sonner';
 
 // Images are served from the public folder at the root path (/images/...)
 const Image_tennis = '/images/TT.png';
@@ -16,7 +18,7 @@ const Image_tt_hero = '/images/table-tennis-players-hero.jpg';
 const Image_kids_hero = '/images/kids-tug-of-war-hero.jpg';
 const Image_coaching_hero = '/images/tennis-court-hero.jpg';
 
-type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'payment';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'payment';
 
 interface EventsWrapperProps {
   onNavigate: (page: Page) => void;
@@ -46,7 +48,61 @@ interface Event {
   venue?: string;
 }
 
-const events: Event[] = [
+// Default event display data (images, descriptions, etc.)
+// This will be merged with live data from the backend
+const defaultEventDisplayData: Record<number, Partial<Event>> = {
+  1: {
+    image: Image_tennis_court,
+    heroImage: Image_tennis_hero,
+    alt: 'Tennis Open 2025',
+    category: 'tournament',
+    featured: true,
+    fullDescription: 'Experience the thrill of competition at the Tennis Open! Designed for players of all abilities, this event includes round-robin matches followed by knockout rounds. Winners will receive trophies and vouchers for AJH coaching sessions.',
+    whoCanJoin: 'Juniors & Adults, Singles & Doubles formats available',
+    whatsIncluded: 'Access to practice courts, refreshments, and event photography',
+    registrationDeadline: 'August 1, 2025',
+    venue: 'Outdoor Tennis Courts',
+  },
+  2: {
+    image: Image_tt_table,
+    heroImage: Image_tt_hero,
+    alt: 'Table Tennis Tournament 2025',
+    category: 'tournament',
+    featured: true,
+    fullDescription: 'Join us for an exciting table tennis tournament! Compete against players of similar skill levels in this fast-paced event. Categories include singles and doubles for both juniors and adults.',
+    whoCanJoin: 'All ages welcome, Beginner to Advanced levels',
+    whatsIncluded: 'Equipment provided, refreshments, medals for winners',
+    registrationDeadline: 'January 15, 2025',
+    venue: 'Indoor Sports Hall',
+  },
+  3: {
+    image: Image_kids_in_sports,
+    heroImage: Image_kids_hero,
+    alt: 'Kids Sports Parties',
+    category: 'party',
+    featured: false,
+    fullDescription: 'Make your child\'s birthday unforgettable with our sports party package! Kids will enjoy a variety of fun sports activities including tennis, table tennis, and team games. Our experienced coaches ensure a safe and exciting experience.',
+    whoCanJoin: 'Kids aged 5-12 years',
+    whatsIncluded: 'All equipment, party coordinator, certificates for all participants',
+    registrationDeadline: 'Book at least 2 weeks in advance',
+    venue: 'Party Area',
+  },
+  4: {
+    image: Image_coaching,
+    heroImage: Image_coaching_hero,
+    alt: '1-on-1 Coaching',
+    category: 'coaching',
+    featured: false,
+    fullDescription: 'Take your game to the next level with personalized one-on-one coaching. Our Level 3 certified coaches will work with you to improve your technique, strategy, and mental game. Suitable for all ages and skill levels.',
+    whoCanJoin: 'All ages and skill levels',
+    whatsIncluded: 'Video analysis, personalized training plan, progress tracking',
+    registrationDeadline: 'Book 48 hours in advance',
+    venue: 'Training Courts',
+  },
+};
+
+// Fallback events if backend is unavailable
+const fallbackEvents: Event[] = [
   {
     id: 1,
     image: Image_tennis_court,
@@ -133,6 +189,49 @@ const events: Event[] = [
   },
 ];
 
+// Helper to determine category from event name
+const getCategoryFromName = (name: string): EventCategory => {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('tournament') || lowerName.includes('open') || lowerName.includes('championship')) {
+    return 'tournament';
+  }
+  if (lowerName.includes('party') || lowerName.includes('kids') || lowerName.includes('birthday')) {
+    return 'party';
+  }
+  if (lowerName.includes('coaching') || lowerName.includes('lesson') || lowerName.includes('private')) {
+    return 'coaching';
+  }
+  return 'tournament'; // default
+};
+
+// Helper to format date from backend
+const formatEventDate = (dateStr: string): string => {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+// Helper to format time from backend
+const formatEventTime = (timeStr: string): string => {
+  try {
+    // Handle HH:MM:SS format
+    const [hours, minutes] = timeStr.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  } catch {
+    return timeStr;
+  }
+};
+
 const categories: Array<{ id: EventCategory; label: string; icon: string }> = [
   { id: 'all', label: 'All Events', icon: '✨' },
   { id: 'tournament', label: 'Tournaments', icon: '🏆' },
@@ -154,6 +253,16 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
+  
+  // Payment unavailable reason - only set when backend returns an actual error
+  // Defaults to null (payments available) - we always try the real flow
+  const [paymentUnavailableReason, setPaymentUnavailableReason] = useState<string | null>(null);
+  
+  // Events state - fetched from backend (start empty, load from API)
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [eventsError, setEventsError] = useState<string | null>(null);
   
   // Google Calendar slot availability state (only for Tennis Open 2025)
   const [availableSlots, setAvailableSlots] = useState<Array<{ start: string; end: string; id: string }>>([]);
@@ -161,6 +270,152 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [slotsError, setSlotsError] = useState<string | null>(null);
   const [gapiLoaded, setGapiLoaded] = useState(false);
+
+  // Fetch events from backend
+  const loadEvents = useCallback(async () => {
+    setIsLoadingEvents(true);
+    setEventsError(null);
+    
+    try {
+      const backendEvents = await apiFetchEvents();
+      
+      // Transform backend events to frontend format
+      // Note: Backend already filters out inactive events for public access
+      const transformedEvents: Event[] = backendEvents.map((be) => {
+        const displayData = defaultEventDisplayData[be.id] || {};
+        const category = displayData.category || getCategoryFromName(be.name);
+        
+        // Determine images with fallback chain:
+        // 1. Backend image_url/hero_image_url (if set by admin)
+        // 2. Default display data (hardcoded for known events)
+        // 3. Default fallback images
+        const cardImage = be.image_url || displayData.image || Image_tennis_court;
+        const heroImage = be.hero_image_url || be.image_url || displayData.heroImage || Image_tennis_hero;
+        
+        return {
+          id: be.id,
+          title: be.name,
+          description: be.description || `Join us for ${be.name}!`,
+          date: formatEventDate(be.date),
+          time: formatEventTime(be.time),
+          location: be.location || 'AJH Sportscentre',
+          spots: be.available_spots,
+          price: `$${be.price}`,
+          // Use backend images if available, otherwise fall back to defaults
+          image: cardImage,
+          heroImage: heroImage,
+          alt: displayData.alt || be.name,
+          category: category,
+          featured: displayData.featured ?? false,
+          fullDescription: displayData.fullDescription || be.description,
+          whoCanJoin: displayData.whoCanJoin || 'All ages and skill levels',
+          entryFee: `$${be.price} per person`,
+          whatsIncluded: displayData.whatsIncluded || 'Equipment and refreshments',
+          registrationDeadline: displayData.registrationDeadline || 'Register in advance',
+          venue: displayData.venue || be.location || 'AJH Sportscentre',
+        };
+      });
+      
+      setEvents(transformedEvents);
+      console.log('✅ Loaded', transformedEvents.length, 'events from backend');
+      
+    } catch (error: any) {
+      console.error('Failed to load events:', error);
+      
+      // Check if this is a connection error (backend not running)
+      const isConnectionError = error.message?.includes('Failed to fetch') || 
+                                error.message?.includes('NetworkError') ||
+                                error.message?.includes('fetch');
+      
+      if (isConnectionError && import.meta.env.DEV) {
+        // In development only: use fallback data if backend is unreachable
+        console.warn('⚠️ Backend unreachable in dev mode, using fallback data');
+        setEventsError('Backend not available. Showing sample data.');
+        setEvents(fallbackEvents);
+      } else {
+        // In production or for other errors: show error state
+        setEventsError('Failed to load events. Please try again later.');
+        setEvents([]);
+      }
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  }, []);
+
+  // Load events on mount
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  // Handle Stripe payment return (success or cancel)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    const eventId = params.get('eventId');
+    
+    if (paymentStatus) {
+      console.log('💳 Payment return detected:', { paymentStatus, eventId });
+      
+      // Clean up URL by removing query params
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+      
+      // Clear any pending registration
+      sessionStorage.removeItem('pendingEventRegistration');
+      
+      // Reset all payment UI states
+      setSelectedEvent(null);
+      setShowPaymentConfirmation(false);
+      setPaymentError(null);
+      setPaymentUnavailableReason(null);
+      setIsProcessingPayment(false);
+      
+      if (paymentStatus === 'success') {
+        toast.success('🎉 Payment successful! Your booking is confirmed.');
+        // Refetch events to update available_spots
+        loadEvents();
+      } else if (paymentStatus === 'cancel') {
+        toast.info('Payment cancelled. You can try again when ready.');
+      }
+    }
+  }, []); // Run once on mount
+
+  // Handle pending event registration (user returned after login)
+  useEffect(() => {
+    // Only check after events are loaded and user is logged in
+    if (isLoadingEvents || events.length === 0) return;
+    if (!isUserLoggedIn()) return;
+
+    const pendingRegistration = sessionStorage.getItem('pendingEventRegistration');
+    if (pendingRegistration) {
+      try {
+        const pending = JSON.parse(pendingRegistration);
+        console.log('📋 Processing pending registration for event:', pending.eventName);
+        
+        // Find the event by ID
+        const event = events.find(e => e.id === pending.eventId);
+        if (event) {
+          // Clear the pending registration
+          sessionStorage.removeItem('pendingEventRegistration');
+          
+          // Auto-select the event and show payment confirmation step
+          setSelectedEvent(event);
+          setShowPaymentConfirmation(true); // Go straight to payment confirmation
+          toast.success(`Welcome back! Continue your registration for "${event.title}"`);
+          
+          // Scroll to top to show the event detail
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          // Event not found (maybe deleted or inactive)
+          sessionStorage.removeItem('pendingEventRegistration');
+          toast.error(`Sorry, "${pending.eventName}" is no longer available.`);
+        }
+      } catch (e) {
+        console.error('Failed to process pending registration:', e);
+        sessionStorage.removeItem('pendingEventRegistration');
+      }
+    }
+  }, [events, isLoadingEvents]);
 
   const handleNavClick = (page: Page) => {
     // Always scroll to top first
@@ -179,6 +434,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         contact: '/contact',
         signin: '/signin',
         signup: '/signup',
+        payment: '/payment',
       };
       const path = pathMap[page] || '/';
       window.history.pushState({ page }, '', path);
@@ -209,6 +465,11 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
     setSelectedEvent(null);
     setSelectedSlot(null);
     setAvailableSlots([]);
+    // Reset payment states
+    setShowPaymentConfirmation(false);
+    setPaymentError(null);
+    setIsProcessingPayment(false);
+    setPaymentUnavailableReason(null); // Reset - user can try again
   };
 
   // Initialize Google API Client Library
@@ -401,47 +662,142 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   const handleRegisterNow = async () => {
     if (!selectedEvent) return;
 
+    // Step 1: Check if user is logged in
+    if (!isUserLoggedIn()) {
+      // Store the event details so we can redirect back after login
+      sessionStorage.setItem('pendingEventRegistration', JSON.stringify({
+        eventId: selectedEvent.id,
+        eventName: selectedEvent.title,
+        price: selectedEvent.price
+      }));
+      toast.info('Please log in or sign up to register for this event');
+      handleNavClick('signin');
+      return;
+    }
+
+    // Step 2: User is logged in - show payment confirmation
+    setShowPaymentConfirmation(true);
+    toast.success('You are logged in! Proceeding to payment...');
+  };
+
+  // Handle proceeding to payment after confirmation
+  const handleProceedToPayment = async () => {
+    if (!selectedEvent) return;
+
     setIsProcessingPayment(true);
     setPaymentError(null);
+    setPaymentUnavailableReason(null);
 
     try {
       // Parse the price from the event
-      // Handle formats like "$30", "$35", "$25/child", "From $60/hr"
       const priceMatch = selectedEvent.price.match(/\$(\d+(?:\.\d+)?)/);
       if (!priceMatch) {
         throw new Error('Invalid price format');
       }
       const amount = parseFloat(priceMatch[1]);
+      const user = getCurrentUser();
 
-      // Create checkout session and redirect to Stripe
+      // Create Stripe checkout session and redirect to payment
       const response = await createCheckoutSession({
         eventId: selectedEvent.id.toString(),
         eventName: selectedEvent.title,
         amount: amount,
         currency: 'aud',
-        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        customerEmail: user?.email,
+        successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&event_id=${selectedEvent.id}`,
         cancelUrl: `${window.location.origin}/events?canceled=true`,
       });
 
       if (response.url) {
-        // Redirect directly to Stripe Checkout
+        // Redirect to Stripe Checkout for payment
         window.location.href = response.url;
       } else {
         throw new Error('No checkout URL received');
       }
+      
     } catch (err: any) {
-      console.error('Payment error:', err);
-      let errorMessage = 'Failed to process payment. Please try again.';
-      if (err.message) {
-        if (err.message.includes('Failed to fetch') || err.message.includes('Cannot connect')) {
-          errorMessage = 'Cannot connect to payment server. Please check if the backend is running on port 5001.';
-        } else {
-          errorMessage = err.message;
-        }
+      console.error('Payment error:', { code: err.code, status: err.status, message: err.message });
+      
+      const errorCode = err.code || '';
+      const errorStatus = err.status || 0;
+      const errorMessage = err.message || 'An error occurred';
+      
+      // Handle errors based on structured error codes
+      switch (errorCode) {
+        case PAYMENT_ERROR_CODES.AUTH_REQUIRED:
+          toast.error('Your session has expired. Please log in again.');
+          sessionStorage.setItem('pendingEventRegistration', JSON.stringify({
+            eventId: selectedEvent.id,
+            eventName: selectedEvent.title,
+            price: selectedEvent.price
+          }));
+          handleNavClick('signin');
+          return;
+        
+        case PAYMENT_ERROR_CODES.ALREADY_REGISTERED:
+          setPaymentError('You have already registered for this event.');
+          setIsProcessingPayment(false);
+          return;
+        
+        case PAYMENT_ERROR_CODES.EVENT_FULL:
+          setPaymentError('Sorry, this event is fully booked. Please check other events.');
+          setIsProcessingPayment(false);
+          return;
+        
+        case PAYMENT_ERROR_CODES.EVENT_UNAVAILABLE:
+        case PAYMENT_ERROR_CODES.EVENT_NOT_FOUND:
+          setPaymentError('This event is no longer available for registration.');
+          setIsProcessingPayment(false);
+          return;
+        
+        case PAYMENT_ERROR_CODES.STRIPE_CONFIG_MISSING:
+          // Stripe not configured - show specific message
+          setPaymentUnavailableReason('Payment system is temporarily unavailable. Please contact us to register.');
+          setPaymentError(null);
+          setIsProcessingPayment(false);
+          return;
+        
+        case PAYMENT_ERROR_CODES.STRIPE_ERROR:
+          // Stripe API error - show payment processing error
+          setPaymentUnavailableReason('Payment processing is temporarily unavailable. Please try again later.');
+          setPaymentError(null);
+          setIsProcessingPayment(false);
+          return;
+        
+        default:
+          // Handle by status code if no error code
+          if (errorStatus === 401) {
+            toast.error('Your session has expired. Please log in again.');
+            sessionStorage.setItem('pendingEventRegistration', JSON.stringify({
+              eventId: selectedEvent.id,
+              eventName: selectedEvent.title,
+              price: selectedEvent.price
+            }));
+            handleNavClick('signin');
+            return;
+          }
+          
+          // Connection errors
+          if (errorMessage.includes('Failed to fetch') || errorMessage.includes('Cannot connect')) {
+            setPaymentUnavailableReason('Unable to connect to payment server. Please check your connection and try again.');
+            setPaymentError(null);
+            setIsProcessingPayment(false);
+            return;
+          }
+          
+          // Generic server error
+          setPaymentError('Something went wrong. Please try again or contact us.');
+          setIsProcessingPayment(false);
       }
-      setPaymentError(errorMessage);
-      setIsProcessingPayment(false);
     }
+  };
+
+  // Cancel payment confirmation
+  const handleCancelPayment = () => {
+    setShowPaymentConfirmation(false);
+    setPaymentError(null);
+    setIsProcessingPayment(false);
+    setPaymentUnavailableReason(null); // Reset - user can try again
   };
 
   const filteredEvents =
@@ -536,7 +892,43 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         </p>
       </div>
       
-      {/* Mobile Menu Button */}
+      {/* Desktop Auth Buttons - Right */}
+      <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
+        <button 
+          onClick={() => handleNavClick('signin')} 
+          className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+        >
+          Log In
+        </button>
+        <div 
+          className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center"
+          onClick={() => handleNavClick('signup')}
+        >
+          <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
+            Sign Up
+          </span>
+        </div>
+      </div>
+
+      {/* Tablet/Mobile Auth Buttons */}
+      <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
+        <button 
+          onClick={() => handleNavClick('signin')} 
+          className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+        >
+          Log In
+        </button>
+        <div 
+          className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+          onClick={() => handleNavClick('signup')}
+        >
+          <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white">
+            Sign Up
+          </span>
+        </div>
+      </div>
+
+      {/* Mobile Menu Button and Auth */}
       <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -547,6 +939,20 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
           <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
         </button>
+        <button 
+          onClick={() => handleNavClick('signin')} 
+          className="font-semibold text-xs text-white cursor-pointer"
+        >
+          Log In
+        </button>
+        <div 
+          className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+          onClick={() => handleNavClick('signup')}
+        >
+          <span className="font-semibold text-xs text-white">
+            Sign Up
+          </span>
+        </div>
       </div>
       
       {/* Mobile Menu Dropdown */}
@@ -954,7 +1360,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         <Header />
         
         {/* Hero Image Section */}
-        <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative overflow-hidden">
+        <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative overflow-hidden bg-gradient-to-br from-[#030213] to-[#1a1a2e]">
           <img 
             src={selectedEvent.heroImage} 
             alt={selectedEvent.alt}
@@ -962,7 +1368,13 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
             loading="eager"
             decoding="async"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = selectedEvent.image;
+              // Fallback chain: heroImage -> cardImage -> default
+              const target = e.target as HTMLImageElement;
+              if (target.src !== selectedEvent.image && selectedEvent.image !== selectedEvent.heroImage) {
+                target.src = selectedEvent.image;
+              } else {
+                target.src = Image_tennis_hero;
+              }
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-black/30" />
@@ -1020,6 +1432,40 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
                   <p className="font-['Inter:Regular',sans-serif] text-xs md:text-sm text-[#666]">{selectedEvent.venue}</p>
                 </div>
               </div>
+              
+              {/* Available Spots */}
+              {selectedEvent.spots > 0 && (
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 md:w-11 md:h-11 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    selectedEvent.spots <= 5 ? 'bg-red-50' : selectedEvent.spots <= 10 ? 'bg-orange-50' : 'bg-green-50'
+                  }`}>
+                    <span className="text-lg md:text-xl">🎟️</span>
+                  </div>
+                  <div>
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-[#888] uppercase tracking-wide mb-1">Availability</p>
+                    <p className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base ${
+                      selectedEvent.spots <= 5 ? 'text-red-600' : selectedEvent.spots <= 10 ? 'text-orange-600' : 'text-green-600'
+                    }`}>
+                      {selectedEvent.spots} spots remaining
+                    </p>
+                    <p className="font-['Inter:Regular',sans-serif] text-xs md:text-sm text-[#666]">
+                      {selectedEvent.spots <= 5 ? 'Limited availability - Register soon!' : 'Spaces available'}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {selectedEvent.spots === 0 && (
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 md:w-11 md:h-11 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg md:text-xl">❌</span>
+                  </div>
+                  <div>
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-[#888] uppercase tracking-wide mb-1">Availability</p>
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base text-red-600">Fully Booked</p>
+                    <p className="font-['Inter:Regular',sans-serif] text-xs md:text-sm text-[#666]">Join waitlist for cancellations</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1044,8 +1490,8 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
               </p>
             </div>
             
-            {/* Slot Selection - Only for Tennis Open 2025 */}
-            {selectedEvent.title === 'Tennis Open 2025' && (
+            {/* Slot Selection - Only for Tennis Open 2025 (disabled - Google Calendar not configured) */}
+            {false && selectedEvent.title === 'Tennis Open 2025' && (
               <div className="mb-6 md:mb-8">
                 <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-base md:text-lg text-black mb-4">
                   Select Available Time Slot
@@ -1122,16 +1568,116 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
             {paymentError && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-600">{paymentError}</p>
+                <button
+                  onClick={handleCancelPayment}
+                  className="mt-2 text-sm text-red-700 underline hover:no-underline"
+                >
+                  Try again
+                </button>
               </div>
             )}
             
-            <button
-              onClick={handleRegisterNow}
-              disabled={isProcessingPayment || (selectedEvent.title === 'Tennis Open 2025' && !selectedSlot)}
-              className="bg-black text-white font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg hover:bg-[#333] transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isProcessingPayment ? 'Processing...' : selectedEvent.title === 'Tennis Open 2025' && !selectedSlot ? 'Please Select a Time Slot' : 'Register Now'}
-            </button>
+            {/* Login Notice */}
+            {!isUserLoggedIn() && !showPaymentConfirmation && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <span className="font-semibold">👤 Not logged in:</span> You'll need to log in or create an account to register for this event.
+                </p>
+              </div>
+            )}
+
+            {/* Payment Confirmation Step */}
+            {showPaymentConfirmation && isUserLoggedIn() && (
+              <div className="mb-4">
+                {/* Payment Unavailable Message */}
+                {paymentUnavailableReason ? (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">⚠️</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-red-800 mb-1">Payments Temporarily Unavailable</p>
+                        <p className="text-sm text-red-700 mb-3">
+                          {paymentUnavailableReason}
+                        </p>
+                        <div className="bg-white p-3 rounded border border-red-100 mb-3">
+                          <p className="text-sm text-gray-700">
+                            <strong>Event:</strong> {selectedEvent.title}<br />
+                            <strong>Price:</strong> {selectedEvent.price}<br />
+                            <strong>To register, contact us:</strong><br />
+                            📧 <a href="mailto:ajh@ajhsports.com.au" className="text-blue-600 hover:underline">ajh@ajhsports.com.au</a><br />
+                            📞 0447827788
+                          </p>
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            onClick={handleProceedToPayment}
+                            className="bg-gray-600 text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                          >
+                            Try Again
+                          </button>
+                          <button
+                            onClick={handleCancelPayment}
+                            className="bg-white text-gray-700 font-semibold text-sm px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                          >
+                            Back to Event Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Payment Available - Show Proceed Button */
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">✅</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-800 mb-1">Ready to complete registration!</p>
+                        <p className="text-sm text-green-700 mb-3">
+                          You're about to register for <strong>{selectedEvent.title}</strong> for <strong>{selectedEvent.price}</strong>.
+                        </p>
+                        <div className="flex gap-3 flex-wrap">
+                          <button
+                            onClick={handleProceedToPayment}
+                            disabled={isProcessingPayment}
+                            className="bg-green-600 text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isProcessingPayment ? 'Redirecting to payment...' : 'Proceed to Payment'}
+                          </button>
+                          <button
+                            onClick={handleCancelPayment}
+                            disabled={isProcessingPayment}
+                            className="bg-white text-gray-700 font-semibold text-sm px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Register Now Button (only shown when not in confirmation step) */}
+            {!showPaymentConfirmation && (
+              <button
+                onClick={handleRegisterNow}
+                disabled={isProcessingPayment || selectedEvent.spots === 0}
+                className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed ${
+                  selectedEvent.spots === 0 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-black text-white hover:bg-[#333]'
+                }`}
+              >
+                {isProcessingPayment 
+                  ? 'Processing...' 
+                  : selectedEvent.spots === 0 
+                    ? 'Event Fully Booked' 
+                    : isUserLoggedIn() 
+                      ? 'Register Now' 
+                      : 'Log In to Register'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -1235,7 +1781,39 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
             ))}
           </div>
           
+          {/* Loading State */}
+          {isLoadingEvents && (
+            <div className="flex justify-center items-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                <p className="font-['Inter:Medium',sans-serif] text-sm text-[#666]">Loading events...</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Error State */}
+          {eventsError && !isLoadingEvents && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+              <p className="text-sm text-yellow-800">{eventsError}</p>
+            </div>
+          )}
+          
           {/* Events Grid */}
+          {!isLoadingEvents && filteredEvents.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📅</div>
+              <h3 className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xl text-black mb-2">
+                No Events Available
+              </h3>
+              <p className="font-['Inter:Regular',sans-serif] text-sm text-[#666]">
+                {selectedCategory === 'all' 
+                  ? 'Check back soon for upcoming events!'
+                  : `No ${selectedCategory} events at the moment. Try a different category.`}
+              </p>
+            </div>
+          )}
+          
+          {!isLoadingEvents && filteredEvents.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
             {filteredEvents.map((event) => (
               <div
@@ -1246,13 +1824,17 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
                 onClick={() => handleViewDetails(event)}
               >
                 {/* Image */}
-                <div className="relative h-[150px] md:h-[180px] overflow-hidden">
+                <div className="relative h-[150px] md:h-[180px] overflow-hidden bg-gradient-to-br from-[#030213] to-[#1a1a2e]">
                   <img
                     src={event.image}
                     alt={event.alt}
                     className={`w-full h-full object-cover transition-transform duration-300 ${
                       hoveredEvent === event.id ? 'scale-110' : 'scale-100'
                     }`}
+                    onError={(e) => {
+                      // Fallback to default image on error
+                      e.currentTarget.src = Image_tennis_court;
+                    }}
                   />
                   {event.featured && (
                     <span className="absolute top-2 left-2 bg-black text-white font-['Inter:Bold',sans-serif] text-xs font-bold px-2 py-1 rounded uppercase">
@@ -1271,11 +1853,25 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
                     {event.description}
                   </p>
                   
-                  <div className="flex items-center gap-2 text-xs text-[#888] mb-3">
+                  <div className="flex items-center gap-2 text-xs text-[#888] mb-2">
                     <span>📅 {event.date}</span>
                     <span>•</span>
                     <span>📍 {event.location}</span>
                   </div>
+                  
+                  {/* Spots Remaining */}
+                  {event.spots > 0 && (
+                    <div className="flex items-center gap-2 text-xs mb-3">
+                      <span className={`font-semibold ${event.spots <= 5 ? 'text-red-500' : event.spots <= 10 ? 'text-orange-500' : 'text-green-600'}`}>
+                        🎟️ {event.spots} spots remaining
+                      </span>
+                    </div>
+                  )}
+                  {event.spots === 0 && (
+                    <div className="flex items-center gap-2 text-xs mb-3">
+                      <span className="font-semibold text-red-500">❌ Fully Booked</span>
+                    </div>
+                  )}
                   
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <span className="font-['Inter:Bold',sans-serif] font-bold text-sm md:text-base text-black">{event.price}</span>
@@ -1298,6 +1894,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
 
