@@ -3,16 +3,8 @@
  * Handles communication with the backend payment API
  */
 
-// Get API URL from environment or use default
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
-
-const API_URL = getApiUrl();
+// Get API URL from centralized config
+import { API_URL } from './api';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {

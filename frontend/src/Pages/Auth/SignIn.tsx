@@ -16,15 +16,7 @@ const LOGO_SRC = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 const AJH_SPORTS_IMAGE = '/images/ajhsports.png';
 
 // Get API URL
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
-
-const API_URL = getApiUrl();
+import { API_URL } from '../../services/api';
 
 export function SignIn({ onNavigate }: SignInProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,12 +30,27 @@ export function SignIn({ onNavigate }: SignInProps) {
     setLoading(true);
 
     try {
+      // Normalize email (trim and lowercase) before sending
+      const normalizedEmail = email.trim().toLowerCase();
+      
+      if (!normalizedEmail) {
+        toast.error('Please enter your email address');
+        setLoading(false);
+        return;
+      }
+
+      if (!password) {
+        toast.error('Please enter your password');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
       // Try to parse JSON, but handle errors gracefully
@@ -61,12 +68,14 @@ export function SignIn({ onNavigate }: SignInProps) {
         throw new Error(errorMessage);
       }
 
-      // Debug: Log the response to see what we're getting
-      console.log('🔍 Login response:', data);
-      console.log('🔍 User object:', data.user);
-      console.log('🔍 User role:', data.user?.role);
-      console.log('🔍 Role type:', typeof data.user?.role);
-      console.log('🔍 Role === "admin":', data.user?.role === 'admin');
+      // Validate response data
+      if (!data.token) {
+        throw new Error('No token received from server');
+      }
+
+      if (!data.user) {
+        throw new Error('No user data received from server');
+      }
 
       // Store token and user info
       localStorage.setItem('token', data.token);
@@ -90,18 +99,20 @@ export function SignIn({ onNavigate }: SignInProps) {
         }
       }
 
-      // Check if user is admin and redirect accordingly
-      // Handle both string comparison and case-insensitive check
-      const userRole = data.user?.role?.toLowerCase?.() || data.user?.role || '';
+      // Check if user is admin and redirect accordingly (case-insensitive)
+      const userRole = data.user?.role ? String(data.user.role).toLowerCase() : '';
       console.log('🔍 Normalized role:', userRole);
       
-      if (userRole === 'admin') {
-        console.log('✅ Redirecting to admin portal');
-        onNavigate('admin');
-      } else {
-        console.log('✅ Redirecting to player profile (role:', userRole, ')');
-        onNavigate('player');
-      }
+      // Small delay to ensure localStorage is saved before navigation
+      setTimeout(() => {
+        if (userRole === 'admin') {
+          console.log('✅ Redirecting to admin portal');
+          onNavigate('admin');
+        } else {
+          console.log('✅ Redirecting to player profile (role:', userRole, ')');
+          onNavigate('player');
+        }
+      }, 100);
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Failed to log in. Please check your credentials.');
@@ -118,7 +129,7 @@ export function SignIn({ onNavigate }: SignInProps) {
   return (
     <div className="min-h-screen bg-[#f7f7f7] flex flex-col">
       {/* Custom Header for Sign In */}
-      <Header onNavigate={onNavigate} />
+      <Header onNavigate={onNavigate} currentPage="signin" />
       <div className="flex flex-col lg:flex-row flex-1">
       {/* Left Side - Sign In Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-br from-white to-gray-50">
@@ -213,6 +224,11 @@ export function SignIn({ onNavigate }: SignInProps) {
               type="button"
               variant="outline"
               className="w-full bg-white border border-[#ddd] text-black hover:bg-[#f5f5f5] h-12"
+              onClick={() => {
+                // Redirect to backend OAuth endpoint
+                const backendUrl = API_URL.replace('/api', '');
+                window.location.href = `${backendUrl}/auth/google`;
+              }}
             >
               <span className="text-xl mr-3">G</span>
               Continue with Google
@@ -221,6 +237,11 @@ export function SignIn({ onNavigate }: SignInProps) {
               type="button"
               variant="outline"
               className="w-full bg-white border border-[#ddd] text-black hover:bg-[#f5f5f5] h-12"
+              onClick={() => {
+                // Redirect to backend OAuth endpoint
+                const backendUrl = API_URL.replace('/api', '');
+                window.location.href = `${backendUrl}/auth/facebook`;
+              }}
             >
               <span className="text-xl mr-3">f</span>
               Continue with Facebook

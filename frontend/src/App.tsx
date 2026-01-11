@@ -12,9 +12,10 @@ import { AuthWrapper } from './components/AuthWrapper';
 import { DashboardWrapper } from './components/Dashboardwrapper';
 import { PlayerWrapper } from './components/Playerwrapper';
 import { AdminWrapper } from './components/admin/AdminWrapper';
+import { OAuthSuccess } from './Pages/Auth/OAuthSuccess';
 import { Toaster } from './components/ui/sonner';
 
-type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
+type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'oauthSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -35,6 +36,7 @@ export default function App() {
     '/player': 'player',
     '/payment': 'payment',
     '/paymentSuccess': 'paymentSuccess',
+    '/oauth-success': 'oauthSuccess',
     '/admin': 'admin',
     '/admin/events': 'adminEvents',
     '/admin/coaches': 'adminCoaches',
@@ -57,6 +59,7 @@ export default function App() {
     player: '/player',
     payment: '/payment',
     paymentSuccess: '/paymentSuccess',
+    oauthSuccess: '/oauth-success',
     admin: '/admin',
     adminEvents: '/admin/events',
     adminCoaches: '/admin/coaches',
@@ -108,6 +111,9 @@ export default function App() {
       window.history.pushState({ page }, '', finalPath);
     }
     
+    // Force a small re-render to ensure state updates
+    console.log('Navigating to:', page, 'Path:', path);
+    
     // Ensure scroll after a brief delay to handle any async rendering
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -143,6 +149,8 @@ export default function App() {
         return <PaymentWrapper onNavigate={handleNavigate} />;
       case 'paymentSuccess':
         return <PaymentSuccessWrapper onNavigate={handleNavigate} />;
+      case 'oauthSuccess':
+        return <OAuthSuccess onNavigate={handleNavigate} />;
       case 'admin':
       case 'adminEvents':
       case 'adminCoaches':

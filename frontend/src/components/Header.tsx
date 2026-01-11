@@ -5,11 +5,12 @@ type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 's
 interface HeaderProps {
   onNavigate: (page: Page) => void;
   showUserInfo?: boolean;
+  currentPage?: Page;
 }
 
 const LOGO_SRC = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 
-export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
+export function Header({ onNavigate, showUserInfo = false, currentPage }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (page: Page) => {
@@ -107,15 +108,15 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
           <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
             <button 
               onClick={() => handleNavClick('signin')} 
-              className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+              className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] cursor-pointer transition-colors ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
             >
               Log In
             </button>
             <div 
-              className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center"
+              className={`h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer transition-colors flex items-center justify-center ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
               onClick={() => handleNavClick('signup')}
             >
-              <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
+              <span className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}>
                 Sign Up
               </span>
             </div>
@@ -127,17 +128,17 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
           <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
             <button 
               onClick={() => handleNavClick('signin')} 
-              className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+              className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs cursor-pointer transition-colors ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
             >
               Log In
             </button>
             <div 
-              className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+              className={`h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer transition-colors ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
               onClick={() => handleNavClick('signup')}
             >
               <button 
                 onClick={() => handleNavClick('signup')} 
-                className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white"
+                className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}
               >
                 Sign Up
               </button>
@@ -160,12 +161,12 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
             <>
               <button 
                 onClick={() => handleNavClick('signin')} 
-                className="font-semibold text-xs text-white cursor-pointer"
+                className={`font-semibold text-xs cursor-pointer ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white'}`}
               >
                 Log In
               </button>
               <div 
-                className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+                className={`h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer transition-colors ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
                 onClick={() => handleNavClick('signup')}
               >
                 <button 
