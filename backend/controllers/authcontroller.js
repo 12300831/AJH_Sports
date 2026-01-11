@@ -2,35 +2,148 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 
 // ---------- SIGNUP ----------
 export const signup = async (req, res) => {
   const { name, email, phone, location, password } = req.body;
 
+  // Validate JWT_SECRET before processing
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set in environment variables');
+    return res.status(500).json({ 
+      message: "Server configuration error: JWT_SECRET is missing"
+    });
+  }
+
   try {
-    // Check if user already exists
+    // Validate required fields
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    if (!email || !email.trim()) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password is required and must be at least 6 characters" });
+    }
+
+    // Trim and normalize email for consistent storage
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if user already exists (case-insensitive)
     const [exists] = await pool.query(
-      "SELECT * FROM users WHERE email = ?",
-      [email]
+      "SELECT * FROM users WHERE LOWER(TRIM(email)) = ?",
+      [normalizedEmail]
     );
 
     if (exists.length > 0) {
       return res.status(400).json({ message: "Email already exists" });
     }
-    // Hash password
-    const hashed = await bcrypt.hash(password, 10);
+
+    // Generate username from email (before @)
+    const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
     
-    // Insert new user
-    await pool.query(
-      "INSERT INTO users (name, email, phone, location, password) VALUES (?, ?, ?, ?, ?)",
-      [name, email, phone, location, hashed]
+    // Check if username exists, if so append random number
+    let finalUsername = username;
+    let attempts = 0;
+    while (attempts < 10) {
+      const [usernameCheck] = await pool.query(
+        "SELECT id FROM users WHERE username = ?",
+        [finalUsername]
+      );
+      if (usernameCheck.length === 0) break;
+      finalUsername = email.split('@')[0] + Math.floor(Math.random() * 10000);
+      attempts++;
+    }
+
+    // Hash password using bcrypt
+    const passwordHash = await bcrypt.hash(password, 10);
+    
+    // Generate UUID
+    const uuid = uuidv4();
+    
+    // Insert new user with all required fields
+    // Default role is 'player', default status is 'active'
+    const [result] = await pool.query(
+      `INSERT INTO users (
+        uuid, name, fullName, email, username, phone, location, password, 
+        role, status, joinedDate, lastActive
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [
+        uuid,
+        name.trim(),
+        name.trim(), // fullName same as name initially
+        normalizedEmail, // Store normalized email
+        finalUsername,
+        phone ? phone.trim() : null,
+        location ? location.trim() : null,
+        passwordHash, // Hashed password
+        'player', // Default role is 'player'
+        'active', // Default status is 'active'
+      ]
     );
 
-    res.json({ message: "Signup successful" });
+    // Fetch the created user to return in response
+    const [newUserRows] = await pool.query(
+      `SELECT id, uuid, name, fullName, email, username, phone, location, 
+       role, status, joinedDate, lastActive, profileImage, created_at 
+       FROM users WHERE id = ?`,
+      [result.insertId]
+    );
+
+    if (newUserRows.length === 0) {
+      return res.status(500).json({ message: "Failed to create user" });
+    }
+
+    const newUser = newUserRows[0];
+
+    // Normalize role and status (ensure lowercase for consistency)
+    const userRole = (newUser.role || 'player').toLowerCase();
+    const userStatus = (newUser.status || 'active').toLowerCase();
+
+    // Generate JWT token with user info
+    const token = jwt.sign(
+      { 
+        id: newUser.id, 
+        email: newUser.email,
+        role: userRole,
+        status: userStatus
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Return token and user object
+    res.json({ 
+      message: "Signup successful",
+      token,
+      user: {
+        id: newUser.id,
+        uuid: newUser.uuid,
+        name: newUser.name,
+        fullName: newUser.fullName || newUser.name,
+        email: newUser.email,
+        username: newUser.username,
+        phone: newUser.phone || null,
+        location: newUser.location || null,
+        role: userRole,
+        status: userStatus,
+        joinedDate: newUser.joinedDate || newUser.created_at,
+        lastActive: newUser.lastActive || new Date().toISOString(),
+        profileImage: newUser.profileImage || null,
+      }
+    });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Signup error:", err);
+    res.status(500).json({ 
+      message: "Server error",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 };
 
@@ -47,58 +160,89 @@ export const login = async (req, res) => {
   }
 
   try {
+    // Trim and lowercase email for case-insensitive matching
+    const normalizedEmail = email ? email.trim().toLowerCase() : '';
+    
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
     // Explicitly select all columns including role
+    // Use LOWER() for case-insensitive email matching
     const [rows] = await pool.query(
-      "SELECT id, name, email, phone, location, password, role, created_at, updated_at FROM users WHERE email = ?",
-      [email]
+      `SELECT id, uuid, name, fullName, email, username, phone, location, password, 
+       role, status, joinedDate, lastActive, profileImage, created_at, updated_at 
+       FROM users WHERE LOWER(TRIM(email)) = ?`,
+      [normalizedEmail]
     );
 
     if (rows.length === 0) {
+      console.log(`Login attempt with email: "${email}" (normalized: "${normalizedEmail}")`);
       return res.status(400).json({ message: "Email not found" });
     }
 
     const user = rows[0];
 
-    // Debug: Log the raw user object from DB
-    console.log('Login - Raw user from DB:', JSON.stringify(user, null, 2));
-    console.log('Login - User role value:', user.role);
-    console.log('Login - User role type:', typeof user.role);
-
+    // Check password BEFORE updating lastActive (security: only update on successful login)
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(400).json({ message: "Incorrect password" });
+    }
 
-    // create token
+    // Update lastActive timestamp ONLY after successful password verification
+    await pool.query(
+      "UPDATE users SET lastActive = NOW() WHERE id = ?",
+      [user.id]
+    );
+
+    // Normalize role value (handle case variations)
+    // Security: Normalize to prevent case-sensitivity bugs
+    // Keep lowercase for consistency with signup ('player', 'coach', 'admin')
+    let userRole = user.role;
+    if (!userRole || userRole === null || userRole === undefined || userRole === '') {
+      userRole = 'player';
+    } else {
+      // Normalize to lowercase for consistency
+      userRole = String(userRole).toLowerCase();
+    }
+
+    // Normalize status value (keep lowercase for consistency)
+    let userStatus = user.status || 'active';
+    if (userStatus) {
+      userStatus = String(userStatus).toLowerCase();
+    }
+
+    // Create token with role and status for better security
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id, 
+        email: user.email,
+        role: userRole,
+        status: userStatus
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
-
-    // Ensure role is set - explicitly check for null/undefined/empty string
-    let userRole = user.role;
-    if (!userRole || userRole === null || userRole === undefined || userRole === '') {
-      userRole = 'user';
-    }
-    console.log('Login - Final user role:', userRole);
-    console.log('Login - User role after processing:', typeof userRole, userRole);
 
     const response = {
       message: "Login success",
       token,
       user: {
         id: user.id,
-        name: user.name,
+        uuid: user.uuid,
+        name: user.name || user.fullName,
+        fullName: user.fullName || user.name,
         email: user.email,
+        username: user.username,
         phone: user.phone || null,
         location: user.location || null,
-        role: String(userRole), // Explicitly convert to string
+        role: userRole, // Normalized role
+        status: userStatus, // Normalized status
+        joinedDate: user.joinedDate || user.created_at,
+        lastActive: new Date().toISOString(),
+        profileImage: user.profileImage || null,
       },
     };
-
-    console.log('Login - Response being sent:');
-    console.log(JSON.stringify(response, null, 2));
-    console.log('Login - Response user.role specifically:', response.user.role);
     
     return res.json(response);
 
@@ -132,9 +276,25 @@ export const googleCallback = async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
     }
 
-    // Create JWT token
+    // Normalize role and status (same as login)
+    let userRole = user.role || 'User';
+    if (userRole) {
+      userRole = String(userRole).charAt(0).toUpperCase() + String(userRole).slice(1).toLowerCase();
+    }
+
+    let userStatus = user.status || 'Active';
+    if (userStatus) {
+      userStatus = String(userStatus).charAt(0).toUpperCase() + String(userStatus).slice(1).toLowerCase();
+    }
+
+    // Create JWT token with role and status (consistent with login)
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id, 
+        email: user.email,
+        role: userRole,
+        status: userStatus
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -158,9 +318,25 @@ export const facebookCallback = async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5173"}/signin?error=oauth_failed`);
     }
 
-    // Create JWT token
+    // Normalize role and status (same as login)
+    let userRole = user.role || 'User';
+    if (userRole) {
+      userRole = String(userRole).charAt(0).toUpperCase() + String(userRole).slice(1).toLowerCase();
+    }
+
+    let userStatus = user.status || 'Active';
+    if (userStatus) {
+      userStatus = String(userStatus).charAt(0).toUpperCase() + String(userStatus).slice(1).toLowerCase();
+    }
+
+    // Create JWT token with role and status (consistent with login)
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      { 
+        id: user.id, 
+        email: user.email,
+        role: userRole,
+        status: userStatus
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );

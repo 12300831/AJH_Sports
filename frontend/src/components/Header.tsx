@@ -5,11 +5,12 @@ type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 's
 interface HeaderProps {
   onNavigate: (page: Page) => void;
   showUserInfo?: boolean;
+  currentPage?: Page;
 }
 
 const LOGO_SRC = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 
-export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
+export function Header({ onNavigate, showUserInfo = false, currentPage }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (page: Page) => {
@@ -106,18 +107,18 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
         {!showUserInfo && (
           <>
             <div 
-              className="absolute bg-[#878787] h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer hover:bg-[#6d6d6d] transition-colors hidden lg:block"
+              className={`absolute h-[50px] left-[1327.25px] lg:left-[1327.25px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[46px] w-[64px] cursor-pointer transition-colors hidden lg:block ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
               onClick={() => handleNavClick('signup')}
             />
             <button 
               onClick={() => handleNavClick('signup')} 
-              className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] text-white top-[65px] w-[46px] cursor-pointer hidden lg:block"
+              className={`absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1336px] lg:left-[1336px] not-italic text-[12px] top-[65px] w-[46px] cursor-pointer hidden lg:block ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}
             >
               Sign Up
             </button>
             <button 
               onClick={() => handleNavClick('signin')} 
-              className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] text-white top-[63px] w-[36px] cursor-pointer hover:text-[#e0cb23] transition-colors hidden lg:block"
+              className={`absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[19px] leading-[normal] left-[1267px] lg:left-[1267px] not-italic text-[12px] top-[63px] w-[36px] cursor-pointer transition-colors hidden lg:block ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
             >
               Log In
             </button>
@@ -129,17 +130,17 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
           <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
             <button 
               onClick={() => handleNavClick('signin')} 
-              className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+              className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs cursor-pointer transition-colors ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white hover:text-[#e0cb23]'}`}
             >
               Log In
             </button>
             <div 
-              className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+              className={`h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer transition-colors ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
               onClick={() => handleNavClick('signup')}
             >
               <button 
                 onClick={() => handleNavClick('signup')} 
-                className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white"
+                className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs ${currentPage === 'signup' ? 'text-black' : 'text-white'}`}
               >
                 Sign Up
               </button>
@@ -162,12 +163,12 @@ export function Header({ onNavigate, showUserInfo = false }: HeaderProps) {
             <>
               <button 
                 onClick={() => handleNavClick('signin')} 
-                className="font-semibold text-xs text-white cursor-pointer"
+                className={`font-semibold text-xs cursor-pointer ${currentPage === 'signin' ? 'text-[#e0cb23]' : 'text-white'}`}
               >
                 Log In
               </button>
               <div 
-                className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
+                className={`h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer transition-colors ${currentPage === 'signup' ? 'bg-[#e0cb23]' : 'bg-[#878787] hover:bg-[#6d6d6d]'}`}
                 onClick={() => handleNavClick('signup')}
               >
                 <button 

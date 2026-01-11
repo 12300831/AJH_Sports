@@ -3,16 +3,8 @@
  * Handles communication with the backend admin API
  */
 
-// Get API URL from environment or use default
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
-
-const API_URL = getApiUrl();
+// Get API URL from centralized config
+import { API_URL } from './api';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {
@@ -191,20 +183,132 @@ export const deleteCoach = async (id: number): Promise<void> => {
 // ==================== USERS ====================
 export interface User {
   id: number;
+  uuid?: string;
   name: string;
+  fullName: string;
   email: string;
+  username: string;
   phone: string | null;
   location: string | null;
-  role: 'user' | 'admin';
+  role: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  status: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
+  joinedDate: string;
+  lastActive: string;
+  lastActiveTimestamp?: string;
+  profileImage?: string | null;
 }
 
+export interface UserFilters {
+  search?: string;
+  role?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'ASC' | 'DESC';
+}
+
+export interface UsersResponse {
+  success: boolean;
+  users: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface CreateUserData {
+  fullName: string;
+  email: string;
+  username?: string;
+  password?: string;
+  role?: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  status?: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
+  phone?: string;
+  location?: string;
+}
+
+export interface UpdateUserData {
+  fullName?: string;
+  email?: string;
+  username?: string;
+  role?: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  status?: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
+  phone?: string;
+  location?: string;
+  profileImage?: string;
+}
+
+// Get all users with filters and pagination
+export const getUsers = async (filters: UserFilters = {}): Promise<UsersResponse> => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      params.append(key, String(value));
+    }
+  });
+  
+  const queryString = params.toString();
+  const url = `/users/admin${queryString ? `?${queryString}` : ''}`;
+  const response = await apiCall(url);
+  const data = await response.json();
+  
+  // Validate response structure
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid response from server');
+  }
+  
+  // Ensure response has expected structure
+  return {
+    success: data.success !== undefined ? data.success : true,
+    users: data.users || [],
+    pagination: data.pagination || {
+      page: 1,
+      limit: 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
+};
+
+// Legacy: Get all users (for backward compatibility)
 export const getAllUsers = async (): Promise<User[]> => {
   const response = await apiCall('/users/all');
+  const result = await response.json();
+  return result.users || result;
+};
+
+// Get user by ID
+export const getUserById = async (id: number): Promise<User> => {
+  const response = await apiCall(`/users/admin/${id}`);
+  const result = await response.json();
+  return result.user;
+};
+
+// Create user
+export const createUser = async (data: CreateUserData): Promise<{ success: boolean; userId: number }> => {
+  const response = await apiCall('/users/admin', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
   return response.json();
 };
 
+// Update user
+export const updateUser = async (id: number, data: UpdateUserData): Promise<void> => {
+  await apiCall(`/users/admin/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+// Delete user
 export const deleteUser = async (id: number): Promise<void> => {
-  await apiCall(`/users/${id}`, {
+  await apiCall(`/users/admin/${id}`, {
     method: 'DELETE',
   });
 };

@@ -31,7 +31,7 @@ export function SignUp({ onNavigate }: SignUpProps) {
   return (
     <div className="min-h-screen bg-[#f7f7f7] flex flex-col">
       {/* Custom Header for Sign Up */}
-      <Header onNavigate={onNavigate} />
+      <Header onNavigate={onNavigate} currentPage="signup" />
       <div className="flex flex-col lg:flex-row flex-1">
       {/* Left Side - Sign Up Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-br from-white to-gray-50">
@@ -63,15 +63,14 @@ export function SignUp({ onNavigate }: SignUpProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">Role</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
               <select
-                className="w-full h-9 sm:h-10 rounded-md border border-input bg-white px-3 py-1 text-sm sm:text-base outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20"
+                className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all"
                 required
               >
                 <option value="">Select your role</option>
+                <option value="admin">Admin</option>
                 <option value="player">Player</option>
-                <option value="coach">Coach</option>
-                <option value="club">Club</option>
               </select>
             </div>
 
@@ -80,7 +79,7 @@ export function SignUp({ onNavigate }: SignUpProps) {
               <Input
                 type="tel"
                 placeholder="Enter your phone number"
-                className="w-full bg-white"
+                className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
                 required
               />
             </div>
@@ -91,7 +90,7 @@ export function SignUp({ onNavigate }: SignUpProps) {
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  className="w-full bg-white pr-10"
+                  className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all pr-10"
                   required
                 />
                 <button
@@ -109,8 +108,8 @@ export function SignUp({ onNavigate }: SignUpProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black mb-2">Location (Optional)</label>
-              <select className="w-full h-9 sm:h-10 rounded-md border border-input bg-white px-3 py-1 text-sm sm:text-base outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Location (Optional)</label>
+              <select className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all">
                 <option value="">Select Location</option>
                 <option value="sydney">Sydney, NSW</option>
                 <option value="melbourne">Melbourne, VIC</option>
@@ -121,7 +120,7 @@ export function SignUp({ onNavigate }: SignUpProps) {
 
             <Button
               type="submit"
-              className="w-full bg-[#e0cb23] text-black hover:bg-[#cdb720] font-semibold h-11 sm:h-12 text-sm sm:text-base mt-4 sm:mt-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+              className="w-full bg-[#e0cb23] text-black hover:bg-[#cdb720] font-semibold h-11 sm:h-12 text-sm sm:text-base mt-4 sm:mt-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] border-0"
             >
               Sign Up
             </Button>
