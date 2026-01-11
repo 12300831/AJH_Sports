@@ -8,6 +8,7 @@ import { getUserProfile } from '../../services/adminService';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
@@ -121,17 +122,21 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
   };
 
   if (loading) {
+    // Always show loading state - never return null
     return (
       <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#030213] mx-auto mb-4"></div>
           <div className="text-lg font-medium text-[#030213]">Checking access...</div>
+          <div className="text-sm text-gray-500 mt-2">Loading admin page...</div>
         </div>
       </div>
     );
   }
 
+
   if (!isAuthorized) {
+    // Always show access denied - never return null
     return (
       <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
@@ -183,5 +188,9 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
     }
   };
 
-  return renderAdminPage();
+  return (
+    <ErrorBoundary>
+      {renderAdminPage()}
+    </ErrorBoundary>
+  );
 }

@@ -63,9 +63,9 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [dateFilter, setDateFilter] = useState<string>('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -110,15 +110,15 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       
       const filters: UserFilters = {
         search: debouncedSearchQuery || undefined,
-        role: roleFilter || undefined,
-        status: statusFilter || undefined,
+        role: roleFilter !== 'all' ? roleFilter : undefined,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
         page,
         limit: rowsPerPage,
         sortBy: sortColumn,
         sortOrder: sortOrder,
       };
 
-      if (dateFilter) {
+      if (dateFilter && dateFilter !== 'all') {
         const now = new Date();
         if (dateFilter === 'today') {
           filters.dateFrom = new Date(now.setHours(0, 0, 0, 0)).toISOString().split('T')[0];
@@ -354,11 +354,11 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       );
     }
     return sortOrder === 'ASC' ? (
-      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#e0cb23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
       </svg>
     ) : (
-      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#e0cb23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     );
@@ -373,8 +373,6 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       onAdminNavigate={onNavigate}
     >
       <div className="space-y-6">
-        {/* Header Section - Already handled by AdminLayout */}
-
         {/* Search and Filters */}
         <Card>
           <CardContent className="pt-6">
@@ -407,16 +405,13 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 setRoleFilter(value);
                 setPage(1);
               }}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[180px] border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Coach">Coach</SelectItem>
-                  <SelectItem value="User">User</SelectItem>
-                  <SelectItem value="Guest">Guest</SelectItem>
-                  <SelectItem value="Moderator">Moderator</SelectItem>
+                <SelectContent className="bg-white border-gray-200 shadow-lg">
+                  <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Roles</SelectItem>
+                  <SelectItem value="Admin" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Admin</SelectItem>
+                  <SelectItem value="Player" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Player</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -425,16 +420,16 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 setStatusFilter(value);
                 setPage(1);
               }}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[180px] border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                   <SelectValue placeholder="STATUS" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Suspended">Suspended</SelectItem>
-                  <SelectItem value="Banned">Banned</SelectItem>
+                <SelectContent className="bg-white border-gray-200 shadow-lg">
+                  <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Status</SelectItem>
+                  <SelectItem value="Active" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Active</SelectItem>
+                  <SelectItem value="Inactive" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Inactive</SelectItem>
+                  <SelectItem value="Pending" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Pending</SelectItem>
+                  <SelectItem value="Suspended" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Suspended</SelectItem>
+                  <SelectItem value="Banned" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Banned</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -443,14 +438,14 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 setDateFilter(value);
                 setPage(1);
               }}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[180px] border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                   <SelectValue placeholder="Date" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All Dates</SelectItem>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="week">Last Week</SelectItem>
-                  <SelectItem value="month">Last Month</SelectItem>
+                <SelectContent className="bg-white border-gray-200 shadow-lg">
+                  <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Dates</SelectItem>
+                  <SelectItem value="today" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Today</SelectItem>
+                  <SelectItem value="week" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Last Week</SelectItem>
+                  <SelectItem value="month" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Last Month</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -462,7 +457,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                   </svg>
                   Export
                 </Button>
-                <Button onClick={handleAddUser} className="bg-blue-600 hover:bg-blue-700 gap-2 text-white">
+                <Button onClick={handleAddUser} className="bg-[#e0cb23] hover:bg-[#d4bf1f] gap-2 text-[#030213] font-semibold">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
@@ -484,64 +479,64 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-blue-900 text-white hover:bg-blue-900">
+              <Table>
+                <TableHeader>
+                      <TableRow className="bg-[#030213] text-white hover:bg-[#030213]">
                         <TableHead className="w-12">
                           <input
                             type="checkbox"
                             checked={selectedUsers.length === users.length && users.length > 0}
                             onChange={(e) => handleSelectAll(e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-gray-300 text-[#e0cb23] focus:ring-[#e0cb23]"
                             disabled={users.length === 0}
                           />
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('fullName')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('fullName')}>
                           <div className="flex items-center gap-2">
                             Full Name
                             <SortIcon column="fullName" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('email')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('email')}>
                           <div className="flex items-center gap-2">
                             Email
                             <SortIcon column="email" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('username')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('username')}>
                           <div className="flex items-center gap-2">
                             Username
                             <SortIcon column="username" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('status')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('status')}>
                           <div className="flex items-center gap-2">
                             Status
                             <SortIcon column="status" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('role')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('role')}>
                           <div className="flex items-center gap-2">
                             Role
                             <SortIcon column="role" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('joinedDate')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('joinedDate')}>
                           <div className="flex items-center gap-2">
                             Joined Date
                             <SortIcon column="joinedDate" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-blue-800" onClick={() => handleSort('lastActive')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('lastActive')}>
                           <div className="flex items-center gap-2">
                             Last Active
                             <SortIcon column="lastActive" />
                           </div>
                         </TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                       {error ? (
                         <TableRow>
                           <TableCell colSpan={9} className="text-center py-12">
@@ -565,7 +560,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                           <TableCell colSpan={9} className="text-center py-12 text-gray-500">
                             <p className="text-lg">No users found</p>
                             <p className="text-sm mt-2">
-                              {searchQuery || roleFilter || statusFilter || dateFilter
+                              {searchQuery || (roleFilter !== 'all') || (statusFilter !== 'all') || (dateFilter !== 'all')
                                 ? 'Try adjusting your filters'
                                 : 'Get started by adding a new user'}
                             </p>
@@ -594,7 +589,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                                   type="checkbox"
                                   checked={selectedUsers.includes(safeUser.id)}
                                   onChange={(e) => handleSelectUser(safeUser.id, e.target.checked)}
-                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  className="rounded border-gray-300 text-[#e0cb23] focus:ring-[#e0cb23]"
                                 />
                               </TableCell>
                               <TableCell>
@@ -618,25 +613,25 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                               </TableCell>
                               <TableCell>{safeUser.email}</TableCell>
                               <TableCell>{safeUser.username}</TableCell>
-                              <TableCell>
+                      <TableCell>
                                 <Badge className={getStatusBadgeClass(safeUser.status)}>
                                   {safeUser.status}
-                                </Badge>
-                              </TableCell>
+                        </Badge>
+                      </TableCell>
                               <TableCell>{safeUser.role}</TableCell>
                               <TableCell>{formatDate(safeUser.joinedDate || '')}</TableCell>
                               <TableCell>{formatLastActive(safeUser.lastActive || '')}</TableCell>
-                              <TableCell className="text-right">
+                      <TableCell className="text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleEdit(user)}
-                                    className="h-8 w-8 p-0 hover:bg-gray-100"
-                                    title="Edit"
+                                    className="h-8 w-8 p-0 text-[#030213] hover:bg-[#e0cb23]/20 hover:text-[#030213] border border-transparent hover:border-[#e0cb23]/30"
+                                    title="Edit User"
                                   >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                   </Button>
                                   <Button
@@ -764,116 +759,119 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
 
         {/* Edit/Add User Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="max-w-2xl bg-white border-2 border-gray-200 shadow-2xl">
+            <DialogHeader className="border-b border-gray-200 pb-4">
+              <DialogTitle className="text-2xl font-bold text-[#030213]">{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+              <DialogDescription className="text-gray-600 mt-2">
                 {editingUser ? 'Update user information below.' : 'Fill in the details to create a new user.'}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700 mb-2 block">Full Name *</Label>
                   <Input
                     id="fullName"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email" className="text-sm font-semibold text-gray-700 mb-2 block">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="username" className="text-sm font-semibold text-gray-700 mb-2 block">Username</Label>
                   <Input
                     id="username"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
                 {!editingUser && (
                   <div>
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-2 block">Password</Label>
                     <Input
                       id="password"
                       type="password"
                       value={(formData as any).password || ''}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value } as any)}
+                      className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                     />
                   </div>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role" className="text-sm font-semibold text-gray-700 mb-2 block">Role</Label>
                   <Select
                     value={formData.role}
                     onValueChange={(value: any) => setFormData({ ...formData, role: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="User">User</SelectItem>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Coach">Coach</SelectItem>
-                      <SelectItem value="Guest">Guest</SelectItem>
-                      <SelectItem value="Moderator">Moderator</SelectItem>
+                    <SelectContent className="bg-white border-gray-200 shadow-lg">
+                      <SelectItem value="Admin" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Admin</SelectItem>
+                      <SelectItem value="Player" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Player</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status" className="text-sm font-semibold text-gray-700 mb-2 block">Status</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value: any) => setFormData({ ...formData, status: value })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Inactive">Inactive</SelectItem>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Suspended">Suspended</SelectItem>
-                      <SelectItem value="Banned">Banned</SelectItem>
+                    <SelectContent className="bg-white border-gray-200 shadow-lg">
+                      <SelectItem value="Active" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Active</SelectItem>
+                      <SelectItem value="Inactive" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Inactive</SelectItem>
+                      <SelectItem value="Pending" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Pending</SelectItem>
+                      <SelectItem value="Suspended" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Suspended</SelectItem>
+                      <SelectItem value="Banned" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Banned</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 mb-2 block">Phone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location" className="text-sm font-semibold text-gray-700 mb-2 block">Location</Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <DialogFooter className="border-t border-gray-200 pt-4 mt-4">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-gray-300 hover:bg-gray-50">
                 Cancel
               </Button>
-              <Button onClick={handleSaveUser}>
+              <Button onClick={handleSaveUser} className="bg-[#e0cb23] hover:bg-[#d4bf1f] text-[#030213] font-semibold">
                 {editingUser ? 'Update User' : 'Create User'}
               </Button>
             </DialogFooter>
