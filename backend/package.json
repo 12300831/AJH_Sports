@@ -14,7 +14,8 @@
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
-    "stripe": "^14.25.0"
+    "stripe": "^14.25.0",
+    "uuid": "^13.0.0"
   },
   "scripts": {
     "start": "node server.js",
@@ -24,6 +25,8 @@
     "db:setup": "node database/setup.js",
     "db:setup-extended": "node database/setup-extended.js",
     "db:start": "powershell -ExecutionPolicy Bypass -File database/start-mysql.ps1",
-    "db:create-admin": "node database/create-admin.js"
+    "db:create-admin": "node database/create-admin.js",
+    "db:create-test-player": "node scripts/create-test-player.js",
+    "test-connection": "node scripts/testConnection.js"
   }
 }

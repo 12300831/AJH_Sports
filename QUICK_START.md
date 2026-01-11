@@ -1,38 +1,112 @@
-# Quick Start Guide
+# Quick Start Guide - Frontend-Backend-Database Connection
 
-## ✅ Fixed Issues
+## 🚀 Start Everything
 
-1. **esbuild Platform Error** - Fixed by reinstalling node_modules
-2. **Backend Port** - Configured to run on port 5001
-3. **Frontend Port** - Configured to run on port 3000
-4. **CORS Configuration** - Backend allows requests from http://localhost:3000
+### Step 1: Start Database
+```bash
+# macOS
+brew services start mysql
 
-## 🚀 Running the Application
+# Windows (PowerShell as Administrator)
+net start MySQL80
 
-### Start Backend Server
+# Verify MySQL is running
+brew services list | grep mysql  # macOS
+```
 
+### Step 2: Start Backend
 ```bash
 cd backend
+npm install  # If not already installed
 npm start
 ```
 
-Backend will run on: **http://localhost:5001**
+**Expected output:**
+```
+✅ Backend running on port: 5001
+🌍 Environment: development
+🔗 Frontend URL: http://localhost:5173
+```
 
-### Start Frontend Server
-
+### Step 3: Start Frontend
 ```bash
 cd frontend
+npm install  # If not already installed
 npm run dev
 ```
 
-Frontend will run on: **http://localhost:3000**
+**Expected output:**
+```
+  VITE v5.x.x  ready in xxx ms
 
-## 🔧 Troubleshooting
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+```
 
-### If Frontend Fails to Start
+## ✅ Verify Connections
 
-If you see esbuild errors, run:
+### Test Database
+```bash
+cd backend
+npm run test-connection
+```
 
+### Test Backend API
+```bash
+curl http://localhost:5001/api/health
+```
+
+**Expected response:**
+```json
+{
+  "status": "ok",
+  "message": "Server is running",
+  "timestamp": "2024-...",
+  "uptime": 123.45
+}
+```
+
+### Test Frontend → Backend
+1. Open browser: `http://localhost:5173`
+2. Open DevTools (F12) → Console tab
+3. Try logging in
+4. Check Network tab for API calls
+
+## 🔧 Configuration Files
+
+### Backend `.env` (Required)
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=ajhsports2024
+DB_NAME=ajh_sports
+PORT=5001
+JWT_SECRET=ajh_sports_jwt_secret_key_2024_secure_random_string
+FRONTEND_URL=http://localhost:5173
+STRIPE_SECRET_KEY=sk_test_your_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
+```
+
+### Frontend `.env` (Optional)
+```env
+VITE_API_URL=http://localhost:5001/api
+```
+
+(Defaults are already set in code, so this is optional)
+
+## 📡 API Endpoints
+
+All API endpoints are prefixed with `/api`:
+
+- **Auth**: `/api/auth/login`, `/api/auth/signup`
+- **Users**: `/api/users/profile`
+- **Events**: `/api/events`, `/api/events/bookings/my`
+- **Coaches**: `/api/coaches`, `/api/coaches/bookings/my`
+- **OAuth**: `/auth/google`, `/auth/facebook` (no `/api` prefix)
+
+## 🐛 Troubleshooting
+
+### Frontend Fails to Start (esbuild errors)
 ```bash
 cd frontend
 rm -rf node_modules package-lock.json
@@ -40,60 +114,58 @@ npm install
 npm run dev
 ```
 
-### If Backend Port is in Use
-
+### Backend won't start
 ```bash
+# Kill process on port 5001
 cd backend
 npm run kill-port
+
+# Check .env file exists
+cat backend/.env  # macOS/Linux
+type backend\.env  # Windows
+
+# Restart
 npm start
 ```
 
-### Check Server Status
+### Frontend can't connect to backend
+1. Verify backend is running: `curl http://localhost:5001/api/health`
+2. Check browser console for errors
+3. Verify CORS allows `http://localhost:5173`
 
+### Database connection fails
 ```bash
-# Check if frontend is running
-lsof -ti:3000
+# Check MySQL is running
+brew services list | grep mysql  # macOS
+net start | findstr MySQL  # Windows
 
-# Check if backend is running
+# Test connection manually
+mysql -u root -pajhsports2024 -e "USE ajh_sports; SELECT 1;"
+```
+
+### Check Server Status
+```bash
+# Check if frontend is running (macOS/Linux)
+lsof -ti:5173
+
+# Check if backend is running (macOS/Linux)
 lsof -ti:5001
+
+# Windows
+netstat -ano | findstr :5173
+netstat -ano | findstr :5001
 ```
 
-## 📝 Environment Setup
+## ✅ Success Checklist
 
-### Backend (.env)
+- [ ] MySQL is running
+- [ ] Backend starts without errors
+- [ ] Frontend starts without errors
+- [ ] `curl http://localhost:5001/api/health` returns JSON
+- [ ] Login works in browser
+- [ ] Dashboard loads user data
+- [ ] No CORS errors in browser console
 
-Create `backend/.env` with:
+## 📚 More Information
 
-```env
-PORT=5001
-FRONTEND_URL=http://localhost:3000
-STRIPE_SECRET_KEY=sk_test_your_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
-```
-
-### Frontend (.env) - Optional
-
-Create `frontend/.env` with:
-
-```env
-VITE_API_URL=http://localhost:5001/api
-```
-
-(Defaults are already set in code, so this is optional)
-
-## ✅ Verification
-
-1. **Backend Health Check**: http://localhost:5001/api/health
-2. **Frontend**: http://localhost:3000
-3. **Test Payment Flow**:
-   - Go to Events page
-   - Click "Register Now"
-   - Fill payment form
-   - Should redirect to Stripe checkout
-
-## 🎯 Current Status
-
-- ✅ Frontend: Running on port 3000
-- ✅ Backend: Ready to run on port 5001
-- ✅ CORS: Configured correctly
-- ✅ API Connection: Frontend → Backend configured
+See `CONNECTION_GUIDE.md` for detailed connection information.

@@ -15,7 +15,6 @@ const config = {
   password: process.env.DB_PASS || '',
   port: process.env.DB_PORT || 3306,
   database: process.env.DB_NAME || 'ajh_sports',
-  socketPath: '/tmp/mysql.sock', // Use socket for local connections on macOS
   multipleStatements: true
 };
 

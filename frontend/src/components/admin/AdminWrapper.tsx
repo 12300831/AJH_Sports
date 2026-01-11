@@ -60,12 +60,18 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
         return;
       }
 
+      // Helper function to check if role is admin (case-insensitive)
+      const isAdminRole = (role: string | undefined | null): boolean => {
+        if (!role) return false;
+        return String(role).toLowerCase() === 'admin';
+      };
+
       // First check localStorage for quick access
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
-          if (user.role === 'admin') {
+          if (isAdminRole(user.role)) {
             setIsAuthorized(true);
             setLoading(false);
             return;
@@ -79,7 +85,7 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
       const user = await getUserProfile();
       const userRole = user.role || (user as any)?.role;
       
-      if (userRole === 'admin') {
+      if (isAdminRole(userRole)) {
         setIsAuthorized(true);
         localStorage.setItem('user', JSON.stringify(user));
       } else {

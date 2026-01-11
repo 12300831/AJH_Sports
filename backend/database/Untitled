@@ -1,0 +1,23 @@
+Problem:
+The backend crashes on startup with:
+ERR_MODULE_NOT_FOUND: Cannot find module './routes/oauthRoutes.js'
+Context:
+The OAuth routes file exists as oauthRoutes.ts, but the server is running with Node.js (ESM) without TypeScript compilation.
+🎯 Goal
+Fix the OAuth routes import so the backend starts successfully without changing the runtime setup.
+🔧 Required Fix
+Rename backend/routes/oauthRoutes.ts → oauthRoutes.js
+Ensure exports use ES module syntax:
+export default router;
+Ensure server.js imports:
+import oauthRoutes from './routes/oauthRoutes.js';
+Verify no remaining .ts imports are referenced by Node
+🧪 Verification
+Backend starts without errors
+OAuth routes are registered
+/auth/google and /auth/facebook endpoints respond
+🧠 Code Quality
+Do not change runtime tooling
+Keep behavior unchanged
+Fix only module resolution issues
+Apply the fix directly to existing files.

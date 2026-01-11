@@ -20,6 +20,11 @@ const pool = mysql.createPool({
   password: process.env.DB_PASS || "",
   database: process.env.DB_NAME || "ajh_sports",
   port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
   // socketPath can be set via DB_SOCKET_PATH if needed
   ...(process.env.DB_SOCKET_PATH && { socketPath: process.env.DB_SOCKET_PATH }),
 });
