@@ -136,67 +136,63 @@ async function findOrCreateUser(profile, provider) {
   }
 }
 
-// Guard: Ensure required environment variables are present
-if (!process.env.GOOGLE_CLIENT_ID) {
-  throw new Error("Missing GOOGLE_CLIENT_ID in environment");
-}
-if (!process.env.GOOGLE_CLIENT_SECRET) {
-  throw new Error("Missing GOOGLE_CLIENT_SECRET in environment");
-}
-if (!process.env.FACEBOOK_APP_ID) {
-  throw new Error("Missing FACEBOOK_APP_ID in environment");
-}
-if (!process.env.FACEBOOK_APP_SECRET) {
-  throw new Error("Missing FACEBOOK_APP_SECRET in environment");
-}
-
-// After guards, these are defined
+// OAuth configuration (optional - only initialize if credentials are provided)
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
-// Google OAuth Strategy
 const BACKEND_PORT = process.env.PORT || '5001';
 const BACKEND_URL = `http://localhost:${BACKEND_PORT}`;
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `${BACKEND_URL}/auth/google/callback`,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const user = await findOrCreateUser(profile, 'google');
-        return done(null, user);
-      } catch (error) {
-        return done(error, undefined);
+// Google OAuth Strategy (only if credentials are provided)
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: `${BACKEND_URL}/auth/google/callback`,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const user = await findOrCreateUser(profile, 'google');
+          return done(null, user);
+        } catch (error) {
+          return done(error, undefined);
+        }
       }
-    }
-  )
-);
+    )
+  );
+  console.log('✅ Google OAuth strategy initialized');
+} else {
+  console.warn('⚠️  Google OAuth credentials not found. Google login will be disabled.');
+}
 
-// Facebook OAuth Strategy
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: FACEBOOK_APP_ID,
-      clientSecret: FACEBOOK_APP_SECRET,
-      callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
-      profileFields: ['id', 'displayName', 'emails'],
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const user = await findOrCreateUser(profile, 'facebook');
-        return done(null, user);
-      } catch (error) {
-        return done(error, undefined);
+// Facebook OAuth Strategy (only if credentials are provided)
+if (FACEBOOK_APP_ID && FACEBOOK_APP_SECRET) {
+  passport.use(
+    new FacebookStrategy(
+      {
+        clientID: FACEBOOK_APP_ID,
+        clientSecret: FACEBOOK_APP_SECRET,
+        callbackURL: `${BACKEND_URL}/auth/facebook/callback`,
+        profileFields: ['id', 'displayName', 'emails'],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const user = await findOrCreateUser(profile, 'facebook');
+          return done(null, user);
+        } catch (error) {
+          return done(error, undefined);
+        }
       }
-    }
-  )
-);
+    )
+  );
+  console.log('✅ Facebook OAuth strategy initialized');
+} else {
+  console.warn('⚠️  Facebook OAuth credentials not found. Facebook login will be disabled.');
+}
 
 // Serialize user for session
 passport.serializeUser((user, done) => {

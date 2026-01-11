@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import dotenv from "dotenv";
-import { v4 as uuidv4 } from "uuid";
 dotenv.config();
 
 // ---------- SIGNUP ----------
@@ -44,53 +43,28 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Generate username from email (before @)
-    const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
-    
-    // Check if username exists, if so append random number
-    let finalUsername = username;
-    let attempts = 0;
-    while (attempts < 10) {
-      const [usernameCheck] = await pool.query(
-        "SELECT id FROM users WHERE username = ?",
-        [finalUsername]
-      );
-      if (usernameCheck.length === 0) break;
-      finalUsername = email.split('@')[0] + Math.floor(Math.random() * 10000);
-      attempts++;
-    }
-
     // Hash password using bcrypt
     const passwordHash = await bcrypt.hash(password, 10);
     
-    // Generate UUID
-    const uuid = uuidv4();
-    
     // Insert new user with all required fields
-    // Default role is 'player', default status is 'active'
+    // Only use columns that actually exist in the database
     const [result] = await pool.query(
       `INSERT INTO users (
-        uuid, name, fullName, email, username, phone, location, password, 
-        role, status, joinedDate, lastActive
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        name, email, phone, location, password, role
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        uuid,
         name.trim(),
-        name.trim(), // fullName same as name initially
         normalizedEmail, // Store normalized email
-        finalUsername,
         phone ? phone.trim() : null,
         location ? location.trim() : null,
         passwordHash, // Hashed password
-        'player', // Default role is 'player'
-        'active', // Default status is 'active'
+        'user', // Default role is 'user' (matches database default)
       ]
     );
 
     // Fetch the created user to return in response
     const [newUserRows] = await pool.query(
-      `SELECT id, uuid, name, fullName, email, username, phone, location, 
-       role, status, joinedDate, lastActive, profileImage, created_at 
+      `SELECT id, name, email, phone, location, role, created_at 
        FROM users WHERE id = ?`,
       [result.insertId]
     );
@@ -101,17 +75,15 @@ export const signup = async (req, res) => {
 
     const newUser = newUserRows[0];
 
-    // Normalize role and status (ensure lowercase for consistency)
-    const userRole = (newUser.role || 'player').toLowerCase();
-    const userStatus = (newUser.status || 'active').toLowerCase();
+    // Normalize role (ensure lowercase for consistency)
+    const userRole = (newUser.role || 'user').toLowerCase();
 
     // Generate JWT token with user info
     const token = jwt.sign(
       { 
         id: newUser.id, 
         email: newUser.email,
-        role: userRole,
-        status: userStatus
+        role: userRole
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -123,18 +95,12 @@ export const signup = async (req, res) => {
       token,
       user: {
         id: newUser.id,
-        uuid: newUser.uuid,
         name: newUser.name,
-        fullName: newUser.fullName || newUser.name,
         email: newUser.email,
-        username: newUser.username,
         phone: newUser.phone || null,
         location: newUser.location || null,
         role: userRole,
-        status: userStatus,
-        joinedDate: newUser.joinedDate || newUser.created_at,
-        lastActive: newUser.lastActive || new Date().toISOString(),
-        profileImage: newUser.profileImage || null,
+        created_at: newUser.created_at,
       }
     });
 
@@ -169,9 +135,9 @@ export const login = async (req, res) => {
 
     // Explicitly select all columns including role
     // Use LOWER() for case-insensitive email matching
+    // Only select columns that actually exist in the database
     const [rows] = await pool.query(
-      `SELECT id, uuid, name, fullName, email, username, phone, location, password, 
-       role, status, joinedDate, lastActive, profileImage, created_at, updated_at 
+      `SELECT id, name, email, phone, location, password, role, created_at, updated_at 
        FROM users WHERE LOWER(TRIM(email)) = ?`,
       [normalizedEmail]
     );
@@ -183,42 +149,28 @@ export const login = async (req, res) => {
 
     const user = rows[0];
 
-    // Check password BEFORE updating lastActive (security: only update on successful login)
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    // Update lastActive timestamp ONLY after successful password verification
-    await pool.query(
-      "UPDATE users SET lastActive = NOW() WHERE id = ?",
-      [user.id]
-    );
-
     // Normalize role value (handle case variations)
-    // Security: Normalize to prevent case-sensitivity bugs
-    // Keep lowercase for consistency with signup ('player', 'coach', 'admin')
+    // Keep lowercase for consistency with signup ('user', 'admin', 'player', 'coach')
     let userRole = user.role;
     if (!userRole || userRole === null || userRole === undefined || userRole === '') {
-      userRole = 'player';
+      userRole = 'user';
     } else {
       // Normalize to lowercase for consistency
       userRole = String(userRole).toLowerCase();
     }
 
-    // Normalize status value (keep lowercase for consistency)
-    let userStatus = user.status || 'active';
-    if (userStatus) {
-      userStatus = String(userStatus).toLowerCase();
-    }
-
-    // Create token with role and status for better security
+    // Create token with role for better security
     const token = jwt.sign(
       { 
         id: user.id, 
         email: user.email,
-        role: userRole,
-        status: userStatus
+        role: userRole
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -229,18 +181,12 @@ export const login = async (req, res) => {
       token,
       user: {
         id: user.id,
-        uuid: user.uuid,
-        name: user.name || user.fullName,
-        fullName: user.fullName || user.name,
+        name: user.name,
         email: user.email,
-        username: user.username,
         phone: user.phone || null,
         location: user.location || null,
         role: userRole, // Normalized role
-        status: userStatus, // Normalized status
-        joinedDate: user.joinedDate || user.created_at,
-        lastActive: new Date().toISOString(),
-        profileImage: user.profileImage || null,
+        created_at: user.created_at,
       },
     };
     
