@@ -50,6 +50,14 @@ export const getContactMessages = async (req, res) => {
   try {
     const { status, limit = 50, offset = 0 } = req.query;
 
+    // Parse limit and offset as integers (ensure they're numbers, not strings)
+    const limitNum = parseInt(String(limit), 10);
+    const offsetNum = parseInt(String(offset), 10);
+    
+    // Ensure valid numbers (sanitize to prevent SQL injection)
+    const safeLimit = isNaN(limitNum) || limitNum < 1 ? 50 : Math.min(limitNum, 1000);
+    const safeOffset = isNaN(offsetNum) || offsetNum < 0 ? 0 : offsetNum;
+
     let query = 'SELECT * FROM contact_messages';
     const params = [];
 
@@ -58,10 +66,12 @@ export const getContactMessages = async (req, res) => {
       params.push(status);
     }
 
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
-
-    const [messages] = await db.execute(query, params);
+    // Build query with LIMIT and OFFSET as part of the string (sanitized above)
+    // mysql2 execute() has issues with LIMIT/OFFSET parameters, so we use query() instead
+    query += ` ORDER BY created_at DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`;
+    
+    // Use query() instead of execute() since we're building LIMIT/OFFSET directly
+    const [messages] = await db.query(query, params.length > 0 ? params : []);
 
     res.json({
       messages,

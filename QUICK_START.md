@@ -43,6 +43,8 @@ npm run dev
   ➜  Network: use --host to expose
 ```
 
+**Note:** Frontend runs on port **5173** by default (Vite), not 3000.
+
 ## ✅ Verify Connections
 
 ### Test Database
@@ -75,6 +77,7 @@ curl http://localhost:5001/api/health
 ## 🔧 Configuration Files
 
 ### Backend `.env` (Required)
+Create `backend/.env` with:
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -88,6 +91,7 @@ STRIPE_WEBHOOK_SECRET=whsec_your_secret_here
 ```
 
 ### Frontend `.env` (Optional)
+Create `frontend/.env` with:
 ```env
 VITE_API_URL=http://localhost:5001/api
 ```
@@ -102,16 +106,24 @@ All API endpoints are prefixed with `/api`:
 - **Users**: `/api/users/profile`
 - **Events**: `/api/events`, `/api/events/bookings/my`
 - **Coaches**: `/api/coaches`, `/api/coaches/bookings/my`
+- **Contact**: `/api/contact`
 - **OAuth**: `/auth/google`, `/auth/facebook` (no `/api` prefix)
 
 ## 🐛 Troubleshooting
 
-### Frontend Fails to Start (esbuild errors)
+### If Frontend Fails to Start (esbuild errors)
 ```bash
 cd frontend
 rm -rf node_modules package-lock.json
 npm install
 npm run dev
+```
+
+### If Backend Port is in Use
+```bash
+cd backend
+npm run kill-port
+npm start
 ```
 
 ### Backend won't start
@@ -165,6 +177,26 @@ netstat -ano | findstr :5001
 - [ ] Login works in browser
 - [ ] Dashboard loads user data
 - [ ] No CORS errors in browser console
+- [ ] Events page displays correctly
+- [ ] Contact form submits successfully
+
+## ✅ Verification Steps
+
+1. **Backend Health Check**: http://localhost:5001/api/health
+2. **Frontend**: http://localhost:5173
+3. **Test Payment Flow**:
+   - Go to Events page
+   - Click "Register Now"
+   - Fill payment form
+   - Should redirect to Stripe checkout
+
+## 🎯 Current Status
+
+- ✅ Frontend: Running on port 5173 (Vite default)
+- ✅ Backend: Ready to run on port 5001
+- ✅ CORS: Configured correctly
+- ✅ API Connection: Frontend → Backend configured
+- ✅ Database: MySQL connection configured
 
 ## 📚 More Information
 
