@@ -63,7 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        // Force React to recognize this as a new object to trigger re-renders
+        setUser(data.user ? { ...data.user } : null);
       } else {
         // Token invalid, clear it
         localStorage.removeItem('token');

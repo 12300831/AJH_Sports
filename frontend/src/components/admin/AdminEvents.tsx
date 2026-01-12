@@ -73,18 +73,21 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Load events on mount
+  // Load events on mount - always fetch fresh data from MySQL
   useEffect(() => {
-      loadEvents();
+    console.log('🔄 AdminEvents mounted - fetching fresh events from API');
+    loadEvents();
   }, []);
 
   const loadEvents = async () => {
-      setLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
+      // Always fetch fresh data from MySQL - no caching
       const data = await getEvents();
       setEvents(Array.isArray(data) ? data : []);
+      console.log('✅ AdminEvents: Loaded', Array.isArray(data) ? data.length : 0, 'events from database');
     } catch (err: any) {
       console.error('Failed to load events:', err);
       setError(err.message || 'Failed to load events');
@@ -166,31 +169,44 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     }
 
     try {
+      console.log('📝 Submitting event form:', { editingEvent: editingEvent?.id, formData });
+      
       const eventData: CreateEventData = {
-        name: formData.name,
-          description: formData.description,
-          date: formData.date,
-          time: formData.time,
+        name: formData.name.trim(),
+        description: formData.description.trim() || '',
+        date: formData.date,
+        time: formData.time,
         max_players: formData.max_players,
-          price: formData.price,
-          location: formData.location,
-        image_url: formData.image_url || undefined,
-        hero_image_url: formData.hero_image_url || undefined,
-          status: formData.status,
-        };
+        price: formData.price,
+        location: formData.location.trim() || '',
+        image_url: formData.image_url?.trim() || undefined,
+        hero_image_url: formData.hero_image_url?.trim() || undefined,
+        status: formData.status,
+      };
+
+      console.log('📤 Sending event data:', eventData);
 
       if (editingEvent) {
+        console.log('🔄 Updating event ID:', editingEvent.id);
         await updateEvent(editingEvent.id, eventData);
         toast.success('Event updated successfully!');
       } else {
+        console.log('➕ Creating new event');
         await createEvent(eventData);
         toast.success('Event created successfully!');
       }
       
       handleCloseDialog();
-      loadEvents();
+      await loadEvents();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save event');
+      console.error('❌ Error saving event:', err);
+      console.error('Error details:', {
+        message: err?.message,
+        stack: err?.stack,
+        response: err?.response,
+      });
+      const errorMessage = err?.message || err?.toString() || 'Failed to save event';
+      toast.error(`Error: ${errorMessage}`);
     }
   };
 

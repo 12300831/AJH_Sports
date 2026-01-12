@@ -56,6 +56,8 @@ export const updateUserProfile = async (token: string, profileData: {
   phone?: string;
   location?: string;
   bio?: string;
+  password?: string;
+  profileImage?: string;
 }) => {
   try {
     const response = await fetch(`${API_URL}/users/profile`, {

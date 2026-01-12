@@ -82,7 +82,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         .slice(0, 5);
 
       // Get upcoming events (next 3 events, sorted by date)
-      const upcoming = allEvents
+      const upcoming = events
         .filter((e: Event) => {
           if (!e.date) return false;
           const eventDate = new Date(e.date);

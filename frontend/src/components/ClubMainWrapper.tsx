@@ -1,5 +1,6 @@
 import { MouseEvent } from 'react';
 import ClubMain from '../imports/ClubMain';
+import { HomeHeader } from './HomeHeader';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
@@ -44,6 +45,7 @@ export function ClubMainWrapper({ onNavigate }: ClubMainWrapperProps) {
 
   return (
     <div onClick={handleClick} className="flex flex-col flex-1 w-full min-h-screen h-full">
+      <HomeHeader onNavigate={onNavigate} activePage="clubs" />
       <style>{`
         [data-name="Club Main"] p {
           cursor: pointer;
@@ -61,6 +63,10 @@ export function ClubMainWrapper({ onNavigate }: ClubMainWrapperProps) {
         }
         [data-name="Club Main"] div[class*="bg-[rgba(196,196,196,0.2)]"] {
           background-color: rgba(196, 196, 196, 0.6) !important;
+        }
+        /* Hide the hardcoded header in ClubMain component */
+        [data-name="Club Main"] > header[data-name="Homepage-Header"] {
+          display: none !important;
         }
       `}</style>
       <ClubMain />

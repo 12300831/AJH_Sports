@@ -1,5 +1,6 @@
 import { MouseEvent } from 'react';
 import OurClubsOriginal from '../imports/OurClubs';
+import { HomeHeader } from './HomeHeader';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact';
 
@@ -44,6 +45,7 @@ export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
 
   return (
     <div onClick={handleClick} className="flex flex-col flex-1 w-full min-h-screen">
+      <HomeHeader onNavigate={onNavigate} activePage="clubs" />
       <style>{`
         [data-name="Our Clubs"] p {
           cursor: pointer;
@@ -58,6 +60,10 @@ export function OurClubsWrapper({ onNavigate }: OurClubsWrapperProps) {
         }
         [data-name="Our Clubs"] div[class*="bg-[#e0cb23]"]:hover {
           opacity: 0.9;
+        }
+        /* Hide the hardcoded header in OurClubs component */
+        [data-name="Our Clubs"] > header[data-name="Homepage-Header"] {
+          display: none !important;
         }
       `}</style>
       <OurClubsOriginal />

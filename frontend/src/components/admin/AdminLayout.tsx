@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { getUserProfile } from '../../services/adminService';
+import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
@@ -27,31 +27,11 @@ export function AdminLayout({
   onAdminNavigate,
   headerAction,
 }: AdminLayoutProps) {
-  const [user, setUser] = useState<any>(null);
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        const userData = await getUserProfile();
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     toast.success('Logged out successfully');
     onNavigate('home');
   };
@@ -133,9 +113,24 @@ export function AdminLayout({
               {user && (
                 <div className="mb-3 p-3 bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-3">
+                  {user.profileImage ? (
+                    <img
+                      key={user.id}
+                      src={`${user.profileImage}${user.profileImage.includes('?') ? '&' : '?'}t=${Date.now()}`}
+                      alt={user.name || 'Admin'}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-[#e0cb23]"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src.includes('?t=')) {
+                          target.src = user.profileImage || '';
+                        }
+                      }}
+                    />
+                  ) : (
                     <div className="w-10 h-10 rounded-full bg-[#e0cb23] flex items-center justify-center text-[#030213] font-bold">
                       {user.name?.charAt(0).toUpperCase() || 'A'}
                     </div>
+                  )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{user.name}</p>
                       <p className="text-xs text-gray-400 truncate">{user.email}</p>

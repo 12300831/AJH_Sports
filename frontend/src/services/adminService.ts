@@ -12,15 +12,24 @@ const getAuthToken = (): string | null => {
 };
 
 // Helper function to make authenticated API calls
+// Always fetches fresh data from MySQL - includes cache-busting headers
 const apiCall = async (
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> => {
   const token = getAuthToken();
   
-  const headers: HeadersInit = {
+  // Merge headers - cache-busting headers by default, options.headers takes precedence
+  const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  };
+
+  const headers: HeadersInit = {
+    ...defaultHeaders,
+    ...(options.headers || {}),
   };
 
   if (token) {
@@ -36,12 +45,21 @@ const apiCall = async (
     if (response.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
       throw new Error('Authentication failed. Please log in again.');
     }
     
-    const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-    throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
+    // Try to extract error message from response
+    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      // Backend returns { success: false, message: "..." } format
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch (e) {
+      // If response is not JSON, use status text
+      console.error('Failed to parse error response:', e);
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return response;
@@ -86,7 +104,9 @@ export interface CreateEventData {
 
 export const getEvents = async (): Promise<Event[]> => {
   // Admin should see all events including inactive ones
-  const response = await apiCall('/events?includeInactive=true');
+  // Add cache-busting timestamp to ensure fresh data from MySQL
+  const timestamp = Date.now();
+  const response = await apiCall(`/events?includeInactive=true&_t=${timestamp}`);
   const data = await response.json();
   
   // Handle different response formats
@@ -119,10 +139,19 @@ export const createEvent = async (data: CreateEventData): Promise<Event> => {
 };
 
 export const updateEvent = async (id: number, data: CreateEventData): Promise<void> => {
-  await apiCall(`/events/${id}`, {
+  console.log('📝 Updating event:', id, data);
+  const response = await apiCall(`/events/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
+  
+  // Parse response to get updated event data
+  const result = await response.json();
+  console.log('✅ Event updated successfully:', result);
+  
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to update event');
+  }
 };
 
 export const deleteEvent = async (id: number): Promise<void> => {
@@ -231,7 +260,7 @@ export interface User {
   username: string;
   phone: string | null;
   location: string | null;
-  role: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  role: 'Admin' | 'User';
   status: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
   joinedDate: string;
   lastActive: string;
@@ -267,17 +296,19 @@ export interface CreateUserData {
   email: string;
   username?: string;
   password?: string;
-  role?: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  role?: 'Admin' | 'User';
   status?: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
   phone?: string;
   location?: string;
+  profileImage?: string;
 }
 
 export interface UpdateUserData {
   fullName?: string;
   email?: string;
   username?: string;
-  role?: 'Admin' | 'Coach' | 'User' | 'Guest' | 'Moderator';
+  password?: string;
+  role?: 'Admin' | 'User';
   status?: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
   phone?: string;
   location?: string;

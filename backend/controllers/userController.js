@@ -4,6 +4,7 @@
  */
 
 import pool from "../config/db.js";
+import bcrypt from "bcryptjs";
 
 // Get user profile
 // Note: Uses authenticateWithUser middleware which fetches full user from DB
@@ -45,7 +46,7 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, fullName, email, phone, location, bio } = req.body;
+    const { name, fullName, email, phone, location, bio, password, profileImage } = req.body;
 
     // Build updates object
     const updates = {};
@@ -53,6 +54,24 @@ export const updateProfile = async (req, res) => {
     if (fullName !== undefined && fullName.trim()) updates.fullName = fullName.trim();
     if (phone !== undefined) updates.phone = phone ? phone.trim() : null;
     if (location !== undefined) updates.location = location ? location.trim() : null;
+    // Handle profileImage update (base64 can be large, so use TEXT column)
+    if (profileImage !== undefined) {
+      if (profileImage && profileImage.trim()) {
+        // Validate base64 string length (max ~7MB base64 = ~5MB image)
+        const base64Length = profileImage.trim().length;
+        console.log('📸 Received profileImage update, length:', base64Length);
+        if (base64Length > 7000000) {
+          return res.status(400).json({
+            success: false,
+            message: "Image is too large. Maximum size is 5MB"
+          });
+        }
+        updates.profileImage = profileImage.trim();
+        console.log('📸 ProfileImage will be saved, length:', updates.profileImage.length);
+      } else {
+        updates.profileImage = null;
+      }
+    }
     
     // Email update requires validation
     if (email !== undefined) {
@@ -77,6 +96,17 @@ export const updateProfile = async (req, res) => {
         });
       }
       updates.email = normalizedEmail;
+    }
+
+    // Handle password update (hash if provided)
+    if (password !== undefined && password !== null && password !== '') {
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters"
+        });
+      }
+      updates.password = await bcrypt.hash(password, 10);
     }
 
     // Note: bio field doesn't exist in users table yet, but we'll store it if needed

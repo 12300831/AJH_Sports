@@ -1,5 +1,6 @@
 import { MouseEvent } from 'react';
 import Homepage from '../imports/Homepage';
+import { HomeHeader } from './HomeHeader';
 
 type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'payment' | 'paymentSuccess';
 
@@ -63,27 +64,34 @@ export function HomepageWrapper({ onNavigate }: HomepageWrapperProps) {
   };
 
   return (
-    <div onClick={handleClick}>
-      <style>{`
-        [data-name="Homepage"] p {
-          cursor: pointer;
-          transition: opacity 0.2s;
-        }
-        [data-name="Homepage"] p:hover {
-          opacity: 0.8;
-        }
-        [data-name="Homepage"] div[class*="bg-[#e0cb23]"] {
-          cursor: pointer;
-          transition: opacity 0.2s;
-        }
-        [data-name="Homepage"] div[class*="bg-[#e0cb23]"]:hover {
-          opacity: 0.9;
-        }
-        [data-name="Homepage"] div[class*="bg-[rgba(196,196,196,0.2)]"] {
-          background-color: rgba(196, 196, 196, 0.6) !important;
-        }
-      `}</style>
-      <Homepage />
+    <div className="flex flex-col">
+      <HomeHeader onNavigate={onNavigate} activePage="home" />
+      <div onClick={handleClick}>
+        <style>{`
+          [data-name="Homepage"] p {
+            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+          [data-name="Homepage"] p:hover {
+            opacity: 0.8;
+          }
+          [data-name="Homepage"] div[class*="bg-[#e0cb23]"] {
+            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+          [data-name="Homepage"] div[class*="bg-[#e0cb23]"]:hover {
+            opacity: 0.9;
+          }
+          [data-name="Homepage"] div[class*="bg-[rgba(196,196,196,0.2)]"] {
+            background-color: rgba(196, 196, 196, 0.6) !important;
+          }
+          /* Hide the hardcoded Frame7 header in Homepage component */
+          [data-name="Copy of First"] > div:first-child {
+            display: none !important;
+          }
+        `}</style>
+        <Homepage />
+      </div>
     </div>
   );
 }

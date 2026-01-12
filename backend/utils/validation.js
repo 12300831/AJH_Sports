@@ -4,7 +4,8 @@
  */
 
 // Valid role values (normalized)
-export const VALID_ROLES = ['Admin', 'Coach', 'User', 'Guest', 'Moderator'];
+// Note: Coaches are stored in the coaches table, not as user roles
+export const VALID_ROLES = ['Admin', 'User'];
 
 // Valid status values (normalized)
 export const VALID_STATUSES = ['Active', 'Inactive', 'Pending', 'Suspended', 'Banned'];

@@ -232,7 +232,7 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { fullName, email, username, role, status, phone, location, profileImage } =
+    const { fullName, email, username, password, role, status, phone, location, profileImage } =
       req.body;
 
     // Prevent privilege escalation: users cannot change their own role or status
@@ -310,7 +310,33 @@ export const updateUser = async (req, res) => {
     if (normalizedStatus !== undefined) updates.status = normalizedStatus;
     if (phone !== undefined) updates.phone = phone ? phone.trim().substring(0, 50) : null;
     if (location !== undefined) updates.location = location ? location.trim().substring(0, 255) : null;
-    if (profileImage !== undefined) updates.profileImage = profileImage ? profileImage.trim().substring(0, 500) : null;
+    // Handle profileImage update (base64 can be large, so use TEXT column)
+    if (profileImage !== undefined) {
+      if (profileImage && profileImage.trim()) {
+        // Validate base64 string length (max ~7MB base64 = ~5MB image)
+        const base64Length = profileImage.trim().length;
+        if (base64Length > 7000000) {
+          return res.status(400).json({
+            success: false,
+            message: "Image is too large. Maximum size is 5MB"
+          });
+        }
+        updates.profileImage = profileImage.trim();
+      } else {
+        updates.profileImage = null;
+      }
+    }
+    
+    // Handle password update (hash if provided)
+    if (password !== undefined && password !== null && password !== '') {
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 6 characters",
+        });
+      }
+      updates.password = await bcrypt.hash(password, 10);
+    }
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({

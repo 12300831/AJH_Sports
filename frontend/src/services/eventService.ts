@@ -58,27 +58,31 @@ export const isUserLoggedIn = (): boolean => {
 };
 
 /**
- * Get current user from localStorage
+ * Get current user from localStorage (DEPRECATED - use useAuth() hook instead)
+ * This is kept for backward compatibility but should not be used in new code.
+ * @deprecated Use useAuth() hook from AuthContext instead
  */
 export const getCurrentUser = (): { id: number; email: string; name: string; role: string } | null => {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return null;
-  try {
-    return JSON.parse(userStr);
-  } catch {
-    return null;
-  }
+  // DEPRECATED: This function reads from localStorage which is no longer used for user data
+  // All user data should come from the API via AuthContext
+  return null;
 };
 
 /**
  * Fetch all events from the backend
+ * Always fetches fresh data from MySQL - no caching
  */
 export const fetchEvents = async (): Promise<Event[]> => {
   try {
-    const response = await fetch(`${API_URL}/events`, {
+    // Add cache-busting timestamp to ensure fresh data
+    const timestamp = Date.now();
+    const response = await fetch(`${API_URL}/events?_t=${timestamp}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
 

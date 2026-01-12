@@ -21,6 +21,7 @@ import {
   type UpdateUserData,
 } from '../../services/adminService';
 import { AdminLayout } from './AdminLayout';
+import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
@@ -58,6 +59,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function AdminUsers({ onNavigate }: AdminUsersProps) {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
   // Edit/Add User Dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<CreateUserData>({
     fullName: '',
     email: '',
@@ -85,6 +88,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
     status: 'Active',
     phone: '',
     location: '',
+    password: '',
   });
 
   // Debounce search query (300ms delay)
@@ -133,13 +137,11 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
         }
       }
 
-      console.log('🔍 Loading users with filters:', filters);
       const response = await getUsers(filters);
-      console.log('✅ Users API response:', response);
       
       // Validate response structure with safe fallbacks
       if (!response) {
-        console.error('❌ Invalid API response: response is null/undefined');
+        console.error('Invalid API response: response is null/undefined');
         setUsers([]);
         setTotalPages(0);
         setTotal(0);
@@ -151,14 +153,12 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       const usersArray = Array.isArray(response.users) ? response.users : [];
       const paginationData = response.pagination || { totalPages: 0, total: 0 };
       
-      console.log(`📊 Loaded ${usersArray.length} users`, usersArray);
-      
       setUsers(usersArray);
       setTotalPages(paginationData.totalPages || 0);
       setTotal(paginationData.total || 0);
       setError(null); // Clear any previous errors
     } catch (error: any) {
-      console.error('❌ Error loading users:', error);
+      console.error('Error loading users:', error);
       const errorMsg = error?.message || 'Failed to load users. Please check your connection.';
       setError(errorMsg);
       // Don't show toast on initial load to avoid spam
@@ -192,8 +192,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
 
   const handleDelete = async (id: number) => {
     // Prevent deleting yourself
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    if (currentUser.id === id) {
+    if (currentUser?.id === id) {
       toast.error('Cannot delete your own account');
       return;
     }
@@ -230,7 +229,10 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
         status: fullUser.status || 'Active',
         phone: fullUser.phone || '',
         location: fullUser.location || '',
+        password: '',
+        profileImage: fullUser.profileImage || '',
       });
+      setProfileImagePreview(fullUser.profileImage || null);
       setIsDialogOpen(true);
     } catch (error: any) {
       console.error('Error loading user details:', error);
@@ -240,6 +242,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
 
   const handleAddUser = () => {
     setEditingUser(null);
+    setProfileImagePreview(null);
     setFormData({
       fullName: '',
       email: '',
@@ -248,6 +251,8 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       status: 'Active',
       phone: '',
       location: '',
+      password: '',
+      profileImage: '',
     });
     setIsDialogOpen(true);
   };
@@ -256,7 +261,16 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
     try {
       if (editingUser) {
         // Update existing user
-        await updateUser(editingUser.id, formData as UpdateUserData);
+        const updateData: UpdateUserData = { ...formData };
+        // Only include password if it's not empty
+        if (!updateData.password || updateData.password.trim() === '') {
+          delete updateData.password;
+        }
+        // Always include profileImage if it exists
+        if (formData.profileImage) {
+          updateData.profileImage = formData.profileImage;
+        }
+        await updateUser(editingUser.id, updateData);
         toast.success('User updated successfully');
       } else {
         // Create new user
@@ -270,6 +284,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
         setPage(1);
       }
       setIsDialogOpen(false);
+      setProfileImagePreview(null);
       await loadUsers();
     } catch (error: any) {
       toast.error(error.message || `Failed to ${editingUser ? 'update' : 'create'} user`);
@@ -411,7 +426,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 <SelectContent className="bg-white border-gray-200 shadow-lg">
                   <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Roles</SelectItem>
                   <SelectItem value="Admin" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Admin</SelectItem>
-                  <SelectItem value="Player" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Player</SelectItem>
+                  <SelectItem value="User" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">User</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -596,12 +611,18 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                                 <div className="flex items-center gap-3">
                                   {safeUser.profileImage ? (
                                     <img
-                                      src={safeUser.profileImage}
+                                      key={`${safeUser.id}-${safeUser.profileImage?.substring(0, 50)}`}
+                                      src={`${safeUser.profileImage}${safeUser.profileImage.includes('?') ? '&' : '?'}t=${Date.now()}`}
                                       alt={safeUser.fullName}
                                       className="w-8 h-8 rounded-full object-cover"
                                       onError={(e) => {
                                         // Fallback to initials if image fails to load
-                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        const target = e.target as HTMLImageElement;
+                                        if (target.src.includes('?t=')) {
+                                          target.src = safeUser.profileImage || '';
+                                        } else {
+                                          target.style.display = 'none';
+                                        }
                                       }}
                                     />
                                   ) : null}
@@ -639,7 +660,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                                     size="sm"
                                     onClick={() => handleDelete(safeUser.id)}
                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    disabled={safeUser.role === 'Admin' && safeUser.id === parseInt(localStorage.getItem('userId') || '0')}
+                                    disabled={safeUser.role === 'Admin' && safeUser.id === currentUser?.id}
                                     title="Delete"
                                   >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -767,6 +788,68 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {/* Profile Picture Section */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4 border-b border-gray-200">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative">
+                    {profileImagePreview ? (
+                      <img
+                        key={editingUser?.id || 'preview'}
+                        src={`${profileImagePreview}${profileImagePreview.includes('?') ? '&' : '?'}t=${Date.now()}`}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (target.src.includes('?t=')) {
+                            target.src = profileImagePreview;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-[#e0cb23] flex items-center justify-center text-[#030213] text-2xl font-bold border-2 border-gray-300">
+                        {formData.fullName ? formData.fullName.substring(0, 2).toUpperCase() : 'U'}
+                      </div>
+                    )}
+                    <label className="absolute bottom-0 right-0 bg-[#e0cb23] text-black rounded-full p-2 cursor-pointer hover:bg-[#cdb720] transition-colors shadow-md">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (!file.type.startsWith('image/')) {
+                              toast.error('Please select an image file');
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error('Image size must be less than 5MB');
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              const result = reader.result as string;
+                              setProfileImagePreview(result);
+                              setFormData({ ...formData, profileImage: result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 text-center">Click to change photo</p>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Profile Picture</h3>
+                  <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 5MB</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="fullName" className="text-sm font-semibold text-gray-700 mb-2 block">Full Name *</Label>
@@ -798,18 +881,19 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                     className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
                   />
                 </div>
-                {!editingUser && (
-                  <div>
-                    <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-2 block">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={(formData as any).password || ''}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value } as any)}
-                      className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
-                    />
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-2 block">
+                    {editingUser ? 'New Password (leave blank to keep current)' : 'Password'}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password || ''}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder={editingUser ? 'Enter new password...' : ''}
+                    className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -821,9 +905,9 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                     <SelectTrigger className="border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200 shadow-lg">
+                    <SelectContent className="bg-white border-gray-200 shadow-lg z-[102]">
                       <SelectItem value="Admin" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Admin</SelectItem>
-                      <SelectItem value="Player" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Player</SelectItem>
+                      <SelectItem value="User" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">User</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -836,7 +920,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                     <SelectTrigger className="border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200 shadow-lg">
+                    <SelectContent className="bg-white border-gray-200 shadow-lg z-[102]">
                       <SelectItem value="Active" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Active</SelectItem>
                       <SelectItem value="Inactive" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Inactive</SelectItem>
                       <SelectItem value="Pending" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Pending</SelectItem>

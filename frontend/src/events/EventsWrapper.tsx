@@ -1,7 +1,9 @@
 import { FormEvent, useState, useEffect, useCallback } from 'react';
 import { createCheckoutSession, PAYMENT_ERROR_CODES } from '../services/paymentService';
-import { isUserLoggedIn, getCurrentUser, fetchEvents as apiFetchEvents } from '../services/eventService';
+import { isUserLoggedIn, fetchEvents as apiFetchEvents } from '../services/eventService';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import { Header } from '../components/Header';
 
 // Images are served from the public folder at the root path (/images/...)
 const Image_tennis = '/images/TT.png';
@@ -247,10 +249,10 @@ const stats = [
 
 // --- COMPONENT ---
 export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>('all');
   const [hoveredEvent, setHoveredEvent] = useState<number | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
@@ -342,10 +344,29 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
     }
   }, []);
 
-  // Load events on mount
+  // Load events on mount - always fetch fresh data from MySQL
+  // When App.tsx navigates to 'events', this component remounts and loads fresh data
   useEffect(() => {
+    console.log('🔄 EventsWrapper mounted - fetching fresh events from API');
     loadEvents();
   }, [loadEvents]);
+
+  // Listen for page visibility changes to reload events when user returns to tab
+  // This ensures events are fresh if admin made changes while user was on another tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && events.length > 0) {
+        // Page became visible and we have events loaded - reload to get any admin updates
+        console.log('👁️ Page visible - reloading events to check for updates');
+        loadEvents();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadEvents, events.length]);
 
   // Handle Stripe payment return (success or cancel)
   useEffect(() => {
@@ -440,7 +461,6 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
       window.history.pushState({ page }, '', path);
       window.dispatchEvent(new PopStateEvent('popstate'));
     }
-    setIsMobileMenuOpen(false);
   };
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -695,7 +715,6 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         throw new Error('Invalid price format');
       }
       const amount = parseFloat(priceMatch[1]);
-      const user = getCurrentUser();
 
       // Create Stripe checkout session and redirect to payment
       const response = await createCheckoutSession({
@@ -703,7 +722,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         eventName: selectedEvent.title,
         amount: amount,
         currency: 'aud',
-        customerEmail: user?.email,
+        customerEmail: user?.email || undefined,
         successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}&event_id=${selectedEvent.id}`,
         cancelUrl: `${window.location.origin}/events?canceled=true`,
       });
@@ -805,197 +824,6 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
       ? events
       : events.filter((e) => e.category === selectedCategory);
 
-  // Header Component (reusable)
-  const Header = () => (
-    <div className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px]">
-      {/* Logo */}
-      <div 
-        className="absolute h-[53px] left-[20px] md:left-[39px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] top-[20px] md:top-[43px] w-[80px] cursor-pointer z-10"
-        onClick={() => handleNavClick('home')}
-      >
-        <img 
-          alt="AJH Sports Logo" 
-          className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
-          src={imgAjhSportsLogo}
-        />
-      </div>
-      
-      {/* Desktop Navigation */}
-      <div className="hidden lg:block">
-        <button 
-          className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[0] left-[190px] not-italic text-[16px] text-white top-[56px] w-[62px] hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('home')}
-        >
-          <p className="leading-[normal]">Home</p>
-        </button>
-        <p 
-          className={`absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] top-[56px] w-[72px] cursor-pointer transition-colors ${
-            selectedEvent ? 'text-white hover:text-[#e0cb23]' : 'text-[#e0cb23]'
-          }`}
-          onClick={selectedEvent ? handleBackToEvents : undefined}
-        >
-          Events
-        </p>
-        <p 
-          className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px] cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('clubs')}
-        >
-          Clubs
-        </p>
-        <p 
-          className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px] cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('coaches')}
-        >
-          Coaches
-        </p>
-        <p 
-          className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px] cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('contact')}
-        >
-          Contact Us
-        </p>
-      </div>
-      
-      {/* Tablet Navigation */}
-      <div className="hidden md:flex lg:hidden absolute left-[120px] top-[56px] gap-4 md:gap-6">
-        <button 
-          className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('home')}
-        >
-          <p>Home</p>
-        </button>
-        <p 
-          className={`font-['Inter:Medium',sans-serif] font-medium text-sm cursor-pointer transition-colors ${
-            selectedEvent ? 'text-white hover:text-[#e0cb23]' : 'text-[#e0cb23]'
-          }`}
-          onClick={selectedEvent ? handleBackToEvents : undefined}
-        >
-          Events
-        </p>
-        <p 
-          className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('clubs')}
-        >
-          Clubs
-        </p>
-        <p 
-          className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('coaches')}
-        >
-          Coaches
-        </p>
-        <p 
-          className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-          onClick={() => handleNavClick('contact')}
-        >
-          Contact
-        </p>
-      </div>
-      
-      {/* Desktop Auth Buttons - Right */}
-      <div className="hidden lg:flex absolute right-[39px] top-[46px] items-center gap-4">
-        <button 
-          onClick={() => handleNavClick('signin')} 
-          className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-        >
-          Log In
-        </button>
-        <div 
-          className="bg-[#878787] h-[50px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] px-4 cursor-pointer hover:bg-[#6d6d6d] transition-colors flex items-center justify-center"
-          onClick={() => handleNavClick('signup')}
-        >
-          <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-[12px] text-white">
-            Sign Up
-          </span>
-        </div>
-      </div>
-
-      {/* Tablet/Mobile Auth Buttons */}
-      <div className="hidden md:flex lg:hidden absolute right-4 top-[46px] items-center gap-3">
-        <button 
-          onClick={() => handleNavClick('signin')} 
-          className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
-        >
-          Log In
-        </button>
-        <div 
-          className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
-          onClick={() => handleNavClick('signup')}
-        >
-          <span className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-xs text-white">
-            Sign Up
-          </span>
-        </div>
-      </div>
-
-      {/* Mobile Menu Button and Auth */}
-      <div className="md:hidden absolute right-4 top-[20px] flex items-center gap-3">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="flex flex-col gap-1.5 w-6 h-6 justify-center items-center"
-          aria-label="Toggle menu"
-        >
-          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-        </button>
-        <button 
-          onClick={() => handleNavClick('signin')} 
-          className="font-semibold text-xs text-white cursor-pointer"
-        >
-          Log In
-        </button>
-        <div 
-          className="bg-[#878787] h-[40px] rounded-[6px] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center px-3 cursor-pointer hover:bg-[#6d6d6d] transition-colors"
-          onClick={() => handleNavClick('signup')}
-        >
-          <span className="font-semibold text-xs text-white">
-            Sign Up
-          </span>
-        </div>
-      </div>
-      
-      {/* Mobile Menu Dropdown */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-black border-t border-gray-800 z-50">
-          <div className="flex flex-col py-4">
-            <button 
-              className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 text-left hover:bg-gray-900 hover:text-[#e0cb23] transition-colors"
-              onClick={() => handleNavClick('home')}
-            >
-              Home
-            </button>
-            <p 
-              className={`font-['Inter:Medium',sans-serif] font-medium text-base px-6 py-3 cursor-pointer hover:bg-gray-900 transition-colors ${
-                selectedEvent ? 'text-white hover:text-[#e0cb23]' : 'text-[#e0cb23]'
-              }`}
-              onClick={selectedEvent ? handleBackToEvents : undefined}
-            >
-              Events
-            </p>
-            <p 
-              className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors"
-              onClick={() => handleNavClick('clubs')}
-            >
-              Clubs
-            </p>
-            <p 
-              className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors"
-              onClick={() => handleNavClick('coaches')}
-            >
-              Coaches
-            </p>
-            <p 
-              className="font-['Inter:Medium',sans-serif] font-medium text-base text-white px-6 py-3 cursor-pointer hover:bg-gray-900 hover:text-[#e0cb23] transition-colors"
-              onClick={() => handleNavClick('contact')}
-            >
-              Contact Us
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
   // Footer Component (reusable) - Homepage Design
   const Footer = () => (
@@ -1357,7 +1185,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   if (selectedEvent) {
     return (
       <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Event Detail Page">
-        <Header />
+        <Header onNavigate={handleNavClick} currentPage={undefined} />
         
         {/* Hero Image Section */}
         <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative overflow-hidden bg-gradient-to-br from-[#030213] to-[#1a1a2e]">
@@ -1689,7 +1517,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   // Main Events List View
   return (
     <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Events Page">
-      <Header />
+      <Header onNavigate={handleNavClick} currentPage="events" />
 
       {/* Hero Section */}
       <div className="w-full bg-white px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[110px] py-8 md:py-12 lg:py-16 border-b border-gray-100">

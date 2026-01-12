@@ -131,6 +131,8 @@ export default function App() {
         // Detailed youth/adult clubs page
         return <OurClubsWrapper onNavigate={handleNavigate} />;
       case 'events':
+        // EventsWrapper will remount when currentPage changes to 'events'
+        // This ensures fresh data fetch from MySQL on every navigation
         return <EventsWrapper onNavigate={handleNavigate} />;
       case 'account':
         return <ClubAccountWrapper onNavigate={handleNavigate} />;

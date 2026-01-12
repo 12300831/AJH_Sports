@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player' | 'admin' | 'adminEvents' | 'adminCoaches' | 'adminUsers' | 'adminBookings';
 
@@ -24,6 +25,7 @@ export function SignIn({ onNavigate }: SignInProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,11 +79,10 @@ export function SignIn({ onNavigate }: SignInProps) {
         throw new Error('No user data received from server');
       }
 
-      // Store token and user info
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
       toast.success('Login successful!');
+
+      // Update auth context first (this sets localStorage and user state)
+      login(data.token, data.user);
 
       // Check for pending event registration (user tried to register before logging in)
       const pendingRegistration = sessionStorage.getItem('pendingEventRegistration');
@@ -98,7 +99,7 @@ export function SignIn({ onNavigate }: SignInProps) {
           sessionStorage.removeItem('pendingEventRegistration');
         }
       }
-
+      
       // Check if user is admin and redirect accordingly (case-insensitive)
       const userRole = data.user?.role ? String(data.user.role).toLowerCase() : '';
       console.log('🔍 Normalized role:', userRole);
@@ -109,8 +110,8 @@ export function SignIn({ onNavigate }: SignInProps) {
           console.log('✅ Redirecting to admin portal');
           onNavigate('admin');
         } else {
-          console.log('✅ Redirecting to player profile (role:', userRole, ')');
-          onNavigate('player');
+          console.log('✅ Redirecting to homepage');
+          onNavigate('home');
         }
       }, 100);
     } catch (error: any) {

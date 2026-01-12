@@ -132,13 +132,18 @@ export const updateEvent = async (req, res) => {
     const { id } = req.params;
     const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = req.body;
 
+    console.log('📝 Update event request:', { id, body: req.body });
+
     const event = await Event.findById(id);
     if (!event) {
+      console.error('❌ Event not found:', id);
       return res.status(404).json({
         success: false,
         message: "Event not found"
       });
     }
+
+    console.log('✅ Found event:', event);
 
     // Helper: check if a string value is "provided" (not undefined, not null, not empty string)
     const isValidString = (val) => val !== undefined && val !== null && val !== '';
@@ -152,28 +157,43 @@ export const updateEvent = async (req, res) => {
 
     // Build update object - only overwrite if valid value provided
     const updateData = {
-      name: isValidString(name) ? name : event.name,
-      description: description !== undefined ? description : event.description, // Allow empty string for description
+      name: isValidString(name) ? name.trim() : event.name,
+      description: description !== undefined ? (description || '') : event.description, // Allow empty string for description
       date: isValidString(date) ? date : event.date,
       time: isValidString(time) ? time : event.time,
       max_players: parseNumeric(max_players) !== null ? parseNumeric(max_players) : event.max_players,
-      price: parseNumeric(price) !== null ? parseNumeric(price) : parseFloat(event.price) || 0,
-      location: location !== undefined ? location : event.location, // Allow empty string for location
+      price: parseNumeric(price) !== null ? parseNumeric(price) : (event.price ? parseFloat(event.price) : 0),
+      location: location !== undefined ? (location || '') : event.location, // Allow empty string for location
       image_url: image_url !== undefined ? (image_url || null) : event.image_url, // Allow clearing with empty string
       hero_image_url: hero_image_url !== undefined ? (hero_image_url || null) : event.hero_image_url, // Allow clearing with empty string
       status: isValidString(status) ? status : event.status
     };
 
+    console.log('📤 Updating event with data:', updateData);
+
     const updated = await Event.update(id, updateData);
 
     if (!updated) {
+      console.error('❌ Event.update returned false for ID:', id);
       return res.status(400).json({
         success: false,
-        message: "Failed to update event"
+        message: "Failed to update event - no rows affected"
       });
     }
 
+    console.log('✅ Event.update successful, fetching updated event');
+
     const updatedEvent = await Event.findById(id);
+    
+    if (!updatedEvent) {
+      console.error('❌ Could not fetch updated event:', id);
+      return res.status(500).json({
+        success: false,
+        message: "Event updated but could not fetch updated data"
+      });
+    }
+
+    console.log('✅ Event updated successfully:', updatedEvent);
 
     res.json({
       success: true,
@@ -181,10 +201,12 @@ export const updateEvent = async (req, res) => {
       event: updatedEvent
     });
   } catch (error) {
-    console.error("Update event error:", error);
+    console.error("❌ Update event error:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
-      message: "Error updating event"
+      message: error.message || "Error updating event",
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

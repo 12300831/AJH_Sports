@@ -136,9 +136,24 @@ export function PlayerOverview({ onNavigate, currentTab = 'overview', onTabChang
         {/* Profile Summary Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="w-32 h-32 bg-[#0969da] rounded-full flex items-center justify-center text-white text-4xl font-bold">
-              {loading ? '--' : getInitials()}
-            </div>
+            {((profileData?.profileImage || user?.profileImage) && !loading) ? (
+              <img
+                key={user?.id || profileData?.id}
+                src={`${profileData?.profileImage || user?.profileImage}${(profileData?.profileImage || user?.profileImage)?.includes('?') ? '&' : '?'}t=${Date.now()}`}
+                alt={getDisplayName()}
+                className="w-32 h-32 rounded-full object-cover border-4 border-[#0969da]"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src.includes('?t=')) {
+                    target.src = profileData?.profileImage || user?.profileImage || '';
+                  }
+                }}
+              />
+            ) : (
+              <div className="w-32 h-32 bg-[#0969da] rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                {loading ? '--' : getInitials()}
+              </div>
+            )}
             <div className="flex-1 text-center md:text-left">
               <h2 className="text-2xl font-semibold text-[#24292f] mb-1">{loading ? '--' : getDisplayName()}</h2>
               <p className="text-[#656d76] text-sm mb-2">{loading ? '--' : getDisplayEmail()}</p>

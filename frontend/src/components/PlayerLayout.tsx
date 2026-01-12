@@ -34,7 +34,6 @@ export function PlayerLayout({
       logout();
     } else {
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
     }
     toast.success('Logged out successfully');
     onNavigate('home');
@@ -138,9 +137,24 @@ export function PlayerLayout({
               {user && (
                 <div className="mb-3 p-3 bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#e0cb23] flex items-center justify-center text-[#030213] font-bold">
-                      {getInitials()}
-                    </div>
+                    {user.profileImage ? (
+                      <img
+                        key={user.id}
+                        src={`${user.profileImage}${user.profileImage.includes('?') ? '&' : '?'}t=${Date.now()}`}
+                        alt={user.fullName || user.name || 'User'}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-[#e0cb23]"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (target.src.includes('?t=')) {
+                            target.src = user.profileImage || '';
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-[#e0cb23] flex items-center justify-center text-[#030213] font-bold">
+                        {getInitials()}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">
                         {user.fullName || user.name || 'Player'}

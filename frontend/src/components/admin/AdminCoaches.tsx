@@ -79,14 +79,8 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
       const data = await getCoaches();
       // Ensure data is an array
       if (Array.isArray(data)) {
-        // Filter to only show the 4 specific coaches: Michael Rodriguez, James Wilson, Mark Leo, Kristin Russell
-        const targetCoaches = data.filter((coach: Coach) => 
-          coach.name === 'Michael Rodriguez' ||
-          coach.name === 'James Wilson' ||
-          coach.name === 'Mark Leo' ||
-          coach.name === 'Kristin Russell'
-        );
-        setCoaches(targetCoaches);
+        // Show all coaches
+        setCoaches(data);
       } else {
         console.error('getCoaches returned non-array:', data);
         setCoaches([]);
@@ -266,9 +260,6 @@ export function AdminCoaches({ onNavigate }: AdminCoachesProps) {
   const handlePageNavigate = (page: Page) => {
     window.location.href = '/';
   };
-
-  // Debug logging
-  console.log('AdminCoaches render - loading:', loading, 'coaches:', coaches.length);
 
   return (
     <AdminLayout

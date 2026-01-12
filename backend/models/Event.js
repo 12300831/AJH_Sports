@@ -59,14 +59,30 @@ export const Event = {
 
   // Update event
   update: async (id, eventData) => {
-    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = eventData;
-    const [result] = await pool.query(
-      `UPDATE events 
-       SET name = ?, description = ?, date = ?, time = ?, max_players = ?, price = ?, location = ?, image_url = ?, hero_image_url = ?, status = ?
-       WHERE id = ?`,
-      [name, description, date, time, max_players, price, location, image_url, hero_image_url, status, id]
-    );
-    return result.affectedRows > 0;
+    try {
+      const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = eventData;
+      
+      console.log('📝 Event.update - SQL update for ID:', id);
+      console.log('📝 Event.update - Data:', { name, description, date, time, max_players, price, location, image_url, hero_image_url, status });
+      
+      const [result] = await pool.query(
+        `UPDATE events 
+         SET name = ?, description = ?, date = ?, time = ?, max_players = ?, price = ?, location = ?, image_url = ?, hero_image_url = ?, status = ?
+         WHERE id = ?`,
+        [name, description, date, time, max_players, price, location, image_url, hero_image_url, status, id]
+      );
+      
+      console.log('✅ Event.update - Result:', {
+        affectedRows: result.affectedRows,
+        changedRows: result.changedRows,
+        warningCount: result.warningCount
+      });
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error('❌ Event.update - Database error:', error);
+      throw error;
+    }
   },
 
   // Soft delete event (set status to 'inactive')

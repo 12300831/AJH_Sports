@@ -5,6 +5,7 @@ import { AdminCoaches } from './AdminCoaches';
 import { AdminUsers } from './AdminUsers';
 import { AdminBookings } from './AdminBookings';
 import { getUserProfile } from '../../services/adminService';
+import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -28,6 +29,7 @@ const pathToAdminPage: Record<string, AdminPage> = {
 };
 
 export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
+  const { user, token } = useAuth();
   const [currentAdminPage, setCurrentAdminPage] = useState<AdminPage>('admin');
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +56,6 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
 
   const checkAdminAccess = async () => {
     try {
-      const token = localStorage.getItem('token');
       if (!token) {
         setIsAuthorized(false);
         setLoading(false);
@@ -67,28 +68,19 @@ export function AdminWrapper({ onNavigate }: AdminWrapperProps) {
         return String(role).toLowerCase() === 'admin';
       };
 
-      // First check localStorage for quick access
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          if (isAdminRole(user.role)) {
-            setIsAuthorized(true);
-            setLoading(false);
-            return;
-          }
-        } catch (e) {
-          console.error('Error parsing stored user:', e);
-        }
+      // Check user from AuthContext first (already fetched from API)
+      if (user && isAdminRole(user.role)) {
+        setIsAuthorized(true);
+        setLoading(false);
+        return;
       }
 
-      // If not in localStorage or not admin, check via API
-      const user = await getUserProfile();
-      const userRole = user.role || (user as any)?.role;
+      // If user not in context yet, fetch from API
+      const userProfile = await getUserProfile();
+      const userRole = userProfile.role || (userProfile as any)?.role;
       
       if (isAdminRole(userRole)) {
         setIsAuthorized(true);
-        localStorage.setItem('user', JSON.stringify(user));
       } else {
         setIsAuthorized(false);
         toast.error('Access denied. Admin privileges required.');
