@@ -142,6 +142,25 @@ router.post('/', async (req, res) => {
       }
     }
     
+    // Fix event image columns - check if they're VARCHAR and convert to TEXT
+    const [eventImageColumns] = await connection.query(`
+      SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'events'
+      AND COLUMN_NAME IN ('image_url', 'hero_image_url')
+    `, [process.env.DB_NAME || 'ajh_sports']);
+    
+    for (const col of eventImageColumns) {
+      if (col.DATA_TYPE === 'varchar') {
+        try {
+          await connection.query(`ALTER TABLE events MODIFY COLUMN ${col.COLUMN_NAME} TEXT NULL`);
+          console.log(`✅ Converted ${col.COLUMN_NAME} from VARCHAR to TEXT`);
+        } catch (err) {
+          console.error(`⚠️  Failed to convert ${col.COLUMN_NAME}:`, err.message);
+        }
+      }
+    }
+    
     // Step 5: Create coach_bookings table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS coach_bookings (
