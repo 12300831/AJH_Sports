@@ -442,4 +442,88 @@ router.post('/seed-all', async (req, res) => {
   }
 });
 
+// Fix event image columns (VARCHAR to TEXT for base64 images)
+router.post('/fix-event-images', async (req, res) => {
+  let connection;
+  
+  try {
+    console.log('🔧 Fixing event image columns (VARCHAR → TEXT)...');
+    
+    connection = await pool.getConnection();
+    
+    // Check existing columns
+    const [columns] = await connection.query(`
+      SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'events'
+      AND COLUMN_NAME IN ('image_url', 'hero_image_url')
+    `, [process.env.DB_NAME || 'ajh_sports']);
+    
+    const fixes = [];
+    
+    for (const col of columns) {
+      if (col.DATA_TYPE === 'varchar') {
+        fixes.push({
+          name: col.COLUMN_NAME,
+          action: 'MODIFY'
+        });
+      }
+    }
+    
+    // Also check if columns don't exist
+    const existingNames = columns.map(c => c.COLUMN_NAME);
+    if (!existingNames.includes('image_url')) {
+      fixes.push({ name: 'image_url', action: 'ADD' });
+    }
+    if (!existingNames.includes('hero_image_url')) {
+      fixes.push({ name: 'hero_image_url', action: 'ADD' });
+    }
+    
+    if (fixes.length === 0) {
+      connection.release();
+      return res.json({
+        success: true,
+        message: 'All image columns are already TEXT type',
+        columns: columns.map(c => ({ name: c.COLUMN_NAME, type: c.DATA_TYPE }))
+      });
+    }
+    
+    // Fix columns
+    for (const fix of fixes) {
+      try {
+        if (fix.action === 'ADD') {
+          const position = fix.name === 'image_url' ? 'AFTER location' : 'AFTER image_url';
+          await connection.query(`ALTER TABLE events ADD COLUMN ${fix.name} TEXT NULL ${position}`);
+          console.log(`✅ Added column: ${fix.name} as TEXT`);
+        } else {
+          await connection.query(`ALTER TABLE events MODIFY COLUMN ${fix.name} TEXT NULL`);
+          console.log(`✅ Modified column: ${fix.name} to TEXT`);
+        }
+      } catch (err) {
+        if (err.code !== 'ER_DUP_FIELDNAME') {
+          console.error(`❌ Error fixing ${fix.name}:`, err.message);
+          throw err;
+        }
+      }
+    }
+
+    connection.release();
+    
+    res.json({
+      success: true,
+      message: `Fixed ${fixes.length} column(s) to TEXT type`,
+      fixedColumns: fixes.map(f => f.name)
+    });
+    
+  } catch (error) {
+    if (connection) connection.release();
+    console.error('Migration error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code
+    });
+  }
+});
+
 export default router;
