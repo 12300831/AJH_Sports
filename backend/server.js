@@ -45,6 +45,8 @@ import coachRoutes from "./routes/coachRoutes.js";
 import bookingPaymentRoutes from "./routes/bookingPaymentRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import setupRoutes from "./routes/setupRoutes.js";
+import migrateRoutes from "./routes/migrateRoutes.js";
 
 // Middleware imports
 import { logger } from "./middleware/logger.js";
@@ -63,6 +65,8 @@ const defaultOrigins = [
   'http://127.0.0.1:3001',
   'http://localhost:3002',  // Vite fallback port
   'http://127.0.0.1:3002',
+  'https://ajh-sports-308b4.web.app',  // Firebase Hosting
+  'https://ajh-sports-308b4.firebaseapp.com',  // Firebase Hosting (alternate)
 ];
 const envOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')
@@ -139,6 +143,8 @@ app.use("/api/events", eventRoutes);
 app.use("/api/coaches", coachRoutes);
 app.use("/api/booking-payments", bookingPaymentRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/setup", setupRoutes);
+app.use("/api/migrate", migrateRoutes);
 
 // Root API endpoint - shows available routes
 app.get('/api', (req, res) => {
