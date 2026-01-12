@@ -178,7 +178,8 @@ export const updateEvent = async (req, res) => {
       location: location !== undefined ? (location || '') : event.location, // Allow empty string for location
       image_url: image_url !== undefined ? (image_url || null) : event.image_url, // Allow clearing with empty string
       hero_image_url: hero_image_url !== undefined ? (hero_image_url || null) : event.hero_image_url, // Allow clearing with empty string
-      status: isValidString(status) ? status : event.status
+      status: isValidString(status) ? status : event.status,
+      age_group: age_group !== undefined ? (age_group || null) : event.age_group
     };
 
     console.log('📤 Updating event with data:', updateData);
