@@ -119,9 +119,20 @@ export const createEvent = async (req, res) => {
     });
   } catch (error) {
     console.error("Create event error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      sqlMessage: error.sqlMessage,
+      sqlState: error.sqlState
+    });
     res.status(500).json({
       success: false,
-      message: "Error creating event"
+      message: "Error creating event",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      details: process.env.NODE_ENV === 'development' ? {
+        code: error.code,
+        sqlMessage: error.sqlMessage
+      } : undefined
     });
   }
 };

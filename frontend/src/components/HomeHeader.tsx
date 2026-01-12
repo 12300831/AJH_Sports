@@ -21,6 +21,9 @@ const LOGO_SRC = '/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png';
 export function HomeHeader({ onNavigate, activePage = 'coaches' }: HomeHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  
+  // Check if user is admin
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   const handleLogout = () => {
     if (logout) {
@@ -213,10 +216,10 @@ export function HomeHeader({ onNavigate, activePage = 'coaches' }: HomeHeaderPro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border-gray-200 shadow-lg">
               <DropdownMenuItem
-                onClick={() => handleNavClick('player')}
+                onClick={() => handleNavClick(isAdmin ? 'admin' : 'player')}
                 className="cursor-pointer focus:bg-[#e0cb23]/10 focus:text-[#030213]"
               >
-                Account Settings
+                {isAdmin ? 'Admin Dashboard' : 'Account Settings'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -278,10 +281,10 @@ export function HomeHeader({ onNavigate, activePage = 'coaches' }: HomeHeaderPro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border-gray-200 shadow-lg">
               <DropdownMenuItem
-                onClick={() => handleNavClick('player')}
+                onClick={() => handleNavClick(isAdmin ? 'admin' : 'player')}
                 className="cursor-pointer focus:bg-[#e0cb23]/10 focus:text-[#030213]"
               >
-                Account Settings
+                {isAdmin ? 'Admin Dashboard' : 'Account Settings'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -352,10 +355,10 @@ export function HomeHeader({ onNavigate, activePage = 'coaches' }: HomeHeaderPro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border-gray-200 shadow-lg">
               <DropdownMenuItem
-                onClick={() => handleNavClick('player')}
+                onClick={() => handleNavClick(isAdmin ? 'admin' : 'player')}
                 className="cursor-pointer focus:bg-[#e0cb23]/10 focus:text-[#030213]"
               >
-                Account Settings
+                {isAdmin ? 'Admin Dashboard' : 'Account Settings'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

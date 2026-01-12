@@ -72,6 +72,11 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     status: 'active' as 'active' | 'inactive' | 'cancelled' | 'completed',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  
+  // Image preview states
+  const [cardImagePreview, setCardImagePreview] = useState<string | null>(null);
+  const [heroImagePreview, setHeroImagePreview] = useState<string | null>(null);
+  const [draggedImageType, setDraggedImageType] = useState<'card' | 'hero' | null>(null);
 
   // Load events on mount - always fetch fresh data from MySQL
   useEffect(() => {
@@ -120,6 +125,80 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     return Object.keys(errors).length === 0;
   };
 
+  // Handle image upload (convert to base64)
+  const handleImageUpload = (file: File, type: 'card' | 'hero') => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      if (type === 'card') {
+        setCardImagePreview(result);
+        setFormData({ ...formData, image_url: result });
+      } else {
+        setHeroImagePreview(result);
+        setFormData({ ...formData, hero_image_url: result });
+      }
+      toast.success(`${type === 'card' ? 'Card' : 'Hero'} image uploaded successfully`);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent, type: 'card' | 'hero') => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedImageType(type);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedImageType(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, type: 'card' | 'hero') => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggedImageType(null);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleImageUpload(file, type);
+    }
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'card' | 'hero') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file, type);
+    }
+  };
+
+  // Clear image
+  const clearImage = (type: 'card' | 'hero') => {
+    if (type === 'card') {
+      setCardImagePreview(null);
+      setFormData({ ...formData, image_url: '' });
+    } else {
+      setHeroImagePreview(null);
+      setFormData({ ...formData, hero_image_url: '' });
+    }
+  };
+
   const handleOpenDialog = (event?: Event) => {
     if (event) {
       setEditingEvent(event);
@@ -135,6 +214,9 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         hero_image_url: event.hero_image_url || '',
         status: event.status || 'active',
       });
+      // Set preview images
+      setCardImagePreview(event.image_url || null);
+      setHeroImagePreview(event.hero_image_url || null);
     } else {
       setEditingEvent(null);
       setFormData({
@@ -149,6 +231,9 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         hero_image_url: '',
         status: 'active',
       });
+      // Clear preview images
+      setCardImagePreview(null);
+      setHeroImagePreview(null);
     }
     setFormErrors({});
     setIsDialogOpen(true);
@@ -171,10 +256,13 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     try {
       console.log('📝 Submitting event form:', { editingEvent: editingEvent?.id, formData });
       
+      // Format date to YYYY-MM-DD (remove time if present)
+      const formattedDate = formData.date ? formData.date.split('T')[0] : formData.date;
+      
       const eventData: CreateEventData = {
         name: formData.name.trim(),
         description: formData.description.trim() || '',
-        date: formData.date,
+        date: formattedDate,
         time: formData.time,
         max_players: formData.max_players,
         price: formData.price,
@@ -349,29 +437,114 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                     />
                   </div>
 
-            {/* Image URL Fields */}
+            {/* Image Upload Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                <label className="text-sm font-medium mb-1 block">Card Image URL</label>
-                <Input
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                  type="url"
-                />
-                <p className="text-xs text-gray-500 mt-1">Image shown on event cards</p>
-              </div>
+              {/* Card Image Upload */}
               <div>
-                <label className="text-sm font-medium mb-1 block">Hero Image URL</label>
-                <Input
-                  value={formData.hero_image_url}
-                  onChange={(e) => setFormData({ ...formData, hero_image_url: e.target.value })}
-                  placeholder="https://example.com/hero.jpg"
-                  type="url"
-                />
-                <p className="text-xs text-gray-500 mt-1">Large image for event details</p>
+                <label className="text-sm font-medium mb-2 block">Card Image</label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
+                    draggedImageType === 'card'
+                      ? 'border-[#e0cb23] bg-[#e0cb23]/10'
+                      : 'border-gray-300 hover:border-[#e0cb23]'
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, 'card')}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'card')}
+                  onClick={() => document.getElementById('card-image-input')?.click()}
+                >
+                  {cardImagePreview || formData.image_url ? (
+                    <div className="relative">
+                      <img
+                        src={cardImagePreview || formData.image_url || ''}
+                        alt="Card preview"
+                        className="w-full h-32 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearImage('card');
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <p className="mt-2 text-sm text-gray-600">Drag & drop or click to upload</p>
+                      <p className="text-xs text-gray-500 mt-1">Image shown on event cards (max 5MB)</p>
+                    </div>
+                  )}
+                  <input
+                    id="card-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileInputChange(e, 'card')}
+                    className="hidden"
+                  />
+                </div>
               </div>
-                  </div>
+
+              {/* Hero Image Upload */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Hero Image</label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer ${
+                    draggedImageType === 'hero'
+                      ? 'border-[#e0cb23] bg-[#e0cb23]/10'
+                      : 'border-gray-300 hover:border-[#e0cb23]'
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, 'hero')}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, 'hero')}
+                  onClick={() => document.getElementById('hero-image-input')?.click()}
+                >
+                  {heroImagePreview || formData.hero_image_url ? (
+                    <div className="relative">
+                      <img
+                        src={heroImagePreview || formData.hero_image_url || ''}
+                        alt="Hero preview"
+                        className="w-full h-32 object-cover rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearImage('hero');
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <p className="mt-2 text-sm text-gray-600">Drag & drop or click to upload</p>
+                      <p className="text-xs text-gray-500 mt-1">Large image for event details (max 5MB)</p>
+                    </div>
+                  )}
+                  <input
+                    id="hero-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileInputChange(e, 'hero')}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>

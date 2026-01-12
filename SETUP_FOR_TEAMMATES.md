@@ -95,6 +95,41 @@ sudo mysql_secure_installation
    FRONTEND_URL=http://localhost:5173
    ```
 
+## Using Railway (shared DB)
+
+Want the whole team on one shared cloud database? Use Railway instead of local MySQL:
+
+1) Create a Railway MySQL instance  
+   - Sign up at https://railway.app → New Project → Provision MySQL.  
+   - Open the MySQL service → Connect tab → copy host, port, user, password, and database name.
+
+2) Configure backend to use Railway  
+   ```bash
+   cd backend
+   cp .env.shared.example .env   # has Railway placeholders
+   ```
+   Then edit `.env` and replace the `DB_*` values with the Railway credentials you copied. Keep `PORT`, `JWT_SECRET`, and `FRONTEND_URL` as appropriate for local dev.
+
+3) Initialize the shared database (run once)  
+   ```bash
+   cd backend
+   npm run setup-db       # creates tables on Railway
+   npm run db:create-admin
+   npm run db:seed-events # optional sample events
+   ```
+   After this, everyone pointing to the same Railway DB will see the same data.
+
+4) Connect and verify  
+   ```bash
+   # replace placeholders with your Railway values
+   mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p <DB_NAME>
+   ```
+   If it connects, the backend can, too. If not, double-check creds in `.env`.
+
+5) Share with teammates  
+   - Commit `backend/.env.shared.example` (already added) with placeholders only.  
+   - Do NOT commit your real `.env`. Share actual Railway creds securely (1Password/Bitwarden/Slack DM).
+
 ## Step 5: Create Database and Tables
 
 ```bash

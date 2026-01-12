@@ -14,7 +14,7 @@ const ensureEventImageColumns = async () => {
 
   try {
     const [rows] = await pool.query(
-      `SELECT COLUMN_NAME 
+      `SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
          FROM INFORMATION_SCHEMA.COLUMNS 
         WHERE TABLE_SCHEMA = ? 
           AND TABLE_NAME = 'events' 
@@ -22,20 +22,35 @@ const ensureEventImageColumns = async () => {
       [databaseName]
     );
 
-    const existingColumns = rows.map((row) => row.COLUMN_NAME);
+    const existingColumns = rows.map((row) => ({
+      name: row.COLUMN_NAME,
+      type: row.DATA_TYPE,
+      maxLength: row.CHARACTER_MAXIMUM_LENGTH
+    }));
     const alters = [];
 
-    if (!existingColumns.includes("image_url")) {
-      alters.push("ADD COLUMN image_url VARCHAR(1024) NULL AFTER location");
+    const imageUrlCol = existingColumns.find(c => c.name === 'image_url');
+    if (!imageUrlCol) {
+      alters.push("ADD COLUMN image_url TEXT NULL AFTER location");
+    } else if (imageUrlCol.type === 'varchar' && imageUrlCol.maxLength && imageUrlCol.maxLength < 65535) {
+      // Change VARCHAR to TEXT if it's too small for base64 images
+      alters.push("MODIFY COLUMN image_url TEXT NULL");
     }
-    if (!existingColumns.includes("hero_image_url")) {
-      alters.push("ADD COLUMN hero_image_url VARCHAR(1024) NULL AFTER image_url");
+
+    const heroImageUrlCol = existingColumns.find(c => c.name === 'hero_image_url');
+    if (!heroImageUrlCol) {
+      alters.push("ADD COLUMN hero_image_url TEXT NULL AFTER image_url");
+    } else if (heroImageUrlCol.type === 'varchar' && heroImageUrlCol.maxLength && heroImageUrlCol.maxLength < 65535) {
+      // Change VARCHAR to TEXT if it's too small for base64 images
+      alters.push("MODIFY COLUMN hero_image_url TEXT NULL");
     }
 
     if (alters.length) {
-      console.log("⚙️  Event model detected missing image columns. Adding now...");
-      await pool.query(`ALTER TABLE events ${alters.join(", ")}`);
-      console.log("✅ Event image columns added to events table");
+      console.log("⚙️  Event model detected image column issues. Fixing now...");
+      for (const alter of alters) {
+        await pool.query(`ALTER TABLE events ${alter}`);
+      }
+      console.log("✅ Event image columns updated to TEXT type");
     }
 
     eventImageColumnsEnsured = true;
