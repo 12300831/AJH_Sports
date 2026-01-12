@@ -126,7 +126,7 @@ export const Booking = {
        FROM coach_bookings cb
        JOIN coaches c ON cb.coach_id = c.id
        WHERE cb.user_id = ?
-       ORDER BY cb.date DESC, cb.time DESC`,
+       ORDER BY cb.booking_date DESC, cb.booking_time DESC`,
       [userId]
     );
     return rows;
