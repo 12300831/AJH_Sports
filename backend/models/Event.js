@@ -104,11 +104,11 @@ export const Event = {
   // Create event
   create: async (eventData) => {
     await ensureEventImageColumns();
-    const { name, description, date, time, max_players, price, location, status, image_url, hero_image_url } = eventData;
+    const { name, description, date, time, max_players, price, location, status, age_group, image_url, hero_image_url } = eventData;
     const [result] = await pool.query(
-      `INSERT INTO events (name, description, date, time, max_players, price, location, image_url, hero_image_url, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, date, time, max_players || 20, price || 0, location, image_url || null, hero_image_url || null, status || "active"]
+      `INSERT INTO events (name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, description, date, time, max_players || 20, price || 0, location, image_url || null, hero_image_url || null, status || "active", age_group || null]
     );
     return result.insertId;
   },

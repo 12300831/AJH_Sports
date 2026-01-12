@@ -87,7 +87,7 @@ export const getEventById = async (req, res) => {
 // Admin: Create event
 export const createEvent = async (req, res) => {
   try {
-    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group } = req.body;
 
     // Validation
     if (!name || !date || !time) {
@@ -107,7 +107,8 @@ export const createEvent = async (req, res) => {
       location,
       image_url: image_url || null,
       hero_image_url: hero_image_url || null,
-      status: status || "active"
+      status: status || "active",
+      age_group: age_group || null
     });
 
     const event = await Event.findById(eventId);
@@ -141,7 +142,7 @@ export const createEvent = async (req, res) => {
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group } = req.body;
 
     console.log('📝 Update event request:', { id, body: req.body });
 

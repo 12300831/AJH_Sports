@@ -310,7 +310,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           category: category,
           featured: displayData.featured ?? false,
           fullDescription: displayData.fullDescription || be.description,
-          whoCanJoin: displayData.whoCanJoin || 'All ages and skill levels',
+          whoCanJoin: be.age_group || displayData.whoCanJoin || 'All ages and skill levels',
           entryFee: `$${be.price} per person`,
           whatsIncluded: displayData.whatsIncluded || 'Equipment and refreshments',
           registrationDeadline: displayData.registrationDeadline || 'Register in advance',

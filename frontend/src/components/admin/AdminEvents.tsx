@@ -69,7 +69,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     location: '',
     image_url: '',
     hero_image_url: '',
-    status: 'active' as 'active' | 'inactive' | 'cancelled' | 'completed',
+    age_group: '' as string,
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -212,7 +212,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         location: event.location || '',
         image_url: event.image_url || '',
         hero_image_url: event.hero_image_url || '',
-        status: event.status || 'active',
+        age_group: event.age_group || '',
       });
       // Set preview images
       setCardImagePreview(event.image_url || null);
@@ -229,7 +229,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         location: '',
         image_url: '',
         hero_image_url: '',
-        status: 'active',
+        age_group: '',
       });
       // Clear preview images
       setCardImagePreview(null);
@@ -269,7 +269,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         location: formData.location.trim() || '',
         image_url: formData.image_url?.trim() || undefined,
         hero_image_url: formData.hero_image_url?.trim() || undefined,
-        status: formData.status,
+        age_group: formData.age_group?.trim() || undefined,
       };
 
       console.log('📤 Sending event data:', eventData);
@@ -583,23 +583,12 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-1 block">Status</label>
-                      <Select
-                        value={formData.status}
-                  onValueChange={(value: 'active' | 'inactive' | 'cancelled' | 'completed') => 
-                          setFormData({ ...formData, status: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <label className="text-sm font-medium mb-1 block">Age Group</label>
+                      <Input
+                        value={formData.age_group}
+                        onChange={(e) => setFormData({ ...formData, age_group: e.target.value })}
+                        placeholder="e.g., All ages welcome, Beginner to Advanced levels"
+                      />
                     </div>
                   </div>
 

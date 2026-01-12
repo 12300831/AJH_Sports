@@ -85,7 +85,7 @@ export interface Event {
   location?: string;
   image_url?: string | null;
   hero_image_url?: string | null;
-  status?: 'active' | 'inactive' | 'cancelled' | 'completed';
+  age_group?: string;
   created_at?: string;
 }
 
@@ -99,7 +99,7 @@ export interface CreateEventData {
   location?: string;
   image_url?: string;
   hero_image_url?: string;
-  status?: 'active' | 'inactive' | 'cancelled' | 'completed';
+  age_group?: string;
 }
 
 export const getEvents = async (): Promise<Event[]> => {
