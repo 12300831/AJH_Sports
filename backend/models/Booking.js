@@ -98,7 +98,7 @@ export const Booking = {
   createCoachBooking: async (bookingData) => {
     const { coach_id, user_id, date, time, duration, status, payment_status, stripe_session_id, notes } = bookingData;
     const [result] = await pool.query(
-      `INSERT INTO coach_bookings (coach_id, user_id, date, time, duration, status, payment_status, stripe_session_id, notes) 
+      `INSERT INTO coach_bookings (coach_id, user_id, booking_date, booking_time, duration, status, payment_status, stripe_session_id, notes) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [coach_id, user_id, date, time, duration || 60, status || "pending", payment_status || "pending", stripe_session_id, notes]
     );
@@ -141,11 +141,11 @@ export const Booking = {
     const params = [coachId];
 
     if (date) {
-      query += " AND cb.date = ?";
+      query += " AND cb.booking_date = ?";
       params.push(date);
     }
 
-    query += " ORDER BY cb.date ASC, cb.time ASC";
+    query += " ORDER BY cb.booking_date ASC, cb.booking_time ASC";
 
     const [rows] = await pool.query(query, params);
     return rows;
