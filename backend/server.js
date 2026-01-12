@@ -46,7 +46,6 @@ import bookingPaymentRoutes from "./routes/bookingPaymentRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import setupRoutes from "./routes/setupRoutes.js";
-import pool from "./config/db.js";
 import migrateRoutes from "./routes/migrateRoutes.js";
 
 // Middleware imports
@@ -145,48 +144,6 @@ app.use("/api/coaches", coachRoutes);
 app.use("/api/booking-payments", bookingPaymentRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/setup", setupRoutes);
-
-// Temporary endpoint to fix event image columns
-app.post("/api/fix-event-columns", async (req, res) => {
-  let connection;
-  try {
-    connection = await pool.getConnection();
-    
-    // Fix image_url column
-    try {
-      await connection.query(`ALTER TABLE events MODIFY COLUMN image_url TEXT NULL`);
-      console.log('✅ Fixed image_url column');
-    } catch (err) {
-      if (err.code !== 'ER_BAD_FIELD_ERROR') {
-        console.error('Error fixing image_url:', err.message);
-      }
-    }
-    
-    // Fix hero_image_url column
-    try {
-      await connection.query(`ALTER TABLE events MODIFY COLUMN hero_image_url TEXT NULL`);
-      console.log('✅ Fixed hero_image_url column');
-    } catch (err) {
-      if (err.code !== 'ER_BAD_FIELD_ERROR') {
-        console.error('Error fixing hero_image_url:', err.message);
-      }
-    }
-    
-    connection.release();
-    
-    res.json({
-      success: true,
-      message: 'Event image columns fixed to TEXT type'
-    });
-  } catch (error) {
-    if (connection) connection.release();
-    console.error('Fix error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
 app.use("/api/migrate", migrateRoutes);
 
 // Root API endpoint - shows available routes
