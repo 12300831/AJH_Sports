@@ -8,6 +8,82 @@ import pool from '../config/db.js';
 
 const router = express.Router();
 
+// Fix event image columns (VARCHAR to TEXT for base64 images)
+router.post('/events-image-columns', async (req, res) => {
+  let connection;
+  
+  try {
+    console.log('🔧 Fixing event image columns (VARCHAR → TEXT)...');
+    
+    connection = await pool.getConnection();
+    
+    // Check existing columns
+    const [columns] = await connection.query(`
+      SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'events'
+      AND COLUMN_NAME IN ('image_url', 'hero_image_url')
+    `, [process.env.DB_NAME || 'ajh_sports']);
+    
+    const existingColumns = columns.map(col => ({
+      name: col.COLUMN_NAME,
+      type: col.DATA_TYPE,
+      maxLength: col.CHARACTER_MAXIMUM_LENGTH
+    }));
+    
+    const columnsToFix = [];
+    
+    const imageUrlCol = existingColumns.find(c => c.name === 'image_url');
+    if (!imageUrlCol) {
+      columnsToFix.push({ name: 'image_url', action: 'ADD COLUMN image_url TEXT NULL' });
+    } else if (imageUrlCol.type === 'varchar') {
+      columnsToFix.push({ name: 'image_url', action: 'MODIFY COLUMN image_url TEXT NULL' });
+    }
+    
+    const heroImageUrlCol = existingColumns.find(c => c.name === 'hero_image_url');
+    if (!heroImageUrlCol) {
+      columnsToFix.push({ name: 'hero_image_url', action: 'ADD COLUMN hero_image_url TEXT NULL' });
+    } else if (heroImageUrlCol.type === 'varchar') {
+      columnsToFix.push({ name: 'hero_image_url', action: 'MODIFY COLUMN hero_image_url TEXT NULL' });
+    }
+    
+    if (columnsToFix.length === 0) {
+      return res.json({
+        success: true,
+        message: 'All image columns are already TEXT type',
+        existingColumns
+      });
+    }
+    
+    // Fix columns
+    for (const col of columnsToFix) {
+      try {
+        await connection.query(`ALTER TABLE events ${col.action}`);
+        console.log(`✅ Fixed column: ${col.name} → TEXT`);
+      } catch (err) {
+        if (err.code !== 'ER_DUP_FIELDNAME') throw err;
+      }
+    }
+    
+    connection.release();
+    
+    res.json({
+      success: true,
+      message: `Fixed ${columnsToFix.length} column(s) to TEXT type`,
+      fixedColumns: columnsToFix.map(c => c.name)
+    });
+    
+  } catch (error) {
+    if (connection) connection.release();
+    console.error('Migration error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code
+    });
+  }
+});
+
 // Add missing columns to coaches table
 router.post('/coaches-columns', async (req, res) => {
   let connection;
