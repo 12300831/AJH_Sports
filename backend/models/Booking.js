@@ -202,11 +202,11 @@ export const Booking = {
     const [rows] = await pool.query(
       `SELECT cb.*, c.name as coach_name, c.specialty,
               u.name as user_name, u.email as user_email, u.phone as user_phone,
-              cb.date as session_date, cb.time as session_time
+              cb.booking_date as session_date, cb.booking_time as session_time
        FROM coach_bookings cb
        JOIN coaches c ON cb.coach_id = c.id
        JOIN users u ON cb.user_id = u.id
-       ORDER BY cb.date DESC, cb.time DESC`
+       ORDER BY cb.booking_date DESC, cb.booking_time DESC`
     );
     return rows;
   },
