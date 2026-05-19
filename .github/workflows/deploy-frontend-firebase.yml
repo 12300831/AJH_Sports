@@ -1,24 +1,41 @@
 name: Deploy Frontend to Firebase Hosting
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
   push:
     branches:
       - main
     paths:
       - 'frontend/**'
+      - 'firebase.json'
+      - '.firebaserc'
       - '.github/workflows/deploy-frontend-firebase.yml'
 
 env:
   NODE_VERSION: '20.x'
+  FIREBASE_PROJECT_ID: ajh-sports-308b4
+  VITE_API_URL: https://ajh-sports-backend.azurewebsites.net/api
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify Firebase service account secret
+        run: |
+          if [ -z "$FIREBASE_SA" ]; then
+            echo "::error::Missing GitHub secret FIREBASE_SERVICE_ACCOUNT."
+            echo "Create it: GitHub repo → Settings → Secrets and variables → Actions → New repository secret"
+            echo "Value: full JSON from Firebase Console → Project settings → Service accounts → Generate new private key"
+            exit 1
+          fi
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,13 +51,13 @@ jobs:
       - name: Build
         working-directory: ./frontend
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL != '' && secrets.VITE_API_URL || env.VITE_API_URL }}
         run: npm run build
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Authenticate to Google Cloud (Firebase)
+        uses: google-github-actions/auth@v2
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: ajh-sports-308b4
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools@14.4.0 deploy --only hosting --project "${{ env.FIREBASE_PROJECT_ID }}" --non-interactive
