@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getAPI_URL } from '../services/api';
 
 interface User {
   id: number;
@@ -54,7 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+      // Use centralized API URL function with production detection
+      const API_URL = getAPI_URL();
+      
       const response = await fetch(`${API_URL}/users/profile`, {
         headers: {
           'Authorization': `Bearer ${tokenToUse}`,

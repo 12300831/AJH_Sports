@@ -99,14 +99,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       let newContactMessages = 0;
       let recentMessages: any[] = [];
       try {
-        const getApiUrl = () => {
-          const envUrl = import.meta.env.VITE_API_URL;
-          if (envUrl) {
-            return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-          }
-          return 'http://localhost:5001/api';
-        };
-        const API_URL = getApiUrl();
+        // Use centralized API URL function
+        const API_URL = getAPI_URL();
         const token = localStorage.getItem('token');
         if (token) {
           const allMessagesResponse = await fetch(`${API_URL}/contact?limit=100`, {

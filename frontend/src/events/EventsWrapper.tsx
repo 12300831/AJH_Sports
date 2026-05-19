@@ -281,6 +281,16 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
     try {
       const backendEvents = await apiFetchEvents();
       
+      // Some DB rows may contain base64 data URLs (data:image/...) which MUST NOT have query params.
+      // If a stale value like "data:image/...;base64,....?t=123" exists, strip the query part.
+      const sanitizeImageSrc = (src: string | null | undefined) => {
+        if (!src) return src as any;
+        if (src.startsWith('data:image') && src.includes('?')) {
+          return src.split('?')[0];
+        }
+        return src;
+      };
+
       // Transform backend events to frontend format
       // Note: Backend already filters out inactive events for public access
       const transformedEvents: Event[] = backendEvents.map((be) => {
@@ -291,8 +301,8 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
         // 1. Backend image_url/hero_image_url (if set by admin)
         // 2. Default display data (hardcoded for known events)
         // 3. Default fallback images
-        const cardImage = be.image_url || displayData.image || Image_tennis_court;
-        const heroImage = be.hero_image_url || be.image_url || displayData.heroImage || Image_tennis_hero;
+        const cardImage = sanitizeImageSrc(be.image_url) || displayData.image || Image_tennis_court;
+        const heroImage = sanitizeImageSrc(be.hero_image_url) || sanitizeImageSrc(be.image_url) || displayData.heroImage || Image_tennis_hero;
         
         return {
           id: be.id,
@@ -312,7 +322,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
           fullDescription: displayData.fullDescription || be.description,
           whoCanJoin: be.age_group || displayData.whoCanJoin || 'All ages and skill levels',
           entryFee: `$${be.price} per person`,
-          whatsIncluded: displayData.whatsIncluded || 'Equipment and refreshments',
+          whatsIncluded: be.whats_included || displayData.whatsIncluded || 'Equipment and refreshments',
           registrationDeadline: displayData.registrationDeadline || 'Register in advance',
           venue: displayData.venue || be.location || 'AJH Sportscentre',
         };
@@ -505,7 +515,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
       const gapi = (window as any).gapi;
       
       // CONFIGURATION: Replace with your Google OAuth 2.0 Client ID
-      const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+      const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '908553395072-ke2sbv4tncqsfi3uo1rn2r01jpmabjo2.apps.googleusercontent.com';
       
       // CONFIGURATION: Add your API key if using API key instead of OAuth
       // For public calendars, you can use API key instead of OAuth
@@ -1185,7 +1195,7 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
   if (selectedEvent) {
     return (
       <div className="bg-white relative w-full min-h-screen flex flex-col" data-name="Event Detail Page">
-        <Header onNavigate={handleNavClick} currentPage={undefined} />
+        <Header onNavigate={handleNavClick} currentPage="events" />
         
         {/* Hero Image Section */}
         <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] relative overflow-hidden bg-gradient-to-br from-[#030213] to-[#1a1a2e]">
@@ -1488,23 +1498,52 @@ export function EventsWrapper({ onNavigate }: EventsWrapperProps) {
 
             {/* Register Now Button (only shown when not in confirmation step) */}
             {!showPaymentConfirmation && (
-              <button
-                onClick={handleRegisterNow}
-                disabled={isProcessingPayment || selectedEvent.spots === 0}
-                className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed ${
-                  selectedEvent.spots === 0 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
-                    : 'bg-black text-white hover:bg-[#333]'
-                }`}
-              >
-                {isProcessingPayment 
-                  ? 'Processing...' 
-                  : selectedEvent.spots === 0 
-                    ? 'Event Fully Booked' 
-                    : isUserLoggedIn() 
-                      ? 'Register Now' 
-                      : 'Log In to Register'}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleRegisterNow}
+                  disabled={isProcessingPayment || selectedEvent.spots === 0}
+                  className={`font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedEvent.spots === 0 
+                      ? 'bg-gray-400 text-white cursor-not-allowed' 
+                      : 'bg-black text-white hover:bg-[#333]'
+                  }`}
+                >
+                  {isProcessingPayment 
+                    ? 'Processing...' 
+                    : selectedEvent.spots === 0 
+                      ? 'Event Fully Booked' 
+                      : isUserLoggedIn() 
+                        ? 'Register Now' 
+                        : 'Log In to Register'}
+                </button>
+                
+                {/* Test Payment Button - Only for Table Tennis Tournament */}
+                {selectedEvent.title.toLowerCase().includes('table tennis tournament') && isUserLoggedIn() && (
+                  <button
+                    onClick={async () => {
+                      if (!selectedEvent) return;
+                      
+                      try {
+                        // Simulate payment success by redirecting to payment success page with test flag
+                        const mockSessionId = `cs_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        const successUrl = `/paymentSuccess?session_id=${mockSessionId}&event_id=${selectedEvent.id}&test=true`;
+                        
+                        toast.info('🧪 Test Mode: Simulating payment success...');
+                        
+                        // Direct navigation to payment success page with query params
+                        // Use window.location to ensure proper routing
+                        window.location.href = successUrl;
+                      } catch (error) {
+                        console.error('Test payment error:', error);
+                        toast.error('Failed to simulate payment. Please try the real payment flow.');
+                      }
+                    }}
+                    className="font-['Inter:Semi_Bold',sans-serif] font-semibold text-sm md:text-base px-6 md:px-8 py-3 md:py-4 rounded-lg transition-colors shadow-lg hover:shadow-xl bg-yellow-500 text-black hover:bg-yellow-600 w-full sm:w-auto"
+                  >
+                    🧪 Test Payment Flow
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -29,13 +29,18 @@ async function findOrCreateUser(profile, provider) {
     if (Array.isArray(existingUsers) && existingUsers.length > 0) {
       const existingUser = existingUsers[0];
       
-      // Ensure role and status have default values if missing
+      // CRITICAL: Preserve admin role - never overwrite it with OAuth login
+      // Only set default role if user doesn't have one (shouldn't happen, but defensive)
       if (!existingUser.role) {
         existingUser.role = 'User';
       }
+      // Ensure status has default value if missing
       if (!existingUser.status) {
         existingUser.status = 'Active';
       }
+      
+      // IMPORTANT: Admin role must remain unchanged - OAuth cannot change admin status
+      // The existing role (especially 'Admin') is preserved as-is
       
       // Update provider info if not set and update lastActive
       if (!existingUser.provider || !existingUser.provider_id) {
@@ -142,8 +147,15 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
-const BACKEND_PORT = process.env.PORT || '5001';
-const BACKEND_URL = `http://localhost:${BACKEND_PORT}`;
+// Use environment variable for backend URL, fallback to localhost for development
+// In production (Azure), this should be set to https://ajh-sports-backend.azurewebsites.net
+// For local development, it defaults to localhost
+const BACKEND_URL = process.env.BACKEND_URL || 
+  (process.env.AZURE_WEBSITE_HOSTNAME 
+    ? `https://${process.env.AZURE_WEBSITE_HOSTNAME}` 
+    : (process.env.PORT ? `http://localhost:${process.env.PORT}` : 'http://localhost:5001'));
+
+console.log('🔗 OAuth callback URL base:', BACKEND_URL);
 
 // Google OAuth Strategy (only if credentials are provided)
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
@@ -156,9 +168,21 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
+          console.log('🔵 Google OAuth profile received:', {
+            id: profile.id,
+            email: profile.emails?.[0]?.value,
+            name: profile.displayName
+          });
           const user = await findOrCreateUser(profile, 'google');
+          console.log('✅ Google OAuth user found/created:', { id: user.id, email: user.email });
           return done(null, user);
         } catch (error) {
+          console.error('❌ Google OAuth strategy error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code
+          });
           return done(error, undefined);
         }
       }

@@ -26,7 +26,7 @@ export function OAuthSuccess({ onNavigate }: OAuthSuccessProps) {
     }
 
     if (token) {
-      // Use auth context to login
+      // Use auth context to login (it will fetch user profile automatically)
       login(token);
       
       toast.success('Login successful!');
@@ -34,26 +34,28 @@ export function OAuthSuccess({ onNavigate }: OAuthSuccessProps) {
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Fetch user profile to determine redirect
-      // The login function will fetch the profile, but we need to wait a bit
-      // to check the role before redirecting
-      setTimeout(() => {
-        // Check user role from token (basic check)
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          const userRole = payload.role ? String(payload.role).toLowerCase() : '';
-          
-          if (userRole === 'admin') {
+      // Check user role from token to determine redirect
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role ? String(payload.role).toLowerCase() : '';
+        
+        // Redirect based on role
+        if (userRole === 'admin') {
+          setTimeout(() => {
             onNavigate('admin');
-          } else {
-            onNavigate('player');
-          }
-        } catch (e) {
-          // If we can't parse the token, default to player dashboard
-          console.error('Error parsing token:', e);
-          onNavigate('player');
+          }, 500);
+        } else {
+          setTimeout(() => {
+            onNavigate('home');
+          }, 500);
         }
-      }, 500);
+      } catch (e) {
+        // If we can't parse the token, default to home
+        console.error('Error parsing token:', e);
+        setTimeout(() => {
+          onNavigate('home');
+        }, 500);
+      }
     } else {
       // No token found, redirect to signin
       toast.error('No authentication token received.');

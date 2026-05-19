@@ -4,7 +4,7 @@
  */
 
 // Get API URL from centralized config
-import { API_URL } from './api';
+import { getAPI_URL } from './api';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {
@@ -17,16 +17,21 @@ if (import.meta.env.DEV) {
 }
 
 export interface CreateCheckoutSessionRequest {
-  eventId: string;
+  eventId?: string; // Event ID for event bookings
   eventName: string;
   amount: number;
   currency?: string;
   customerEmail?: string;
   successUrl?: string;
   cancelUrl?: string;
-  bookingType?: 'event' | 'coach'; // Type of booking
+  bookingType?: 'event' | 'coach' | 'lesson'; // Type of booking
   coachId?: string; // Coach ID for coach bookings
+  lessonId?: string; // Lesson ID for lesson bookings
+  bookingType_lesson?: 'single' | 'pack'; // 'single' or 'pack' for lesson bookings
   bookingId?: string; // Booking ID if booking already exists
+  bookingDate?: string; // For coach bookings: date (YYYY-MM-DD)
+  bookingTime?: string; // For coach bookings: time (HH:MM)
+  bookingDuration?: number; // For coach bookings: duration in minutes
 }
 
 export interface CreateCheckoutSessionResponse {
@@ -76,7 +81,7 @@ export const createCheckoutSession = async (
   data: CreateCheckoutSessionRequest
 ): Promise<CreateCheckoutSessionResponse> => {
   try {
-    const url = `${API_URL}/payments/create-checkout-session`;
+    const url = `${getAPI_URL()}/payments/create-checkout-session`;
     const token = getAuthToken();
     
     if (!token) {
@@ -144,7 +149,7 @@ export const getCheckoutSession = async (
   sessionId: string
 ): Promise<CheckoutSessionResponse> => {
   try {
-    const response = await fetch(`${API_URL}/payments/session/${sessionId}`, {
+    const response = await fetch(`${getAPI_URL()}/payments/session/${sessionId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -57,13 +57,13 @@ export const updateProfile = async (req, res) => {
     // Handle profileImage update (base64 can be large, so use TEXT column)
     if (profileImage !== undefined) {
       if (profileImage && profileImage.trim()) {
-        // Validate base64 string length (max ~7MB base64 = ~5MB image)
+        // Validate base64 string length (max ~14MB base64 = ~10MB image)
         const base64Length = profileImage.trim().length;
         console.log('📸 Received profileImage update, length:', base64Length);
-        if (base64Length > 7000000) {
+        if (base64Length > 14000000) {
           return res.status(400).json({
             success: false,
-            message: "Image is too large. Maximum size is 5MB"
+            message: "Image is too large. Maximum size is 10MB"
           });
         }
         updates.profileImage = profileImage.trim();

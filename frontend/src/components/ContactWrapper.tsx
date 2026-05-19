@@ -10,15 +10,11 @@ interface ContactWrapperProps {
 
 const LOGO_SRC = "/images/e8dadc63068e8cb8da040a6443512ba36cbcfb97.png";
 
-// Get API URL from environment or use default
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
+// Use centralized API URL function
+import { getAPI_URL } from '../services/api';
 
+// Get API URL dynamically
+const getApiUrl = () => getAPI_URL();
 const API_URL = getApiUrl();
 
 export function ContactWrapper({ onNavigate }: ContactWrapperProps) {

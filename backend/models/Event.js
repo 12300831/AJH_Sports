@@ -104,11 +104,11 @@ export const Event = {
   // Create event
   create: async (eventData) => {
     await ensureEventImageColumns();
-    const { name, description, date, time, max_players, price, location, status, age_group, image_url, hero_image_url } = eventData;
+    const { name, description, date, time, max_players, price, location, status, age_group, whats_included, image_url, hero_image_url } = eventData;
     const [result] = await pool.query(
-      `INSERT INTO events (name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name, description, date, time, max_players || 20, price || 0, location, image_url || null, hero_image_url || null, status || "active", age_group || null]
+      `INSERT INTO events (name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name, description, date, time, max_players || 20, price || 0, location, image_url || null, hero_image_url || null, status || "active", age_group || null, whats_included || null]
     );
     return result.insertId;
   },
@@ -117,16 +117,16 @@ export const Event = {
   update: async (id, eventData) => {
     try {
       await ensureEventImageColumns();
-      const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status } = eventData;
+      const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included } = eventData;
       
       console.log('📝 Event.update - SQL update for ID:', id);
-      console.log('📝 Event.update - Data:', { name, description, date, time, max_players, price, location, image_url, hero_image_url, status });
+      console.log('📝 Event.update - Data:', { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included });
       
       const [result] = await pool.query(
         `UPDATE events 
-         SET name = ?, description = ?, date = ?, time = ?, max_players = ?, price = ?, location = ?, image_url = ?, hero_image_url = ?, status = ?
+         SET name = ?, description = ?, date = ?, time = ?, max_players = ?, price = ?, location = ?, image_url = ?, hero_image_url = ?, status = ?, age_group = ?, whats_included = ?
          WHERE id = ?`,
-        [name, description, date, time, max_players, price, location, image_url, hero_image_url, status, id]
+        [name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included, id]
       );
       
       console.log('✅ Event.update - Result:', {

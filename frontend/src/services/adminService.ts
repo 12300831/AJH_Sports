@@ -4,7 +4,7 @@
  */
 
 // Get API URL from centralized config
-import { API_URL } from './api';
+import { getAPI_URL } from './api';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {
@@ -36,7 +36,7 @@ const apiCall = async (
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(`${getAPI_URL()}${endpoint}`, {
     ...options,
     headers,
   });
@@ -86,6 +86,7 @@ export interface Event {
   image_url?: string | null;
   hero_image_url?: string | null;
   age_group?: string;
+  whats_included?: string;
   created_at?: string;
 }
 
@@ -100,6 +101,7 @@ export interface CreateEventData {
   image_url?: string;
   hero_image_url?: string;
   age_group?: string;
+  whats_included?: string;
 }
 
 export const getEvents = async (): Promise<Event[]> => {
@@ -160,6 +162,20 @@ export const deleteEvent = async (id: number): Promise<void> => {
   });
 };
 
+export const hardDeleteEvent = async (id: number): Promise<void> => {
+  await apiCall(`/events/${id}/hard-delete`, {
+    method: 'DELETE',
+  });
+};
+
+export const sendTestEmail = async (eventId: number, testEmail: string): Promise<{ success: boolean; message: string }> => {
+  const response = await apiCall(`/events/${eventId}/test-email`, {
+    method: 'POST',
+    body: JSON.stringify({ testEmail }),
+  });
+  return response.json();
+};
+
 // ==================== COACHES ====================
 export interface Coach {
   id: number;
@@ -167,9 +183,24 @@ export interface Coach {
   specialty: string;
   email?: string;
   phone?: string;
-  availability: string | Array<{ day: string; start: string; end: string }>;
+  location?: string;
+  availability: string | Array<{ 
+    type?: 'pattern' | 'date'; // 'pattern' for day-of-week, 'date' for specific dates
+    day?: string; // For pattern-based availability
+    date?: string; // For date-specific availability (YYYY-MM-DD)
+    start: string; // Time (HH:MM)
+    end: string; // Time (HH:MM)
+    startDate?: string; // Optional: start date for pattern range (YYYY-MM-DD)
+    endDate?: string; // Optional: end date for pattern range (YYYY-MM-DD)
+  }>;
   hourly_rate: number;
+  allowed_durations?: number[] | string; // Array of allowed durations in minutes
   status?: 'active' | 'inactive';
+  image_url?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  instagram_url?: string;
+  facebook_url?: string;
   created_at?: string;
 }
 
@@ -178,13 +209,30 @@ export interface CreateCoachData {
   specialty: string;
   email?: string;
   phone?: string;
-  availability: Array<{ day: string; start: string; end: string }>;
+  location?: string;
+  availability: Array<{ 
+    type?: 'pattern' | 'date'; // 'pattern' for day-of-week, 'date' for specific dates
+    day?: string; // For pattern-based availability
+    date?: string; // For date-specific availability (YYYY-MM-DD)
+    start: string; // Time (HH:MM)
+    end: string; // Time (HH:MM)
+    startDate?: string; // Optional: start date for pattern range (YYYY-MM-DD)
+    endDate?: string; // Optional: end date for pattern range (YYYY-MM-DD)
+  }>;
   hourly_rate: number;
+  allowed_durations?: number[]; // Array of allowed durations in minutes (e.g., [60, 90, 120])
   status?: 'active' | 'inactive';
+  image_url?: string;
+  linkedin_url?: string;
+  twitter_url?: string;
+  instagram_url?: string;
+  facebook_url?: string;
 }
 
 export const getCoaches = async (): Promise<Coach[]> => {
-  const response = await apiCall('/coaches');
+  // Add cache-busting timestamp to ensure fresh data
+  const timestamp = Date.now();
+  const response = await apiCall(`/coaches?_t=${timestamp}`);
   const result = await response.json();
   // Backend returns { success: true, coaches: [...] }
   const coaches = result.coaches || result || [];
@@ -250,6 +298,115 @@ export const deleteCoach = async (id: number): Promise<void> => {
   });
 };
 
+export const hardDeleteCoach = async (id: number): Promise<void> => {
+  await apiCall(`/coaches/${id}/hard-delete`, {
+    method: 'DELETE',
+  });
+};
+
+// ==================== LESSONS ====================
+export interface Lesson {
+  id: number;
+  title: string;
+  description?: string;
+  image_url?: string | null;
+  pricing: Array<{ label: string; single: string; pack: string }>;
+  category: 'Tennis' | 'Table Tennis' | 'Modified Sports';
+  image_position: 'left' | 'right';
+  cta_text?: string;
+  status?: 'active' | 'inactive';
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateLessonData {
+  title: string;
+  description?: string;
+  image_url?: string;
+  pricing: Array<{ label: string; single: string; pack: string }>;
+  category?: 'Tennis' | 'Table Tennis' | 'Modified Sports';
+  image_position?: 'left' | 'right';
+  cta_text?: string;
+  status?: 'active' | 'inactive';
+  display_order?: number;
+}
+
+export const getLessons = async (): Promise<Lesson[]> => {
+  const timestamp = Date.now();
+  const response = await apiCall(`/lessons?_t=${timestamp}`);
+  const result = await response.json();
+  const lessons = result.lessons || result || [];
+  return lessons.map((lesson: Lesson) => {
+    let pricing = lesson.pricing;
+    if (typeof lesson.pricing === 'string') {
+      try {
+        pricing = JSON.parse(lesson.pricing);
+      } catch (e) {
+        pricing = [];
+      }
+    }
+    return {
+      ...lesson,
+      pricing: Array.isArray(pricing) ? pricing : [],
+    };
+  });
+};
+
+export const getLessonById = async (id: number): Promise<Lesson> => {
+  const response = await apiCall(`/lessons/${id}`);
+  const result = await response.json();
+  const lesson = result.lesson || result;
+  let pricing = lesson.pricing;
+  if (typeof lesson.pricing === 'string') {
+    try {
+      pricing = JSON.parse(lesson.pricing);
+    } catch (e) {
+      pricing = [];
+    }
+  }
+  return {
+    ...lesson,
+    pricing: Array.isArray(pricing) ? pricing : [],
+  };
+};
+
+export const createLesson = async (data: CreateLessonData): Promise<Lesson> => {
+  const response = await apiCall('/lessons', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  const result = await response.json();
+  return result.lesson || result;
+};
+
+export const updateLesson = async (id: number, data: CreateLessonData): Promise<void> => {
+  await apiCall(`/lessons/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteLesson = async (id: number): Promise<void> => {
+  await apiCall(`/lessons/${id}`, {
+    method: 'DELETE',
+  });
+};
+
+export const hardDeleteLesson = async (id: number): Promise<void> => {
+  await apiCall(`/lessons/${id}/hard-delete`, {
+    method: 'DELETE',
+  });
+};
+
+export const sendLessonTestEmail = async (lessonId: number, testEmail: string, bookingType: 'single' | 'pack' = 'single'): Promise<{ success: boolean; message: string }> => {
+  const response = await apiCall(`/lessons/${lessonId}/test-email`, {
+    method: 'POST',
+    body: JSON.stringify({ testEmail, bookingType }),
+  });
+  return response.json();
+};
+
 // ==================== USERS ====================
 export interface User {
   id: number;
@@ -261,17 +418,21 @@ export interface User {
   phone: string | null;
   location: string | null;
   role: 'Admin' | 'User';
-  status: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned';
+  sports: 'Tennis' | 'Table Tennis';
+  status?: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Banned'; // Kept for backward compatibility
   joinedDate: string;
   lastActive: string;
   lastActiveTimestamp?: string;
   profileImage?: string | null;
+  provider?: string | null; // 'google', 'facebook', or null for email/password users
+  provider_id?: string | null; // OAuth provider's user ID
 }
 
 export interface UserFilters {
   search?: string;
   role?: string;
-  status?: string;
+  sports?: string; // Changed from status to sports
+  status?: string; // Kept for backward compatibility
   dateFrom?: string;
   dateTo?: string;
   page?: number;
@@ -412,6 +573,25 @@ export interface CoachBooking {
   specialty?: string;
 }
 
+export interface LessonBooking {
+  id: number;
+  lesson_id: number;
+  user_id: number;
+  booking_type: 'single' | 'pack';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  payment_status: 'pending' | 'paid' | 'refunded';
+  stripe_session_id?: string | null;
+  payment_intent_id?: string | null;
+  sessions_remaining?: number | null;
+  lesson_title?: string;
+  lesson_category?: string;
+  user_name?: string;
+  user_email?: string;
+  user_phone?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const getEventBookings = async (): Promise<EventBooking[]> => {
   const response = await apiCall('/events/bookings/all');
   const result = await response.json();
@@ -424,9 +604,15 @@ export const getCoachBookings = async (): Promise<CoachBooking[]> => {
   return result.bookings || [];
 };
 
+export const getLessonBookings = async (): Promise<LessonBooking[]> => {
+  const response = await apiCall('/lessons/bookings/all');
+  const result = await response.json();
+  return result.bookings || [];
+};
+
 export const updateBookingStatus = async (
   bookingId: number,
-  type: 'event' | 'coach',
+  type: 'event' | 'coach' | 'lesson',
   status: 'pending' | 'confirmed' | 'cancelled'
 ): Promise<void> => {
   await apiCall('/coaches/bookings/status', {

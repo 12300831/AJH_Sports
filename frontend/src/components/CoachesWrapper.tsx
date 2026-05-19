@@ -38,6 +38,42 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
   };
 
   const [view, setView] = useState<CoachView>(getInitialView());
+  const [coachesListKey, setCoachesListKey] = useState(Date.now());
+  const [lessonsListKey, setLessonsListKey] = useState(Date.now());
+  
+  // Force remount of CoachesPage when view changes to 'list' to ensure fresh data
+  useEffect(() => {
+    if (view === 'list') {
+      // Increment key to force remount, ensuring fresh data fetch
+      setCoachesListKey(Date.now());
+      // Also trigger a reload event for immediate refresh
+      window.dispatchEvent(new CustomEvent('coachesPageReload'));
+    }
+  }, [view]);
+
+  // Force remount of Coaching page when view changes to 'lessons' to ensure fresh data
+  useEffect(() => {
+    if (view === 'lessons') {
+      // Increment key to force remount, ensuring fresh data fetch
+      setLessonsListKey(Date.now());
+      // Also trigger a reload event for immediate refresh
+      window.dispatchEvent(new CustomEvent('lessonsPageReload'));
+    }
+  }, [view]);
+
+  // Force reload when component mounts and view is already 'list' or 'lessons'
+  // This ensures fresh data when navigating to coaches/lessons page from another page
+  useEffect(() => {
+    if (view === 'list') {
+      console.log('🔄 CoachesWrapper mounted with list view - triggering reload');
+      setCoachesListKey(Date.now());
+      window.dispatchEvent(new CustomEvent('coachesPageReload'));
+    } else if (view === 'lessons') {
+      console.log('🔄 CoachesWrapper mounted with lessons view - triggering reload');
+      setLessonsListKey(Date.now());
+      window.dispatchEvent(new CustomEvent('lessonsPageReload'));
+    }
+  }, []); // Empty deps - only on mount
 
   // Ensure page scrolls to top when component mounts or view changes
   useEffect(() => {
@@ -71,7 +107,19 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
     const text = target.textContent?.trim();
     const normalizedText = text?.replace(/\u2019/g, "'"); // normalize smart quotes in menu items
 
+    // Don't interfere with buttons or modals
+    if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('[role="dialog"]')) {
+      return; // Let buttons and modals handle their own clicks
+    }
+
+    // Only prevent default on navigation links (header menu), not social media links
+    // Check if it's a social media link by checking if it has target="_blank" and rel="noopener noreferrer"
     if (target.tagName === 'A') {
+      const link = target as HTMLAnchorElement;
+      // Allow social media links to work normally
+      if (link.target === '_blank' && link.rel.includes('noopener')) {
+        return; // Don't prevent default for external links
+      }
       e.preventDefault();
     }
 
@@ -183,13 +231,25 @@ export function CoachesWrapper({ onNavigate }: CoachesWrapperProps) {
       ) : view === 'receipt' ? (
         <Receipt onBack={() => setView('paymentsuccess')} />
       ) : view === 'lessons' ? (
-        <Coaching onBack={() => setView('landing')} />
+        <Coaching key={`lessons-${lessonsListKey}`} onBack={() => setView('landing')} />
       ) : view === 'list' ? (
-        <CoachesPage onViewProfile={handleViewProfile} onBack={handleBackToLanding} />
+        <CoachesPage key={`coaches-list-${coachesListKey}`} onViewProfile={handleViewProfile} onBack={handleBackToLanding} />
       ) : (
         <Coaches
-          onShowCoachesList={() => setView('list')}
-          onShowLessons={() => setView('lessons')}
+          onShowCoachesList={() => {
+            console.log('🔄 View Our Coaches clicked - switching to list view and forcing reload');
+            // Force reload by updating key and triggering event
+            setCoachesListKey(Date.now());
+            window.dispatchEvent(new CustomEvent('coachesPageReload'));
+            setView('list');
+          }}
+          onShowLessons={() => {
+            console.log('🔄 View Tennis Lessons clicked - switching to lessons view and forcing reload');
+            // Force reload by updating key and triggering event
+            setLessonsListKey(Date.now());
+            window.dispatchEvent(new CustomEvent('lessonsPageReload'));
+            setView('lessons');
+          }}
         />
       )}
     </div>

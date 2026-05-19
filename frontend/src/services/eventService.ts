@@ -1,17 +1,13 @@
 /**
  * Event Service
- * Handles event-related API calls
+ * Handles event-related API calls and lesson API calls
  */
 
-const getApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl) {
-    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-  }
-  return 'http://localhost:5001/api';
-};
+// Use centralized API URL function
+import { getAPI_URL } from './api';
 
-const API_URL = getApiUrl();
+// Re-export for backward compatibility
+export const getApiUrl = () => getAPI_URL();
 
 export interface Event {
   id: number;
@@ -69,6 +65,70 @@ export const getCurrentUser = (): { id: number; email: string; name: string; rol
 };
 
 /**
+ * Lesson interface for public API
+ */
+export interface Lesson {
+  id: number;
+  title: string;
+  description?: string;
+  image_url?: string | null;
+  pricing: Array<{ label: string; single: string; pack: string }>;
+  category: 'Tennis' | 'Table Tennis' | 'Modified Sports';
+  image_position: 'left' | 'right';
+  cta_text?: string;
+  status?: 'active' | 'inactive';
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Fetch all lessons from the backend
+ * Always fetches fresh data from MySQL - no caching
+ */
+export const fetchLessons = async (): Promise<Lesson[]> => {
+  try {
+    // Add cache-busting timestamp to ensure fresh data
+    const timestamp = Date.now();
+    const response = await fetch(`${getApiUrl()}/lessons?_t=${timestamp}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch lessons: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const lessons = data.lessons || data || [];
+    
+    // Parse pricing if it's a string
+    return lessons.map((lesson: any) => {
+      let pricing = lesson.pricing;
+      if (typeof pricing === 'string') {
+        try {
+          pricing = JSON.parse(pricing);
+        } catch (e) {
+          pricing = [];
+        }
+      }
+      return {
+        ...lesson,
+        pricing: Array.isArray(pricing) ? pricing : [],
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+    throw error;
+  }
+};
+
+/**
  * Fetch all events from the backend
  * Always fetches fresh data from MySQL - no caching
  */
@@ -76,7 +136,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
   try {
     // Add cache-busting timestamp to ensure fresh data
     const timestamp = Date.now();
-    const response = await fetch(`${API_URL}/events?_t=${timestamp}`, {
+    const response = await fetch(`${getApiUrl()}/events?_t=${timestamp}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -103,7 +163,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
  */
 export const fetchEventById = async (eventId: number): Promise<Event | null> => {
   try {
-    const response = await fetch(`${API_URL}/events/${eventId}`, {
+    const response = await fetch(`${getApiUrl()}/events/${eventId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -136,7 +196,7 @@ export const bookEvent = async (eventId: number): Promise<{ success: boolean; me
   }
 
   try {
-    const response = await fetch(`${API_URL}/events/book`, {
+    const response = await fetch(`${getApiUrl()}/events/book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -169,7 +229,7 @@ export const cancelEventBooking = async (bookingId: number): Promise<{ success: 
   }
 
   try {
-    const response = await fetch(`${API_URL}/events/cancel/${bookingId}`, {
+    const response = await fetch(`${getApiUrl()}/events/cancel/${bookingId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -201,7 +261,7 @@ export const getMyEventBookings = async (): Promise<EventBooking[]> => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/events/bookings/my`, {
+    const response = await fetch(`${getApiUrl()}/events/bookings/my`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

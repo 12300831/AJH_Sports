@@ -16,9 +16,27 @@ export const getCoaches = async (req, res) => {
 
     const coaches = await Coach.findAll(filters);
 
+    // Parse availability JSON for each coach
+    const coachesWithParsedAvailability = coaches.map(coach => {
+      if (coach.availability && typeof coach.availability === 'string') {
+        try {
+          coach.availability = JSON.parse(coach.availability);
+        } catch (e) {
+          console.error(`Error parsing availability for coach ${coach.id}:`, e);
+          coach.availability = [];
+        }
+      }
+      return coach;
+    });
+
+    // Prevent caching to ensure fresh data
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
     res.json({
       success: true,
-      coaches
+      coaches: coachesWithParsedAvailability
     });
   } catch (error) {
     console.error("Get coaches error:", error);
@@ -40,6 +58,16 @@ export const getCoachById = async (req, res) => {
         success: false,
         message: "Coach not found"
       });
+    }
+
+    // Parse availability JSON if it's a string
+    if (coach.availability && typeof coach.availability === 'string') {
+      try {
+        coach.availability = JSON.parse(coach.availability);
+      } catch (e) {
+        console.error(`Error parsing availability for coach ${id}:`, e);
+        coach.availability = [];
+      }
     }
 
     // Get upcoming bookings for this coach
@@ -64,13 +92,21 @@ export const getCoachById = async (req, res) => {
 // Admin: Create coach
 export const createCoach = async (req, res) => {
   try {
-    const { name, specialty, email, phone, availability, hourly_rate, status } = req.body;
+    const { name, specialty, email, phone, availability, hourly_rate, status, image_url, linkedin_url, twitter_url, instagram_url, facebook_url } = req.body;
 
     // Validation
     if (!name) {
       return res.status(400).json({
         success: false,
         message: "Name is required"
+      });
+    }
+
+    // Validate image size if provided (max ~14MB base64 = ~10MB image)
+    if (image_url && image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is too large. Maximum size is 10MB"
       });
     }
 
@@ -93,7 +129,12 @@ export const createCoach = async (req, res) => {
       phone,
       availability: availabilityString,
       hourly_rate: hourly_rate || 0,
-      status: status || "active"
+      status: status || "active",
+      image_url: image_url || null,
+      linkedin_url: linkedin_url || null,
+      twitter_url: twitter_url || null,
+      instagram_url: instagram_url || null,
+      facebook_url: facebook_url || null
     });
 
     const coach = await Coach.findById(coachId);
@@ -116,13 +157,26 @@ export const createCoach = async (req, res) => {
 export const updateCoach = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, specialty, email, phone, availability, hourly_rate, status } = req.body;
+    const { name, specialty, email, phone, availability, hourly_rate, status, image_url, linkedin_url, twitter_url, instagram_url, facebook_url } = req.body;
+
+    console.log('📝 Update coach request:', { id, body: req.body });
 
     const coach = await Coach.findById(id);
     if (!coach) {
+      console.error('❌ Coach not found:', id);
       return res.status(404).json({
         success: false,
         message: "Coach not found"
+      });
+    }
+
+    console.log('✅ Found coach:', { id: coach.id, name: coach.name, current_image_url: coach.image_url ? 'exists' : 'null' });
+
+    // Validate image size if provided (max ~14MB base64 = ~10MB image)
+    if (image_url !== undefined && image_url && image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is too large. Maximum size is 10MB"
       });
     }
 
@@ -143,24 +197,53 @@ export const updateCoach = async (req, res) => {
       availabilityString = coach.availability;
     }
 
-    const updated = await Coach.update(id, {
+    const updateData = {
       name: name || coach.name,
       specialty: specialty !== undefined ? specialty : coach.specialty,
       email: email !== undefined ? email : coach.email,
       phone: phone !== undefined ? phone : coach.phone,
       availability: availabilityString,
       hourly_rate: hourly_rate !== undefined ? hourly_rate : coach.hourly_rate,
-      status: status || coach.status
+      status: status || coach.status,
+      image_url: image_url !== undefined ? (image_url || null) : coach.image_url,
+      linkedin_url: linkedin_url !== undefined ? (linkedin_url || null) : coach.linkedin_url,
+      twitter_url: twitter_url !== undefined ? (twitter_url || null) : coach.twitter_url,
+      instagram_url: instagram_url !== undefined ? (instagram_url || null) : coach.instagram_url,
+      facebook_url: facebook_url !== undefined ? (facebook_url || null) : coach.facebook_url
+    };
+
+    console.log('📤 Updating coach with data:', { 
+      ...updateData, 
+      image_url: updateData.image_url ? `base64 (${updateData.image_url.substring(0, 50)}...)` : 'null' 
     });
 
+    const updated = await Coach.update(id, updateData);
+
     if (!updated) {
+      console.error('❌ Coach.update returned false for ID:', id);
       return res.status(400).json({
         success: false,
         message: "Failed to update coach"
       });
     }
 
+    console.log('✅ Coach.update successful, fetching updated coach');
+
     const updatedCoach = await Coach.findById(id);
+    
+    if (!updatedCoach) {
+      console.error('❌ Could not fetch updated coach:', id);
+      return res.status(500).json({
+        success: false,
+        message: "Coach updated but could not fetch updated data"
+      });
+    }
+
+    console.log('✅ Coach updated successfully:', { 
+      id: updatedCoach.id, 
+      name: updatedCoach.name, 
+      image_url: updatedCoach.image_url ? 'exists' : 'null' 
+    });
 
     res.json({
       success: true,
@@ -168,15 +251,16 @@ export const updateCoach = async (req, res) => {
       coach: updatedCoach
     });
   } catch (error) {
-    console.error("Update coach error:", error);
+    console.error("❌ Update coach error:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
-      message: "Error updating coach"
+      message: error.message || "Error updating coach"
     });
   }
 };
 
-// Admin: Delete coach
+// Admin: Delete coach (soft delete - archive)
 export const deleteCoach = async (req, res) => {
   try {
     const { id } = req.params;
@@ -204,6 +288,41 @@ export const deleteCoach = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete coach error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting coach"
+    });
+  }
+};
+
+// Admin: Hard delete coach (permanent deletion)
+export const hardDeleteCoach = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const coach = await Coach.findById(id);
+    if (!coach) {
+      return res.status(404).json({
+        success: false,
+        message: "Coach not found"
+      });
+    }
+
+    const deleted = await Coach.hardDelete(id);
+
+    if (!deleted) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to delete coach"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Coach permanently deleted"
+    });
+  } catch (error) {
+    console.error("Hard delete coach error:", error);
     res.status(500).json({
       success: false,
       message: "Error deleting coach"
@@ -282,6 +401,171 @@ export const bookCoach = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error booking coach session"
+    });
+  }
+};
+
+// Get available time slots for a coach on a specific date
+export const getAvailableTimeSlots = async (req, res) => {
+  try {
+    const { coachId, date } = req.query;
+
+    if (!coachId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: 'coachId and date are required'
+      });
+    }
+
+    const coach = await Coach.findById(coachId);
+    if (!coach) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coach not found'
+      });
+    }
+
+    if (coach.status !== 'active') {
+      return res.json({
+        success: true,
+        availableSlots: [],
+        message: 'Coach is not available'
+      });
+    }
+
+    // Parse availability
+    let availability = [];
+    if (Array.isArray(coach.availability)) {
+      availability = coach.availability;
+    } else if (typeof coach.availability === 'string' && coach.availability.trim() !== '') {
+      try {
+        availability = JSON.parse(coach.availability);
+      } catch (e) {
+        availability = [];
+      }
+    }
+
+    // Get day name from date
+    const dateObj = new Date(date);
+    const dayName = dateObj.toLocaleDateString('en-AU', { weekday: 'long' });
+
+    // Find availability for this day/date
+    // First check for date-specific availability
+    const dateSpecificAvailability = availability.find(av => 
+      av.type === 'date' && av.date === date
+    );
+    
+    let dayAvailability = dateSpecificAvailability;
+    
+    // If no date-specific availability, check pattern-based
+    if (!dayAvailability) {
+      dayAvailability = availability.find(av => {
+        // Pattern-based availability (type: 'pattern' or no type for backward compatibility)
+        if (av.type && av.type !== 'pattern') return false;
+        
+        // Check if day matches
+        if (!av.day || av.day.toLowerCase() !== dayName.toLowerCase()) return false;
+        
+        // Check date range if provided
+        if (av.startDate || av.endDate) {
+          const startDate = av.startDate ? new Date(av.startDate) : null;
+          const endDate = av.endDate ? new Date(av.endDate) : null;
+          const checkDate = new Date(date);
+          checkDate.setHours(0, 0, 0, 0);
+          
+          if (startDate) {
+            startDate.setHours(0, 0, 0, 0);
+            if (checkDate < startDate) return false;
+          }
+          if (endDate) {
+            endDate.setHours(0, 0, 0, 0);
+            if (checkDate > endDate) return false;
+          }
+        }
+        
+        return true;
+      });
+    }
+
+    if (!dayAvailability) {
+      return res.json({
+        success: true,
+        availableSlots: [],
+        message: 'No availability for this day/date range'
+      });
+    }
+
+    // Get existing bookings for this coach on this date
+    const existingBookings = await Booking.getCoachBookingsByCoach(coachId, date);
+    const bookedSlots = existingBookings
+      .filter(b => b.status !== 'cancelled')
+      .map(b => ({
+        start: b.booking_time,
+        duration: b.duration || 60
+      }));
+
+    // Generate all possible time slots (hourly intervals - 1 hour minimum booking)
+    const [startHour, startMin] = dayAvailability.start.split(':').map(Number);
+    const [endHour, endMin] = dayAvailability.end.split(':').map(Number);
+    
+    const allSlots = [];
+    let currentHour = startHour;
+    let currentMin = startMin;
+    
+    // Generate hourly slots (e.g., 5am, 6am, 7am, etc.)
+    while (currentHour < endHour || (currentHour === endHour && currentMin < endMin)) {
+      const timeStr = `${String(currentHour).padStart(2, '0')}:${String(currentMin).padStart(2, '0')}`;
+      allSlots.push(timeStr);
+      
+      // Move to next hour
+      currentHour += 1;
+      // Don't add slots that would exceed the end time
+      if (currentHour > endHour || (currentHour === endHour && currentMin >= endMin)) {
+        break;
+      }
+    }
+
+    // Filter out slots that conflict with existing bookings
+    const availableSlots = allSlots.filter(slotTime => {
+      const slotStart = new Date(`${date}T${slotTime}:00`);
+      
+      // Check if this slot conflicts with any existing booking
+      return !bookedSlots.some(booked => {
+        const bookedStart = new Date(`${date}T${booked.start}`);
+        const bookedEnd = new Date(bookedStart.getTime() + booked.duration * 60000);
+        const slotEnd = new Date(slotStart.getTime() + 60 * 60000); // Assume 1 hour for checking
+        
+        // Check for overlap
+        return slotStart < bookedEnd && slotEnd > bookedStart;
+      });
+    });
+
+    // Get allowed durations from coach (default to [60] if not set)
+    let allowedDurations = [60];
+    if (coach.allowed_durations) {
+      try {
+        if (typeof coach.allowed_durations === 'string') {
+          allowedDurations = JSON.parse(coach.allowed_durations);
+        } else if (Array.isArray(coach.allowed_durations)) {
+          allowedDurations = coach.allowed_durations;
+        }
+      } catch (e) {
+        console.error('Error parsing allowed_durations:', e);
+      }
+    }
+
+    res.json({
+      success: true,
+      availableSlots,
+      allowedDurations,
+      coachName: coach.name,
+      hourlyRate: coach.hourly_rate
+    });
+  } catch (error) {
+    console.error('Get available time slots error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching available time slots'
     });
   }
 };

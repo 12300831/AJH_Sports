@@ -19,9 +19,10 @@ Get-ChildItem -Path . -Exclude node_modules,.env,.git,*.log |
 
 if (Test-Path $zipPath) {
     $size = (Get-Item $zipPath).Length / 1MB
-    Write-Host "✅ Created: backend-deploy.zip ($([math]::Round($size, 2)) MB)" -ForegroundColor Green
+    $sizeRounded = [math]::Round($size, 2)
+    Write-Host "Created: backend-deploy.zip ($sizeRounded MB)" -ForegroundColor Green
 } else {
-    Write-Host "❌ Failed to create zip" -ForegroundColor Red
+    Write-Host "Failed to create zip" -ForegroundColor Red
     exit 1
 }
 

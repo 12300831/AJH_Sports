@@ -69,6 +69,18 @@ export function Header({ onNavigate, showUserInfo = false, currentPage }: Header
     setMobileMenuOpen(false);
   };
 
+  // Helper functions to get navigation colors based on current page
+  // Default to 'home' if currentPage is not provided
+  const activePage = currentPage || 'home';
+  
+  const getNavColor = (page: string) => {
+    return activePage === page ? 'text-[#e0cb23]' : 'text-white';
+  };
+
+  const getNavHover = (page: string) => {
+    return activePage === page ? 'hover:text-white' : 'hover:text-[#e0cb23]';
+  };
+
   return (
     <>
       <header className="bg-black h-auto min-h-[124.5px] w-full relative pb-4 md:pb-0 md:h-[124.5px]">
@@ -89,31 +101,31 @@ export function Header({ onNavigate, showUserInfo = false, currentPage }: Header
         <div className="hidden lg:block">
           <button 
             onClick={() => handleNavClick('home')} 
-            className="absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[190px] not-italic text-[16px] text-[#e0cb23] top-[56px] w-[62px] hover:text-white transition-colors"
+            className={`absolute block cursor-pointer font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[190px] not-italic text-[16px] ${getNavColor('home')} top-[56px] w-[62px] ${getNavHover('home')} transition-colors`}
           >
             <p className="leading-[normal]">Home</p>
           </button>
           <button 
             onClick={() => handleNavClick('events')} 
-            className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] text-white top-[56px] w-[72px] cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[309px] not-italic text-[16px] ${getNavColor('events')} top-[56px] w-[72px] cursor-pointer ${getNavHover('events')} transition-colors`}
           >
             Events
           </button>
           <button 
             onClick={() => handleNavClick('clubs')} 
-            className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] text-white top-[54px] w-[71px] cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[427px] not-italic text-[16px] ${getNavColor('clubs')} top-[54px] w-[71px] cursor-pointer ${getNavHover('clubs')} transition-colors`}
           >
             Clubs
           </button>
           <button 
             onClick={() => handleNavClick('coaches')} 
-            className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] text-white top-[54px] w-[92px] cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[544px] not-italic text-[16px] ${getNavColor('coaches')} top-[54px] w-[92px] cursor-pointer ${getNavHover('coaches')} transition-colors`}
           >
             Coaches
           </button>
           <button 
             onClick={() => handleNavClick('contact')} 
-            className="absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] text-white top-[54px] w-[88px] cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`absolute font-['Inter:Medium',sans-serif] font-medium h-[24px] leading-[normal] left-[667px] not-italic text-[16px] ${getNavColor('contact')} top-[54px] w-[88px] cursor-pointer ${getNavHover('contact')} transition-colors`}
           >
             Contact Us
           </button>
@@ -123,31 +135,31 @@ export function Header({ onNavigate, showUserInfo = false, currentPage }: Header
         <div className="hidden md:flex lg:hidden absolute left-[120px] top-[56px] gap-4 md:gap-6">
           <button 
             onClick={() => handleNavClick('home')} 
-            className="font-['Inter:Medium',sans-serif] font-medium text-sm text-[#e0cb23] cursor-pointer hover:text-white transition-colors"
+            className={`font-['Inter:Medium',sans-serif] font-medium text-sm ${getNavColor('home')} cursor-pointer ${getNavHover('home')} transition-colors`}
           >
             <p>Home</p>
           </button>
           <button 
             onClick={() => handleNavClick('events')} 
-            className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`font-['Inter:Medium',sans-serif] font-medium text-sm ${getNavColor('events')} cursor-pointer ${getNavHover('events')} transition-colors`}
           >
             Events
           </button>
           <button 
             onClick={() => handleNavClick('clubs')} 
-            className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`font-['Inter:Medium',sans-serif] font-medium text-sm ${getNavColor('clubs')} cursor-pointer ${getNavHover('clubs')} transition-colors`}
           >
             Clubs
           </button>
           <button 
             onClick={() => handleNavClick('coaches')} 
-            className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`font-['Inter:Medium',sans-serif] font-medium text-sm ${getNavColor('coaches')} cursor-pointer ${getNavHover('coaches')} transition-colors`}
           >
             Coaches
           </button>
           <button 
             onClick={() => handleNavClick('contact')} 
-            className="font-['Inter:Medium',sans-serif] font-medium text-sm text-white cursor-pointer hover:text-[#e0cb23] transition-colors"
+            className={`font-['Inter:Medium',sans-serif] font-medium text-sm ${getNavColor('contact')} cursor-pointer ${getNavHover('contact')} transition-colors`}
           >
             Contact
           </button>

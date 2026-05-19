@@ -1,6 +1,6 @@
 // Player Service - API calls for player dashboard data
 
-import { API_URL } from './api';
+import { getAPI_URL } from './api';
 
 export interface Booking {
   id: number;
@@ -30,7 +30,7 @@ export interface RecentActivity {
 // Get user profile
 export const getUserProfile = async (token: string) => {
   try {
-    const response = await fetch(`${API_URL}/users/profile`, {
+    const response = await fetch(`${getAPI_URL()}/users/profile`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -60,7 +60,7 @@ export const updateUserProfile = async (token: string, profileData: {
   profileImage?: string;
 }) => {
   try {
-    const response = await fetch(`${API_URL}/users/profile`, {
+    const response = await fetch(`${getAPI_URL()}/users/profile`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -84,7 +84,7 @@ export const updateUserProfile = async (token: string, profileData: {
 // Get user's event bookings
 export const getEventBookings = async (token: string) => {
   try {
-    const response = await fetch(`${API_URL}/events/bookings/my`, {
+    const response = await fetch(`${getAPI_URL()}/events/bookings/my`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -106,7 +106,7 @@ export const getEventBookings = async (token: string) => {
 // Get user's coach bookings
 export const getCoachBookings = async (token: string) => {
   try {
-    const response = await fetch(`${API_URL}/coaches/bookings/my`, {
+    const response = await fetch(`${getAPI_URL()}/coaches/bookings/my`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

@@ -32,6 +32,8 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  hardDeleteEvent,
+  sendTestEmail,
   type Event,
   type CreateEventData,
 } from '../../services/adminService';
@@ -55,7 +57,13 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
   // Dialog states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isHardDeleteDialogOpen, setIsHardDeleteDialogOpen] = useState(false);
+  const [isTestEmailDialogOpen, setIsTestEmailDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
+  const [eventToHardDelete, setEventToHardDelete] = useState<Event | null>(null);
+  const [eventToTestEmail, setEventToTestEmail] = useState<Event | null>(null);
+  const [testEmailAddress, setTestEmailAddress] = useState('');
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   
   // Form state
@@ -70,6 +78,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
     image_url: '',
     hero_image_url: '',
     age_group: '' as string,
+    whats_included: '' as string,
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   
@@ -132,9 +141,9 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
       toast.error('Please select an image file');
       return;
     }
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size must be less than 5MB');
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size must be less than 10MB');
       return;
     }
     // Convert to base64
@@ -213,6 +222,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         image_url: event.image_url || '',
         hero_image_url: event.hero_image_url || '',
         age_group: event.age_group || '',
+        whats_included: event.whats_included || '',
       });
       // Set preview images
       setCardImagePreview(event.image_url || null);
@@ -230,6 +240,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         image_url: '',
         hero_image_url: '',
         age_group: '',
+        whats_included: '',
       });
       // Clear preview images
       setCardImagePreview(null);
@@ -270,6 +281,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
         image_url: formData.image_url?.trim() || undefined,
         hero_image_url: formData.hero_image_url?.trim() || undefined,
         age_group: formData.age_group?.trim() || undefined,
+        whats_included: formData.whats_included?.trim() || undefined,
       };
 
       console.log('📤 Sending event data:', eventData);
@@ -314,6 +326,63 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
       loadEvents();
     } catch (err: any) {
       toast.error(err.message || 'Failed to archive event');
+    }
+  };
+
+  const handleHardDeleteClick = (event: Event) => {
+    setEventToHardDelete(event);
+    setIsHardDeleteDialogOpen(true);
+  };
+
+  const handleTestEmailClick = (event: Event) => {
+    setEventToTestEmail(event);
+    setTestEmailAddress('');
+    setIsTestEmailDialogOpen(true);
+  };
+
+  const handleTestEmailConfirm = async () => {
+    if (!eventToTestEmail || !testEmailAddress.trim()) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(testEmailAddress.trim())) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSendingTestEmail(true);
+    try {
+      const result = await sendTestEmail(eventToTestEmail.id, testEmailAddress.trim());
+      if (result.success) {
+        toast.success(`Test email sent successfully to ${testEmailAddress.trim()}`);
+        setIsTestEmailDialogOpen(false);
+        setEventToTestEmail(null);
+        setTestEmailAddress('');
+      } else {
+        toast.error(result.message || 'Failed to send test email');
+      }
+    } catch (err: any) {
+      console.error('Error sending test email:', err);
+      toast.error(err.message || 'Failed to send test email');
+    } finally {
+      setIsSendingTestEmail(false);
+    }
+  };
+
+  const handleHardDeleteConfirm = async () => {
+    if (!eventToHardDelete) return;
+    
+    try {
+      await hardDeleteEvent(eventToHardDelete.id);
+      toast.success('Event permanently deleted.');
+      setIsHardDeleteDialogOpen(false);
+      setEventToHardDelete(null);
+      loadEvents();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete event');
     }
   };
 
@@ -448,10 +517,25 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                       ? 'border-[#e0cb23] bg-[#e0cb23]/10'
                       : 'border-gray-300 hover:border-[#e0cb23]'
                   }`}
-                  onDragOver={(e) => handleDragOver(e, 'card')}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, 'card')}
-                  onClick={() => document.getElementById('card-image-input')?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDragOver(e, 'card');
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDragLeave(e);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDrop(e, 'card');
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    document.getElementById('card-image-input')?.click();
+                  }}
                 >
                   {cardImagePreview || formData.image_url ? (
                     <div className="relative">
@@ -479,7 +563,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <p className="mt-2 text-sm text-gray-600">Drag & drop or click to upload</p>
-                      <p className="text-xs text-gray-500 mt-1">Image shown on event cards (max 5MB)</p>
+                      <p className="text-xs text-gray-500 mt-1">Image shown on event cards (max 10MB)</p>
                     </div>
                   )}
                   <input
@@ -501,10 +585,25 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                       ? 'border-[#e0cb23] bg-[#e0cb23]/10'
                       : 'border-gray-300 hover:border-[#e0cb23]'
                   }`}
-                  onDragOver={(e) => handleDragOver(e, 'hero')}
-                  onDragLeave={handleDragLeave}
-                  onDrop={(e) => handleDrop(e, 'hero')}
-                  onClick={() => document.getElementById('hero-image-input')?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDragOver(e, 'hero');
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDragLeave(e);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDrop(e, 'hero');
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    document.getElementById('hero-image-input')?.click();
+                  }}
                 >
                   {heroImagePreview || formData.hero_image_url ? (
                     <div className="relative">
@@ -532,7 +631,7 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <p className="mt-2 text-sm text-gray-600">Drag & drop or click to upload</p>
-                      <p className="text-xs text-gray-500 mt-1">Large image for event details (max 5MB)</p>
+                      <p className="text-xs text-gray-500 mt-1">Large image for event details (max 10MB)</p>
                     </div>
                   )}
                   <input
@@ -590,6 +689,16 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                         placeholder="e.g., All ages welcome, Beginner to Advanced levels"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">What's Included</label>
+                    <Textarea
+                      value={formData.whats_included}
+                      onChange={(e) => setFormData({ ...formData, whats_included: e.target.value })}
+                      placeholder="e.g., Equipment and refreshments"
+                      rows={3}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -654,6 +763,86 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
               className="bg-orange-600 hover:bg-orange-700 text-white"
             >
               Archive Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Permanent Delete Confirmation Dialog */}
+      <AlertDialog open={isHardDeleteDialogOpen} onOpenChange={setIsHardDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border border-red-300 shadow-2xl z-[999]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-red-600">
+              ⚠️ Permanently Delete Event?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 mt-2">
+              Are you sure you want to permanently delete "<span className="font-semibold text-gray-800">{eventToHardDelete?.name}</span>"?
+              <br /><br />
+              <span className="text-red-600 font-semibold">This action cannot be undone.</span> The event and all associated data will be permanently removed from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel 
+              onClick={() => setEventToHardDelete(null)}
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleHardDeleteConfirm} 
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Yes, Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Test Email Dialog */}
+      <AlertDialog open={isTestEmailDialogOpen} onOpenChange={setIsTestEmailDialogOpen}>
+        <AlertDialogContent className="bg-white border border-blue-300 shadow-2xl z-[999] max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold text-blue-600">
+              📧 Send Test Email
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 mt-2">
+              Send a test booking confirmation email for "<span className="font-semibold text-gray-800">{eventToTestEmail?.name}</span>"
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Test Email Address
+            </label>
+            <Input
+              type="email"
+              value={testEmailAddress}
+              onChange={(e) => setTestEmailAddress(e.target.value)}
+              placeholder="test@example.com"
+              className="w-full"
+              disabled={isSendingTestEmail}
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              The email will include the session availability message: "For session availability, AJH Sports will contact you soon"
+            </p>
+          </div>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel 
+              onClick={() => {
+                setIsTestEmailDialogOpen(false);
+                setEventToTestEmail(null);
+                setTestEmailAddress('');
+              }}
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300"
+              disabled={isSendingTestEmail}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleTestEmailConfirm} 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isSendingTestEmail || !testEmailAddress.trim()}
+            >
+              {isSendingTestEmail ? 'Sending...' : 'Send Test Email'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -748,7 +937,8 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                   <div className="flex items-center justify-between mb-3 pt-2 border-t">
                     <span className="font-bold">${Number(event.price || 0).toFixed(2)}</span>
                       </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
                           <Button
                             variant="outline"
                             size="sm"
@@ -766,7 +956,28 @@ export function AdminEvents({ onNavigate }: AdminEventsProps) {
                           >
                       {event.status === 'inactive' ? 'Archived' : 'Archive'}
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleHardDeleteClick(event)}
+                      className="px-2 text-xs border-red-300 text-red-600 hover:bg-red-50"
+                            title="Permanently delete event"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </Button>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTestEmailClick(event)}
+                      className="w-full text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                      title="Send test booking confirmation email"
+                    >
+                      📧 Test Email
+                    </Button>
+                  </div>
                   </CardContent>
                 </Card>
               ))}

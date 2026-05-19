@@ -7,6 +7,12 @@ const router = express.Router();
 // Google OAuth initiation
 router.get(
   '/google',
+  (req, res, next) => {
+    console.log('🔵 Google OAuth initiation requested');
+    console.log('Backend URL:', process.env.BACKEND_URL);
+    console.log('Callback URL will be:', `${process.env.BACKEND_URL || 'http://localhost:5001'}/auth/google/callback`);
+    next();
+  },
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     accessType: 'offline',
@@ -17,15 +23,28 @@ router.get(
 // Google OAuth callback
 router.get(
   '/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/auth/error' }),
+  (req, res, next) => {
+    console.log('🔵 Google OAuth callback received');
+    console.log('Query params:', req.query);
+    next();
+  },
+  passport.authenticate('google', { 
+    session: false, 
+    failureRedirect: '/auth/error',
+    failureMessage: true 
+  }),
   (req, res) => {
     try {
+      console.log('✅ Google OAuth authentication successful');
       const user = req.user;
       
       if (!user) {
+        console.error('❌ No user object in request after authentication');
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        return res.redirect(`${frontendUrl}/signin?error=oauth_error`);
+        return res.redirect(`${frontendUrl}/signin?error=oauth_error&message=no_user`);
       }
+
+      console.log('👤 User authenticated:', { id: user.id, email: user.email, role: user.role });
 
       // Normalize role and status
       let userRole = user.role || 'User';
@@ -50,13 +69,16 @@ router.get(
         { expiresIn: '7d' }
       );
 
+      console.log('🎫 JWT token generated, redirecting to frontend');
+
       // Redirect to frontend with token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       res.redirect(`${frontendUrl}/oauth-success?token=${token}`);
     } catch (error) {
-      console.error('Google OAuth callback error:', error);
+      console.error('❌ Google OAuth callback error:', error);
+      console.error('Error stack:', error.stack);
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      res.redirect(`${frontendUrl}/signin?error=oauth_error`);
+      res.redirect(`${frontendUrl}/signin?error=oauth_error&message=${encodeURIComponent(error.message)}`);
     }
   }
 );
@@ -118,8 +140,13 @@ router.get(
 
 // OAuth error handler
 router.get('/error', (req, res) => {
+  console.error('❌ OAuth error handler triggered');
+  console.error('Error query params:', req.query);
+  console.error('Error message:', req.query.error || 'Unknown error');
+  
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  res.redirect(`${frontendUrl}/signin?error=oauth_error`);
+  const errorMessage = req.query.error || 'oauth_error';
+  res.redirect(`${frontendUrl}/signin?error=${errorMessage}`);
 });
 
 export default router;

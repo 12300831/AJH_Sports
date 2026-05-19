@@ -50,12 +50,9 @@ interface AdminUsersProps {
   onNavigate: (page: AdminPage) => void;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  Active: 'bg-green-100 text-green-800 border-green-200',
-  Inactive: 'bg-gray-100 text-gray-800 border-gray-200',
-  Banned: 'bg-red-100 text-red-800 border-red-200',
-  Pending: 'bg-blue-100 text-blue-800 border-blue-200',
-  Suspended: 'bg-orange-100 text-orange-800 border-orange-200',
+const SPORTS_COLORS: Record<string, string> = {
+  Tennis: 'bg-green-100 text-green-800 border-green-200',
+  'Table Tennis': 'bg-blue-100 text-blue-800 border-blue-200',
 };
 
 export function AdminUsers({ onNavigate }: AdminUsersProps) {
@@ -66,7 +63,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sportsFilter, setSportsFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -85,7 +82,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
     email: '',
     username: '',
     role: 'User',
-    status: 'Active',
+    sports: 'Tennis',
     phone: '',
     location: '',
     password: '',
@@ -105,7 +102,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
   useEffect(() => {
     loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, debouncedSearchQuery, roleFilter, statusFilter, dateFilter, sortColumn, sortOrder]);
+  }, [page, rowsPerPage, debouncedSearchQuery, roleFilter, sportsFilter, dateFilter, sortColumn, sortOrder]);
 
   const loadUsers = async () => {
     try {
@@ -115,7 +112,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       const filters: UserFilters = {
         search: debouncedSearchQuery || undefined,
         role: roleFilter !== 'all' ? roleFilter : undefined,
-        status: statusFilter !== 'all' ? statusFilter : undefined,
+        sports: sportsFilter !== 'all' ? sportsFilter : undefined,
         page,
         limit: rowsPerPage,
         sortBy: sortColumn,
@@ -188,7 +185,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
   useEffect(() => {
     loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, debouncedSearchQuery, roleFilter, statusFilter, dateFilter, sortColumn, sortOrder]);
+  }, [page, rowsPerPage, debouncedSearchQuery, roleFilter, sportsFilter, dateFilter, sortColumn, sortOrder]);
 
   const handleDelete = async (id: number) => {
     // Prevent deleting yourself
@@ -226,7 +223,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
         email: fullUser.email || '',
         username: fullUser.username || '',
         role: fullUser.role || 'User',
-        status: fullUser.status || 'Active',
+        sports: fullUser.sports || 'Tennis',
         phone: fullUser.phone || '',
         location: fullUser.location || '',
         password: '',
@@ -248,7 +245,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       email: '',
       username: '',
       role: 'User',
-      status: 'Active',
+        sports: 'Tennis',
       phone: '',
       location: '',
       password: '',
@@ -262,10 +259,18 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
       if (editingUser) {
         // Update existing user
         const updateData: UpdateUserData = { ...formData };
-        // Only include password if it's not empty
-        if (!updateData.password || updateData.password.trim() === '') {
+        
+        // OAuth users cannot have passwords changed
+        if (editingUser.provider) {
+          // Remove password from update data for OAuth users
           delete updateData.password;
+        } else {
+          // Only include password if it's not empty for regular users
+          if (!updateData.password || updateData.password.trim() === '') {
+            delete updateData.password;
+          }
         }
+        
         // Always include profileImage if it exists
         if (formData.profileImage) {
           updateData.profileImage = formData.profileImage;
@@ -295,8 +300,8 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
     window.location.href = '/';
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    return STATUS_COLORS[status] || STATUS_COLORS.Active;
+  const getSportsBadgeClass = (sports: string) => {
+    return SPORTS_COLORS[sports] || SPORTS_COLORS.Tennis;
   };
 
   const handleSort = (column: string) => {
@@ -430,21 +435,18 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 </SelectContent>
               </Select>
 
-              {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={(value) => {
-                setStatusFilter(value);
+              {/* Sports Filter */}
+              <Select value={sportsFilter} onValueChange={(value) => {
+                setSportsFilter(value);
                 setPage(1);
               }}>
                 <SelectTrigger className="w-[180px] border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
-                  <SelectValue placeholder="STATUS" />
+                  <SelectValue placeholder="SPORTS" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200 shadow-lg">
-                  <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Status</SelectItem>
-                  <SelectItem value="Active" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Active</SelectItem>
-                  <SelectItem value="Inactive" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Inactive</SelectItem>
-                  <SelectItem value="Pending" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Pending</SelectItem>
-                  <SelectItem value="Suspended" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Suspended</SelectItem>
-                  <SelectItem value="Banned" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Banned</SelectItem>
+                  <SelectItem value="all" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">All Sports</SelectItem>
+                  <SelectItem value="Tennis" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Tennis</SelectItem>
+                  <SelectItem value="Table Tennis" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Table Tennis</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -524,10 +526,10 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                             <SortIcon column="username" />
                           </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('status')}>
+                        <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('sports')}>
                           <div className="flex items-center gap-2">
-                            Status
-                            <SortIcon column="status" />
+                            Sports
+                            <SortIcon column="sports" />
                           </div>
                         </TableHead>
                         <TableHead className="cursor-pointer hover:bg-[#1a1a2e]" onClick={() => handleSort('role')}>
@@ -575,7 +577,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                           <TableCell colSpan={9} className="text-center py-12 text-gray-500">
                             <p className="text-lg">No users found</p>
                             <p className="text-sm mt-2">
-                              {searchQuery || (roleFilter !== 'all') || (statusFilter !== 'all') || (dateFilter !== 'all')
+                              {searchQuery || (roleFilter !== 'all') || (sportsFilter !== 'all') || (dateFilter !== 'all')
                                 ? 'Try adjusting your filters'
                                 : 'Get started by adding a new user'}
                             </p>
@@ -595,6 +597,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                             joinedDate: user?.joinedDate || (user as any)?.created_at || null,
                             lastActive: user?.lastActive || (user as any)?.updated_at || null,
                             profileImage: user?.profileImage || null,
+                            provider: user?.provider || null, // OAuth provider (google, facebook, or null)
                           };
 
                           return (
@@ -630,13 +633,18 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                                     {(safeUser.fullName || safeUser.email || 'U')[0].toUpperCase()}
                                   </div>
                                   <span className="font-medium">{safeUser.fullName}</span>
+                                  {safeUser.provider && (
+                                    <Badge className="ml-2 bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                                      {safeUser.provider === 'google' ? '🔵 Google' : safeUser.provider === 'facebook' ? '🔵 Facebook' : safeUser.provider}
+                                    </Badge>
+                                  )}
                                 </div>
                               </TableCell>
                               <TableCell>{safeUser.email}</TableCell>
                               <TableCell>{safeUser.username}</TableCell>
-                      <TableCell>
-                                <Badge className={getStatusBadgeClass(safeUser.status)}>
-                                  {safeUser.status}
+                              <TableCell>
+                                <Badge className={getSportsBadgeClass(safeUser.sports || 'Tennis')}>
+                                  {safeUser.sports || 'Tennis'}
                         </Badge>
                       </TableCell>
                               <TableCell>{safeUser.role}</TableCell>
@@ -825,8 +833,8 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                               toast.error('Please select an image file');
                               return;
                             }
-                            if (file.size > 5 * 1024 * 1024) {
-                              toast.error('Image size must be less than 5MB');
+                            if (file.size > 10 * 1024 * 1024) {
+                              toast.error('Image size must be less than 10MB');
                               return;
                             }
                             const reader = new FileReader();
@@ -846,7 +854,7 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-gray-700 mb-1">Profile Picture</h3>
-                  <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 5MB</p>
+                  <p className="text-xs text-gray-500">JPG, PNG or GIF. Max size 10MB</p>
                 </div>
               </div>
 
@@ -884,15 +892,26 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                 <div>
                   <Label htmlFor="password" className="text-sm font-semibold text-gray-700 mb-2 block">
                     {editingUser ? 'New Password (leave blank to keep current)' : 'Password'}
+                    {editingUser?.provider && (
+                      <span className="ml-2 text-xs text-gray-500 font-normal">
+                        (OAuth user - password not applicable)
+                      </span>
+                    )}
                   </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password || ''}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder={editingUser ? 'Enter new password...' : ''}
+                    placeholder={editingUser?.provider ? 'OAuth users do not have passwords' : (editingUser ? 'Enter new password...' : '')}
                     className="border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23]/50"
+                    disabled={!!editingUser?.provider}
                   />
+                  {editingUser?.provider && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      This user signed in with {editingUser.provider === 'google' ? 'Google' : 'Facebook'}. Password management is not available for OAuth users.
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -912,20 +931,17 @@ export function AdminUsers({ onNavigate }: AdminUsersProps) {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="status" className="text-sm font-semibold text-gray-700 mb-2 block">Status</Label>
+                  <Label htmlFor="sports" className="text-sm font-semibold text-gray-700 mb-2 block">Sports</Label>
                   <Select
-                    value={formData.status}
-                    onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                    value={formData.sports || 'Tennis'}
+                    onValueChange={(value: any) => setFormData({ ...formData, sports: value })}
                   >
                     <SelectTrigger className="border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-[#e0cb23]/50 focus-visible:border-[#e0cb23]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200 shadow-lg z-[102]">
-                      <SelectItem value="Active" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Active</SelectItem>
-                      <SelectItem value="Inactive" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Inactive</SelectItem>
-                      <SelectItem value="Pending" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Pending</SelectItem>
-                      <SelectItem value="Suspended" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Suspended</SelectItem>
-                      <SelectItem value="Banned" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Banned</SelectItem>
+                      <SelectItem value="Tennis" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Tennis</SelectItem>
+                      <SelectItem value="Table Tennis" className="hover:bg-[#e0cb23]/10 focus:bg-[#e0cb23]/10 focus:text-[#030213] cursor-pointer">Table Tennis</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

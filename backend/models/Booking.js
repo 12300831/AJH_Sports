@@ -10,11 +10,11 @@ export const Booking = {
 
   // Create event booking
   createEventBooking: async (bookingData) => {
-    const { event_id, user_id, status, payment_status, stripe_session_id } = bookingData;
+    const { event_id, user_id, status, payment_status, stripe_session_id, payment_intent_id } = bookingData;
     const [result] = await pool.query(
-      `INSERT INTO event_bookings (event_id, user_id, status, payment_status, stripe_session_id) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [event_id, user_id, status || "pending", payment_status || "pending", stripe_session_id]
+      `INSERT INTO event_bookings (event_id, user_id, status, payment_status, stripe_session_id, payment_intent_id) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [event_id, user_id, status || "pending", payment_status || "pending", stripe_session_id, payment_intent_id || null]
     );
     return result.insertId;
   },
@@ -96,11 +96,19 @@ export const Booking = {
 
   // Create coach booking
   createCoachBooking: async (bookingData) => {
-    const { coach_id, user_id, date, time, duration, status, payment_status, stripe_session_id, notes } = bookingData;
+    // Support both 'date'/'time' and 'booking_date'/'booking_time' for flexibility
+    const { coach_id, user_id, date, time, booking_date, booking_time, duration, status, payment_status, stripe_session_id, payment_intent_id, notes } = bookingData;
+    const bookingDate = booking_date || date;
+    const bookingTime = booking_time || time;
+    
+    if (!bookingDate || !bookingTime) {
+      throw new Error('date/booking_date and time/booking_time are required');
+    }
+    
     const [result] = await pool.query(
-      `INSERT INTO coach_bookings (coach_id, user_id, booking_date, booking_time, duration, status, payment_status, stripe_session_id, notes) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [coach_id, user_id, date, time, duration || 60, status || "pending", payment_status || "pending", stripe_session_id, notes]
+      `INSERT INTO coach_bookings (coach_id, user_id, booking_date, booking_time, duration, status, payment_status, stripe_session_id, payment_intent_id, notes) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [coach_id, user_id, bookingDate, bookingTime, duration || 60, status || "pending", payment_status || "pending", stripe_session_id, payment_intent_id || null, notes]
     );
     return result.insertId;
   },
@@ -213,7 +221,16 @@ export const Booking = {
 
   // Update booking status (admin)
   updateBookingStatus: async (bookingId, type, status) => {
-    const table = type === 'event' ? 'event_bookings' : 'coach_bookings';
+    let table;
+    if (type === 'event') {
+      table = 'event_bookings';
+    } else if (type === 'coach') {
+      table = 'coach_bookings';
+    } else if (type === 'lesson') {
+      table = 'lesson_bookings';
+    } else {
+      throw new Error(`Invalid booking type: ${type}`);
+    }
     const [result] = await pool.query(
       `UPDATE ${table} SET status = ? WHERE id = ?`,
       [status, bookingId]
@@ -244,6 +261,121 @@ export const Booking = {
        JOIN coaches c ON cb.coach_id = c.id
        JOIN users u ON cb.user_id = u.id
        WHERE cb.stripe_session_id = ?`,
+      [stripeSessionId]
+    );
+    return rows[0] || null;
+  },
+
+  // Lesson Bookings
+
+  // Create lesson booking
+  createLessonBooking: async (bookingData) => {
+    const { lesson_id, user_id, booking_type, status, payment_status, stripe_session_id, payment_intent_id } = bookingData;
+    // For pack bookings, set sessions_remaining to 10
+    const sessions_remaining = booking_type === 'pack' ? 10 : null;
+    const [result] = await pool.query(
+      `INSERT INTO lesson_bookings (lesson_id, user_id, booking_type, status, payment_status, stripe_session_id, payment_intent_id, sessions_remaining) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [lesson_id, user_id, booking_type || 'single', status || "pending", payment_status || "pending", stripe_session_id, payment_intent_id || null, sessions_remaining]
+    );
+    return result.insertId;
+  },
+
+  // Get lesson booking by ID
+  getLessonBookingById: async (id) => {
+    const [rows] = await pool.query(
+      `SELECT lb.*, l.title as lesson_title, l.description as lesson_description, l.category,
+              u.name as user_name, u.email as user_email
+       FROM lesson_bookings lb
+       JOIN lessons l ON lb.lesson_id = l.id
+       JOIN users u ON lb.user_id = u.id
+       WHERE lb.id = ?`,
+      [id]
+    );
+    return rows[0] || null;
+  },
+
+  // Get lesson bookings by user
+  getLessonBookingsByUser: async (userId) => {
+    const [rows] = await pool.query(
+      `SELECT lb.*, l.title as lesson_title, l.description, l.category, l.pricing
+       FROM lesson_bookings lb
+       JOIN lessons l ON lb.lesson_id = l.id
+       WHERE lb.user_id = ?
+       ORDER BY lb.created_at DESC`,
+      [userId]
+    );
+    return rows;
+  },
+
+  // Get lesson bookings by lesson
+  getLessonBookingsByLesson: async (lessonId) => {
+    const [rows] = await pool.query(
+      `SELECT lb.*, u.name as user_name, u.email as user_email, u.phone
+       FROM lesson_bookings lb
+       JOIN users u ON lb.user_id = u.id
+       WHERE lb.lesson_id = ?
+       ORDER BY lb.created_at DESC`,
+      [lessonId]
+    );
+    return rows;
+  },
+
+  // Update lesson booking
+  updateLessonBooking: async (id, updates) => {
+    const fields = [];
+    const values = [];
+
+    Object.keys(updates).forEach(key => {
+      if (updates[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(updates[key]);
+      }
+    });
+
+    if (fields.length === 0) return false;
+
+    values.push(id);
+    const [result] = await pool.query(
+      `UPDATE lesson_bookings SET ${fields.join(", ")} WHERE id = ?`,
+      values
+    );
+    return result.affectedRows > 0;
+  },
+
+  // Cancel lesson booking
+  cancelLessonBooking: async (id, userId) => {
+    const [result] = await pool.query(
+      `UPDATE lesson_bookings 
+       SET status = 'cancelled' 
+       WHERE id = ? AND user_id = ? AND status IN ('pending', 'confirmed')`,
+      [id, userId]
+    );
+    return result.affectedRows > 0;
+  },
+
+  // Get all lesson bookings (admin)
+  getAllLessonBookings: async () => {
+    const [rows] = await pool.query(
+      `SELECT lb.*, l.title as lesson_title, l.category,
+              u.name as user_name, u.email as user_email, u.phone as user_phone
+       FROM lesson_bookings lb
+       JOIN lessons l ON lb.lesson_id = l.id
+       JOIN users u ON lb.user_id = u.id
+       ORDER BY lb.created_at DESC`
+    );
+    return rows;
+  },
+
+  // Find lesson booking by Stripe session ID (for idempotency)
+  findLessonBookingByStripeSessionId: async (stripeSessionId) => {
+    if (!stripeSessionId) return null;
+    const [rows] = await pool.query(
+      `SELECT lb.*, l.title as lesson_title, u.name as user_name, u.email as user_email
+       FROM lesson_bookings lb
+       JOIN lessons l ON lb.lesson_id = l.id
+       JOIN users u ON lb.user_id = u.id
+       WHERE lb.stripe_session_id = ?`,
       [stripeSessionId]
     );
     return rows[0] || null;

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { getCheckoutSession } from "../../services/paymentService";
 import { getCoachById } from "../../services/adminService";
 import { HomeHeader } from "../../components/HomeHeader";
+import { getAPI_URL } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface PaymentSuccessProps {
   onNavigate?: (page: string) => void;
@@ -24,8 +26,10 @@ interface PaymentDetails {
 }
 
 export default function PaymentSuccessNew({ onNavigate, onBookAnother }: PaymentSuccessProps) {
+  const { user } = useAuth();
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [coachDetails, setCoachDetails] = useState<any>(null);
+  const [eventDetails, setEventDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,9 +39,176 @@ export default function PaymentSuccessNew({ onNavigate, onBookAnother }: Payment
         // Get session_id from URL params
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
+        const isTest = params.get('test') === 'true';
+        const eventId = params.get('event_id');
+        const coachId = params.get('coachId');
+        const bookingType = params.get('type'); // 'coach' or 'event'
+        const bookingDate = params.get('bookingDate');
+        const bookingTime = params.get('bookingTime');
+        const bookingDuration = params.get('bookingDuration');
 
         if (!sessionId) {
           setError('No payment session found');
+          setLoading(false);
+          return;
+        }
+
+        // Handle test mode - show mock payment details
+        if (isTest || sessionId.startsWith('cs_test_') || sessionId.startsWith('cs_mock_')) {
+          console.log('🧪 Test Mode: Using mock payment data');
+          
+          let amount = 0;
+          let eventData = null;
+          let coachData = null;
+
+          // Handle coach test payments
+          if (bookingType === 'coach' && coachId) {
+            try {
+              const API_URL = getAPI_URL();
+              
+              console.log('🧪 Test mode: Fetching coach data from database for coach ID:', coachId);
+              const response = await fetch(`${API_URL}/coaches/${coachId}`);
+              if (response.ok) {
+                const coachResponse = await response.json();
+                if (coachResponse.coach) {
+                  coachData = coachResponse.coach;
+                  setCoachDetails(coachData);
+                  
+                  // Calculate amount based on hourly rate and duration
+                  const hourlyRate = parseFloat(coachData.hourly_rate?.toString() || '0');
+                  const durationHours = parseFloat(bookingDuration || '60') / 60;
+                  amount = hourlyRate * durationHours;
+                  
+                  console.log('🧪 Test mode: Coach hourly rate:', hourlyRate, 'Duration:', durationHours, 'Total:', amount);
+                }
+              } else {
+                console.error('❌ Test mode: Failed to fetch coach:', response.status);
+              }
+            } catch (err) {
+              console.error('❌ Test mode: Error fetching coach:', err);
+            }
+          }
+          // Handle event test payments
+          else if (eventId) {
+            try {
+              // Use centralized API URL function
+              const API_URL = getAPI_URL();
+              
+              console.log('🧪 Test mode: Fetching event price from database for event ID:', eventId);
+              const response = await fetch(`${API_URL}/events/${eventId}`);
+              if (response.ok) {
+                eventData = await response.json();
+                if (eventData.event) {
+                  setEventDetails(eventData.event);
+                  
+                  // ALWAYS use event price from database
+                  let eventPrice = eventData.event.price;
+                  console.log('🧪 Test mode: Event price from database:', eventPrice, 'Type:', typeof eventPrice);
+                  
+                  if (eventPrice !== null && eventPrice !== undefined) {
+                    if (typeof eventPrice === 'number') {
+                      amount = eventPrice;
+                      console.log('✅ Test mode: Using numeric price:', amount);
+                    } else if (typeof eventPrice === 'string') {
+                      const priceMatch = eventPrice.match(/\$?(\d+(?:\.\d+)?)/);
+                      if (priceMatch) {
+                        amount = parseFloat(priceMatch[1]);
+                        console.log('✅ Test mode: Parsed string price:', amount);
+                      } else {
+                        const parsed = parseFloat(eventPrice);
+                        if (!isNaN(parsed)) {
+                          amount = parsed;
+                          console.log('✅ Test mode: Direct parseFloat price:', amount);
+                        }
+                      }
+                    }
+                  }
+                  
+                  console.log('🧪 Test mode: Final amount to display:', amount);
+                }
+              } else {
+                console.error('❌ Test mode: Failed to fetch event:', response.status);
+              }
+            } catch (err) {
+              console.error('❌ Test mode: Error fetching event:', err);
+            }
+          }
+
+          const details: PaymentDetails = {
+            sessionId: sessionId,
+            amount: amount,
+            currency: 'AUD',
+            paymentStatus: 'paid',
+            customerEmail: user?.email || null,
+            metadata: {
+              eventId: eventId || '',
+              coach_id: coachId || '',
+              booking_type: bookingType || 'event',
+              bookingDate: bookingDate || '',
+              bookingTime: bookingTime || '',
+              bookingDuration: bookingDuration || '',
+              test: 'true'
+            },
+          };
+
+          setPaymentDetails(details);
+          
+          // Send test payment confirmation email
+          if (bookingType === 'coach' && coachData && user?.email) {
+            try {
+              const API_URL = getAPI_URL();
+              const token = localStorage.getItem('token');
+              
+              // Call backend endpoint to send test payment email for coach
+              await fetch(`${API_URL}/payments/send-test-email-coach`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  coachId: coachId,
+                  coachName: coachData.name,
+                  amount: amount,
+                  bookingDate: bookingDate,
+                  bookingTime: bookingTime,
+                  bookingDuration: bookingDuration,
+                  bookingId: null // Test payments don't have booking ID yet
+                })
+              });
+              
+              console.log('✅ Test payment confirmation email sent for coach');
+            } catch (emailError) {
+              console.error('⚠️ Failed to send test payment email:', emailError);
+              // Don't fail the test payment flow if email fails
+            }
+          } else if (eventData?.event && user?.email) {
+            try {
+              const API_URL = getAPI_URL();
+              const token = localStorage.getItem('token');
+              
+              // Call backend endpoint to send test payment email
+              await fetch(`${API_URL}/payments/send-test-email`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  eventId: eventId,
+                  eventName: eventData.event.name || eventData.event.title,
+                  amount: amount,
+                  bookingId: null // Test payments don't have booking ID yet
+                })
+              });
+              
+              console.log('✅ Test payment confirmation email sent');
+            } catch (emailError) {
+              console.error('⚠️ Failed to send test payment email:', emailError);
+              // Don't fail the test payment flow if email fails
+            }
+          }
+          
           setLoading(false);
           return;
         }
@@ -47,16 +218,82 @@ export default function PaymentSuccessNew({ onNavigate, onBookAnother }: Payment
         
         if (response.success && response.session) {
           const session = response.session;
+          
+          // Start with Stripe amount (convert from cents to dollars)
+          let amount = session.amount_total / 100;
+          let eventData = null;
+
+          // If it's an event booking, ALWAYS fetch event details FIRST to get accurate price from database
+          // This ensures we show the current price even if admin changed it after booking
+          if (session.metadata?.booking_type === 'event' && session.metadata?.eventId) {
+            try {
+              // Use centralized API URL function
+              const API_URL = getAPI_URL();
+              
+              console.log('💰 Fetching event price from database for event ID:', session.metadata.eventId);
+              const eventResponse = await fetch(`${API_URL}/events/${session.metadata.eventId}`);
+              
+              if (eventResponse.ok) {
+                eventData = await eventResponse.json();
+                if (eventData.event) {
+                  setEventDetails(eventData.event);
+                  
+                  // ALWAYS use event price from database (this is the source of truth)
+                  // Price is stored as DECIMAL(10,2) in MySQL, so it comes as a number
+                  let eventPrice = eventData.event.price;
+                  
+                  console.log('💰 Event price from database:', eventPrice, 'Type:', typeof eventPrice);
+                  
+                  // Handle different formats: number, string with $, or string without $
+                  if (eventPrice !== null && eventPrice !== undefined) {
+                    if (typeof eventPrice === 'number') {
+                      amount = eventPrice;
+                      console.log('✅ Using numeric price:', amount);
+                    } else if (typeof eventPrice === 'string') {
+                      // Try to parse string formats like "$35", "35", "35.00", etc.
+                      const priceMatch = eventPrice.match(/\$?(\d+(?:\.\d+)?)/);
+                      if (priceMatch) {
+                        amount = parseFloat(priceMatch[1]);
+                        console.log('✅ Parsed string price:', amount);
+                      } else {
+                        // Try direct parseFloat as fallback
+                        const parsed = parseFloat(eventPrice);
+                        if (!isNaN(parsed)) {
+                          amount = parsed;
+                          console.log('✅ Direct parseFloat price:', amount);
+                        } else {
+                          console.warn('⚠️ Could not parse event price:', eventPrice);
+                        }
+                      }
+                    }
+                  } else {
+                    console.warn('⚠️ Event price is null/undefined, using Stripe amount:', amount);
+                  }
+                  
+                  console.log('💰 Final amount to display:', amount);
+                } else {
+                  console.warn('⚠️ Event data missing event object');
+                }
+              } else {
+                console.error('❌ Failed to fetch event:', eventResponse.status, eventResponse.statusText);
+              }
+            } catch (err) {
+              console.error('❌ Error fetching event details:', err);
+              // Continue without event details, use Stripe amount as fallback
+              console.warn('⚠️ Using Stripe amount as fallback:', amount);
+            }
+          } else {
+            console.log('ℹ️ Not an event booking or missing eventId, using Stripe amount:', amount);
+          }
+
           const details: PaymentDetails = {
             sessionId: session.id,
-            amount: session.amount_total / 100, // Convert from cents to dollars
+            amount: amount, // Use the correct amount (from event if available, otherwise from Stripe)
             currency: session.currency.toUpperCase(),
             paymentStatus: session.payment_status,
             customerEmail: session.customer_email,
             metadata: session.metadata || {},
           };
-
-          setPaymentDetails(details);
 
           // If it's a coach booking, fetch coach details
           if (details.metadata.booking_type === 'coach' && details.metadata.coach_id) {
@@ -68,6 +305,8 @@ export default function PaymentSuccessNew({ onNavigate, onBookAnother }: Payment
               // Continue without coach details
             }
           }
+
+          setPaymentDetails(details);
 
         } else {
           setError('Failed to load payment details');
@@ -81,55 +320,19 @@ export default function PaymentSuccessNew({ onNavigate, onBookAnother }: Payment
     };
 
     fetchPaymentDetails();
-  }, []);
+  }, [user]); // Include user in dependencies for test payment email
 
-  const handleDownloadReceipt = () => {
-    // Generate receipt data
-    const receiptData = {
-      sessionId: paymentDetails?.sessionId,
-      amount: paymentDetails?.amount,
-      currency: paymentDetails?.currency,
-      item: paymentDetails?.metadata.eventName || (coachDetails ? `Coaching Session with ${coachDetails.name}` : 'Booking'),
-      date: new Date().toLocaleDateString('en-AU', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }),
-    };
-
-    // Create receipt text
-    const receiptText = `
-AJH SPORTS - PAYMENT RECEIPT
-============================
-
-Session ID: ${receiptData.sessionId}
-Date: ${receiptData.date}
-Item: ${receiptData.item}
-Amount: ${receiptData.currency} ${receiptData.amount.toFixed(2)}
-
-Payment Status: Paid
-
-Thank you for your booking!
-
-AJH Sports
-ajh@ajhsports.com.au
-0447827788
-`;
-
-    // Create blob and download
-    const blob = new Blob([receiptText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${receiptData.sessionId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  // Download Receipt removed - emails are now sent automatically via Gmail SMTP
 
   const handleBookAnother = () => {
-    if (paymentDetails?.metadata.booking_type === 'coach') {
+    if (!paymentDetails) return;
+    
+    // Check if it's a coach booking - use multiple checks for reliability
+    const isCoach = paymentDetails.metadata?.booking_type === 'coach' || 
+                    paymentDetails.metadata?.coach_id !== undefined ||
+                    coachDetails !== null;
+    
+    if (isCoach) {
       if (onNavigate) {
         // Update URL first to include view=list parameter
         window.history.pushState({}, '', '/coaches?view=list');
@@ -210,6 +413,11 @@ ajh@ajhsports.com.au
             <h1 className="text-3xl md:text-4xl font-bold text-black mb-3">
               Payment Successful!
             </h1>
+            {paymentDetails?.metadata?.test === 'true' && (
+              <div className="mb-3 px-4 py-2 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <p className="text-sm font-semibold text-yellow-800">🧪 TEST MODE - This is a simulated payment</p>
+              </div>
+            )}
             <p className="text-lg text-gray-600">
               Your payment has been processed and your booking is confirmed.
             </p>
@@ -243,7 +451,19 @@ ajh@ajhsports.com.au
               <div className="pb-4">
                 <p className="text-sm text-gray-600 mb-1">Amount Paid</p>
                 <p className="text-2xl font-bold text-[#030213]">
-                  {paymentDetails.currency} {(paymentDetails.amount).toFixed(2)}
+                  {paymentDetails.currency} {(() => {
+                    // Use event price from database if available (current price), otherwise use payment amount
+                    if (eventDetails?.price !== null && eventDetails?.price !== undefined) {
+                      const eventPrice = typeof eventDetails.price === 'number' 
+                        ? eventDetails.price 
+                        : (() => {
+                            const priceMatch = String(eventDetails.price).match(/\$?(\d+(?:\.\d+)?)/);
+                            return priceMatch ? parseFloat(priceMatch[1]) : paymentDetails.amount;
+                          })();
+                      return eventPrice.toFixed(2);
+                    }
+                    return paymentDetails.amount.toFixed(2);
+                  })()}
                 </p>
               </div>
 
@@ -306,16 +526,6 @@ ajh@ajhsports.com.au
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={handleDownloadReceipt}
-              className="px-6 py-3 border-2 border-black bg-white text-black rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Download Receipt
-            </button>
-            
             <button
               onClick={handleBookAnother}
               className="px-6 py-3 bg-[#030213] text-white rounded-lg font-semibold hover:bg-[#050525] transition"

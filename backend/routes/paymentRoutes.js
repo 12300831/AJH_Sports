@@ -2,7 +2,9 @@ import express from 'express';
 import { 
   createCheckoutSession, 
   getCheckoutSession, 
-  handleWebhook 
+  handleWebhook,
+  sendTestPaymentEmail,
+  sendTestPaymentEmailCoach
 } from '../controllers/paymentController.js';
 import { authenticate } from '../middleware/auth.js';
 
@@ -31,6 +33,20 @@ router.post('/create-checkout-session', authenticate, createCheckoutSession);
  * Retrieves checkout session details
  */
 router.get('/session/:sessionId', getCheckoutSession);
+
+/**
+ * POST /api/payments/send-test-email
+ * Sends test payment confirmation email (for test/mock payments)
+ * PROTECTED - requires JWT authentication
+ */
+router.post('/send-test-email', authenticate, sendTestPaymentEmail);
+
+/**
+ * POST /api/payments/send-test-email-coach
+ * Sends test payment confirmation email for coach bookings (for test/mock payments)
+ * PROTECTED - requires JWT authentication
+ */
+router.post('/send-test-email-coach', authenticate, sendTestPaymentEmailCoach);
 
 /**
  * POST /api/payments/webhook

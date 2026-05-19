@@ -8,14 +8,15 @@ import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import {
   normalizeRole,
-  normalizeStatus,
+  normalizeSports,
+  normalizeStatus, // Keep for backward compatibility
   validateEmail,
   validateUsername,
   sanitizeSearch,
   validatePagination,
   validateDate,
   VALID_ROLES,
-  VALID_STATUSES,
+  VALID_SPORTS,
 } from "../utils/validation.js";
 
 // Get all users with search, filters, and pagination
@@ -24,7 +25,8 @@ export const getUsers = async (req, res) => {
     const {
       search = "",
       role = "",
-      status = "",
+      sports = "", // Changed from status to sports
+      status = "", // Keep for backward compatibility
       dateFrom = "",
       dateTo = "",
       page = 1,
@@ -60,11 +62,14 @@ export const getUsers = async (req, res) => {
       queryParams.push(normalizedRole);
     }
 
-    // Status filter - normalized
-    if (status) {
-      const normalizedStatus = normalizeStatus(status);
-      whereConditions.push("status = ?");
-      queryParams.push(normalizedStatus);
+    // Sports filter - normalized (preferred)
+    // Only filter by sports if the column exists (check will be done at query time)
+    const sportsFilter = sports || status; // Support both for backward compatibility
+    if (sportsFilter) {
+      const normalizedSports = normalizeSports(sportsFilter);
+      // Use COALESCE to handle missing column gracefully
+      whereConditions.push("COALESCE(sports, 'Tennis') = ?");
+      queryParams.push(normalizedSports);
     }
 
     // Date range filter - validated
@@ -86,7 +91,8 @@ export const getUsers = async (req, res) => {
       "email",
       "username",
       "role",
-      "status",
+      "sports",
+      "status", // Keep for backward compatibility
       "joinedDate",
       "lastActive",
     ];
@@ -101,10 +107,11 @@ export const getUsers = async (req, res) => {
     const total = countResult[0].total;
 
     // Get users with pagination
+    // Use COALESCE to handle missing sports column (defaults to 'Tennis')
     const [users] = await pool.query(
       `SELECT 
         id, uuid, name, fullName, email, username, phone, location,
-        role, status, joinedDate, lastActive, profileImage, created_at
+        role, COALESCE(sports, 'Tennis') as sports, status, joinedDate, lastActive, profileImage, created_at
       FROM users 
       ${whereClause}
       ORDER BY ${sortColumn} ${sortDirection}
@@ -169,6 +176,21 @@ export const getUsers = async (req, res) => {
     });
   } catch (error) {
     console.error("Get users error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      sqlState: error.sqlState
+    });
+    
+    // If it's a column not found error for sports, suggest running setup
+    if (error.code === 'ER_BAD_FIELD_ERROR' && (error.message.includes('sports') || error.message.includes('Unknown column'))) {
+      return res.status(500).json({
+        success: false,
+        message: "Database schema needs update. The 'sports' column is missing. Please run the /api/setup endpoint to add it.",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: "Error fetching users",
@@ -186,7 +208,7 @@ export const getUserById = async (req, res) => {
     const [users] = await pool.query(
       `SELECT 
         id, uuid, name, fullName, email, username, phone, location,
-        role, status, joinedDate, lastActive, profileImage, created_at
+        role, COALESCE(sports, 'Tennis') as sports, status, joinedDate, lastActive, profileImage, created_at
       FROM users WHERE id = ?`,
       [id]
     );
@@ -232,7 +254,7 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { fullName, email, username, password, role, status, phone, location, profileImage } =
+    const { fullName, email, username, password, role, sports, status, phone, location, profileImage } =
       req.body;
 
     // Prevent privilege escalation: users cannot change their own role or status
@@ -251,9 +273,10 @@ export const updateUser = async (req, res) => {
       }
     }
 
-    // Normalize role and status values
+    // Normalize role and sports values
     const normalizedRole = role !== undefined ? normalizeRole(role) : undefined;
-    const normalizedStatus = status !== undefined ? normalizeStatus(status) : undefined;
+    const normalizedSports = sports !== undefined ? normalizeSports(sports) : undefined;
+    const normalizedStatus = status !== undefined ? normalizeStatus(status) : undefined; // Keep for backward compatibility
 
     // Validate email format if provided
     if (email && !validateEmail(email)) {
@@ -307,18 +330,19 @@ export const updateUser = async (req, res) => {
     if (email !== undefined) updates.email = email.trim().toLowerCase();
     if (username !== undefined) updates.username = username.trim();
     if (normalizedRole !== undefined) updates.role = normalizedRole;
-    if (normalizedStatus !== undefined) updates.status = normalizedStatus;
+    if (normalizedSports !== undefined) updates.sports = normalizedSports;
+    if (normalizedStatus !== undefined) updates.status = normalizedStatus; // Keep for backward compatibility
     if (phone !== undefined) updates.phone = phone ? phone.trim().substring(0, 50) : null;
     if (location !== undefined) updates.location = location ? location.trim().substring(0, 255) : null;
     // Handle profileImage update (base64 can be large, so use TEXT column)
     if (profileImage !== undefined) {
       if (profileImage && profileImage.trim()) {
-        // Validate base64 string length (max ~7MB base64 = ~5MB image)
+        // Validate base64 string length (max ~14MB base64 = ~10MB image)
         const base64Length = profileImage.trim().length;
-        if (base64Length > 7000000) {
+        if (base64Length > 14000000) {
           return res.status(400).json({
             success: false,
-            message: "Image is too large. Maximum size is 5MB"
+            message: "Image is too large. Maximum size is 10MB"
           });
         }
         updates.profileImage = profileImage.trim();
@@ -328,7 +352,23 @@ export const updateUser = async (req, res) => {
     }
     
     // Handle password update (hash if provided)
+    // IMPORTANT: OAuth users (with provider set) cannot have passwords
+    // Check if user is an OAuth user before allowing password changes
     if (password !== undefined && password !== null && password !== '') {
+      // Check if this user is an OAuth user
+      const [userCheck] = await pool.query(
+        'SELECT provider FROM users WHERE id = ?',
+        [id]
+      );
+      
+      if (userCheck.length > 0 && userCheck[0].provider) {
+        // User is an OAuth user - password changes not allowed
+        return res.status(400).json({
+          success: false,
+          message: `Cannot set password for OAuth users (signed in with ${userCheck[0].provider}). Password management is not available for social login accounts.`,
+        });
+      }
+      
       if (password.length < 6) {
         return res.status(400).json({
           success: false,
@@ -378,7 +418,7 @@ export const updateUser = async (req, res) => {
 // Create user (admin)
 export const createUser = async (req, res) => {
   try {
-    const { fullName, email, username, password, role, status, phone, location } =
+    const { fullName, email, username, password, role, sports, status, phone, location } =
       req.body;
 
     // Validate required fields
@@ -412,9 +452,10 @@ export const createUser = async (req, res) => {
       });
     }
 
-    // Normalize role and status
+    // Normalize role and sports
     const normalizedRole = normalizeRole(role);
-    const normalizedStatus = normalizeStatus(status);
+    const normalizedSports = sports ? normalizeSports(sports) : 'Tennis';
+    const normalizedStatus = status ? normalizeStatus(status) : 'Active'; // Keep for backward compatibility
 
     // Check if email already exists
     const [emailCheck] = await pool.query(
@@ -451,8 +492,8 @@ export const createUser = async (req, res) => {
     const [result] = await pool.query(
       `INSERT INTO users (
         uuid, name, fullName, email, username, phone, location, password,
-        role, status, joinedDate, lastActive
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        role, sports, status, joinedDate, lastActive
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         uuid,
         fullName.trim(),
@@ -463,6 +504,7 @@ export const createUser = async (req, res) => {
         location ? location.trim().substring(0, 255) : null,
         hashedPassword,
         normalizedRole,
+        normalizedSports,
         normalizedStatus,
       ]
     );

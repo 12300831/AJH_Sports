@@ -42,6 +42,7 @@ router.post('/', async (req, res) => {
         provider VARCHAR(50),
         provider_id VARCHAR(255),
         role VARCHAR(50) DEFAULT 'user',
+        sports VARCHAR(50) DEFAULT 'Tennis',
         status VARCHAR(50) DEFAULT 'Active',
         profileImage TEXT,
         joinedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -59,6 +60,7 @@ router.post('/', async (req, res) => {
       { name: 'provider', type: 'VARCHAR(50)' },
       { name: 'provider_id', type: 'VARCHAR(255)' },
       { name: 'role', type: "VARCHAR(50) DEFAULT 'user'" },
+      { name: 'sports', type: "VARCHAR(50) DEFAULT 'Tennis'" },
       { name: 'status', type: "VARCHAR(50) DEFAULT 'Active'" },
       { name: 'profileImage', type: 'TEXT' },
       { name: 'joinedDate', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' },
@@ -68,9 +70,23 @@ router.post('/', async (req, res) => {
     for (const col of columnsToAdd) {
       try {
         await connection.query(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`);
+        console.log(`✅ Added column: ${col.name}`);
       } catch (err) {
         if (err.code !== 'ER_DUP_FIELDNAME') throw err;
       }
+    }
+    
+    // Set default sports for existing users who don't have it
+    try {
+      await connection.query(`
+        UPDATE users 
+        SET sports = 'Tennis' 
+        WHERE sports IS NULL OR sports = ''
+      `);
+      console.log('✅ Set default sports for existing users');
+    } catch (err) {
+      // Column might not exist yet, that's okay
+      console.log('⚠️  Could not update existing users (column may not exist yet)');
     }
     
     // Step 2: Create events table
@@ -84,8 +100,8 @@ router.post('/', async (req, res) => {
         max_players INT NOT NULL DEFAULT 20,
         price DECIMAL(10, 2) DEFAULT 0.00,
         location VARCHAR(255),
-        image_url TEXT NULL,
-        hero_image_url TEXT NULL,
+        image_url MEDIUMTEXT NULL,
+        hero_image_url MEDIUMTEXT NULL,
         status ENUM('active', 'inactive', 'cancelled', 'completed') DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -121,7 +137,11 @@ router.post('/', async (req, res) => {
         availability TEXT,
         bio TEXT,
         hourly_rate DECIMAL(10, 2) DEFAULT 0.00,
-        image_url VARCHAR(1024) NULL,
+        image_url MEDIUMTEXT NULL,
+        linkedin_url VARCHAR(500) NULL,
+        twitter_url VARCHAR(500) NULL,
+        instagram_url VARCHAR(500) NULL,
+        facebook_url VARCHAR(500) NULL,
         status ENUM('active', 'inactive') DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -131,7 +151,11 @@ router.post('/', async (req, res) => {
     // Add missing columns if they don't exist
     const coachColumnsToAdd = [
       { name: 'specialty', type: 'VARCHAR(255)' },
-      { name: 'availability', type: 'TEXT' }
+      { name: 'availability', type: 'TEXT' },
+      { name: 'linkedin_url', type: 'VARCHAR(500) NULL' },
+      { name: 'twitter_url', type: 'VARCHAR(500) NULL' },
+      { name: 'instagram_url', type: 'VARCHAR(500) NULL' },
+      { name: 'facebook_url', type: 'VARCHAR(500) NULL' }
     ];
     
     for (const col of coachColumnsToAdd) {
@@ -151,12 +175,33 @@ router.post('/', async (req, res) => {
     `, [process.env.DB_NAME || 'ajh_sports']);
     
     for (const col of eventImageColumns) {
-      if (col.DATA_TYPE === 'varchar') {
+      // Convert VARCHAR or TEXT to MEDIUMTEXT to support 10MB images (base64 = ~13-14MB)
+      if (col.DATA_TYPE === 'varchar' || (col.DATA_TYPE === 'text' && col.CHARACTER_MAXIMUM_LENGTH <= 65535)) {
         try {
-          await connection.query(`ALTER TABLE events MODIFY COLUMN ${col.COLUMN_NAME} TEXT NULL`);
-          console.log(`✅ Converted ${col.COLUMN_NAME} from VARCHAR to TEXT`);
+          await connection.query(`ALTER TABLE events MODIFY COLUMN ${col.COLUMN_NAME} MEDIUMTEXT NULL`);
+          console.log(`✅ Converted events.${col.COLUMN_NAME} to MEDIUMTEXT`);
         } catch (err) {
-          console.error(`⚠️  Failed to convert ${col.COLUMN_NAME}:`, err.message);
+          console.error(`⚠️  Failed to convert events.${col.COLUMN_NAME}:`, err.message);
+        }
+      }
+    }
+    
+    // Fix coach image column - convert to MEDIUMTEXT for large base64 images (up to 16MB)
+    const [coachImageColumns] = await connection.query(`
+      SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'coaches'
+      AND COLUMN_NAME = 'image_url'
+    `, [process.env.DB_NAME || 'ajh_sports']);
+    
+    for (const col of coachImageColumns) {
+      // Convert VARCHAR or TEXT to MEDIUMTEXT to support 10MB images (base64 = ~13-14MB)
+      if (col.DATA_TYPE === 'varchar' || (col.DATA_TYPE === 'text' && col.CHARACTER_MAXIMUM_LENGTH <= 65535)) {
+        try {
+          await connection.query(`ALTER TABLE coaches MODIFY COLUMN ${col.COLUMN_NAME} MEDIUMTEXT NULL`);
+          console.log(`✅ Converted coaches.${col.COLUMN_NAME} to MEDIUMTEXT`);
+        } catch (err) {
+          console.error(`⚠️  Failed to convert coaches.${col.COLUMN_NAME}:`, err.message);
         }
       }
     }
@@ -177,7 +222,28 @@ router.post('/', async (req, res) => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
     
-    // Step 6: Create contact_messages table
+    // Step 6: Create lessons table
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS lessons (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        image_url MEDIUMTEXT NULL,
+        pricing TEXT,
+        category ENUM('Tennis', 'Table Tennis', 'Modified Sports') DEFAULT 'Tennis',
+        image_position ENUM('left', 'right') DEFAULT 'right',
+        cta_text VARCHAR(255) DEFAULT 'Register Now!',
+        status ENUM('active', 'inactive') DEFAULT 'active',
+        display_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_status (status),
+        INDEX idx_category (category),
+        INDEX idx_display_order (display_order)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    
+    // Step 7: Create contact_messages table
     await connection.query(`
       CREATE TABLE IF NOT EXISTS contact_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -192,7 +258,7 @@ router.post('/', async (req, res) => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
     
-    // Step 7: Create admin user
+    // Step 8: Create admin user
     const adminEmail = 'admin@gmail.com';
     const adminPassword = 'admin';
     const hashedPassword = await bcrypt.hash(adminPassword, 10);

@@ -7,8 +7,8 @@
 // Note: Coaches are stored in the coaches table, not as user roles
 export const VALID_ROLES = ['Admin', 'User'];
 
-// Valid status values (normalized)
-export const VALID_STATUSES = ['Active', 'Inactive', 'Pending', 'Suspended', 'Banned'];
+// Valid sports values (normalized)
+export const VALID_SPORTS = ['Tennis', 'Table Tennis'];
 
 /**
  * Normalize role value (case-insensitive)
@@ -20,13 +20,29 @@ export function normalizeRole(role) {
 }
 
 /**
- * Normalize status value (case-insensitive)
+ * Normalize sports value (case-insensitive)
  */
-export function normalizeStatus(status) {
-  if (!status || typeof status !== 'string') return 'Active';
-  const normalized = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-  return VALID_STATUSES.includes(normalized) ? normalized : 'Active';
+export function normalizeSports(sports) {
+  if (!sports || typeof sports !== 'string') return 'Tennis';
+  // Handle variations
+  const normalized = sports.trim();
+  if (normalized.toLowerCase() === 'table tennis' || normalized.toLowerCase() === 'tabletennis') {
+    return 'Table Tennis';
+  }
+  if (normalized.toLowerCase() === 'tennis') {
+    return 'Tennis';
+  }
+  return VALID_SPORTS.includes(normalized) ? normalized : 'Tennis';
 }
+
+// Keep normalizeStatus for backward compatibility (maps to sports)
+export function normalizeStatus(status) {
+  // For backward compatibility, map old status values
+  return normalizeSports(status);
+}
+
+// Keep VALID_STATUSES for backward compatibility
+export const VALID_STATUSES = ['Tennis', 'Table Tennis'];
 
 /**
  * Validate email format

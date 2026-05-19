@@ -2,11 +2,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import dotenv from "dotenv";
+import { v4 as uuidv4 } from 'uuid';
 dotenv.config();
 
 // ---------- SIGNUP ----------
 export const signup = async (req, res) => {
-  const { name, email, phone, location, password } = req.body;
+  const { name, email, phone, location, password, sports } = req.body;
 
   // Validate JWT_SECRET before processing
   if (!process.env.JWT_SECRET) {
@@ -46,25 +47,50 @@ export const signup = async (req, res) => {
     // Hash password using bcrypt
     const passwordHash = await bcrypt.hash(password, 10);
     
-    // Insert new user with all required fields
-    // Only use columns that actually exist in the database
+    // Generate username from email
+    let username = normalizedEmail.split('@')[0];
+    let attempts = 0;
+    while (attempts < 10) {
+      const [usernameCheck] = await pool.query(
+        'SELECT id FROM users WHERE username = ?',
+        [username]
+      );
+      if (Array.isArray(usernameCheck) && usernameCheck.length === 0) break;
+      username = normalizedEmail.split('@')[0] + Math.floor(Math.random() * 10000);
+      attempts++;
+    }
+
+    // Generate UUID
+    const uuid = uuidv4();
+    
+    // Normalize sports value
+    const normalizedSports = sports && (sports === 'Table Tennis' || sports === 'Tennis') 
+      ? sports 
+      : 'Tennis';
+
+    // Insert new user with all required fields (matching OAuth flow)
     const [result] = await pool.query(
       `INSERT INTO users (
-        name, email, phone, location, password, role
-      ) VALUES (?, ?, ?, ?, ?, ?)`,
+        uuid, name, fullName, email, username, phone, location, password, role, sports, status, joinedDate, lastActive
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
+        uuid,
         name.trim(),
+        name.trim(), // fullName same as name initially
         normalizedEmail, // Store normalized email
+        username,
         phone ? phone.trim() : null,
         location ? location.trim() : null,
         passwordHash, // Hashed password
-        'user', // Default role is 'user' (matches database default)
+        'User', // Default role (capitalized to match OAuth)
+        normalizedSports, // User's sport preference
+        'Active', // Keep status for backward compatibility
       ]
     );
 
     // Fetch the created user to return in response
     const [newUserRows] = await pool.query(
-      `SELECT id, name, email, phone, location, role, created_at 
+      `SELECT id, name, fullName, email, username, phone, location, role, sports, status, created_at 
        FROM users WHERE id = ?`,
       [result.insertId]
     );
@@ -75,15 +101,34 @@ export const signup = async (req, res) => {
 
     const newUser = newUserRows[0];
 
-    // Normalize role (ensure lowercase for consistency)
-    const userRole = (newUser.role || 'user').toLowerCase();
+    // Normalize role and sports (ensure proper format)
+    let userRole = newUser.role || 'User';
+    if (userRole) {
+      userRole = String(userRole).charAt(0).toUpperCase() + String(userRole).slice(1).toLowerCase();
+    }
 
-    // Generate JWT token with user info
+    let userSports = newUser.sports || 'Tennis';
+    if (userSports) {
+      if (userSports.toLowerCase() === 'table tennis' || userSports.toLowerCase() === 'tabletennis') {
+        userSports = 'Table Tennis';
+      } else {
+        userSports = 'Tennis';
+      }
+    }
+
+    let userStatus = newUser.status || 'Active';
+    if (userStatus) {
+      userStatus = String(userStatus).charAt(0).toUpperCase() + String(userStatus).slice(1).toLowerCase();
+    }
+
+    // Generate JWT token with user info (including sports and status like OAuth)
     const token = jwt.sign(
       { 
         id: newUser.id, 
         email: newUser.email,
-        role: userRole
+        role: userRole,
+        sports: userSports,
+        status: userStatus
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -96,18 +141,49 @@ export const signup = async (req, res) => {
       user: {
         id: newUser.id,
         name: newUser.name,
+        fullName: newUser.fullName || newUser.name,
         email: newUser.email,
+        username: newUser.username,
         phone: newUser.phone || null,
         location: newUser.location || null,
         role: userRole,
+        sports: userSports,
+        status: userStatus,
         created_at: newUser.created_at,
       }
     });
 
   } catch (err) {
-    console.error("Signup error:", err);
+    console.error("❌ Signup error:", err);
+    console.error("Error message:", err.message);
+    console.error("Error code:", err.code);
+    console.error("Error stack:", err.stack);
+    
+    // Provide more specific error messages
+    if (err.code === 'ER_DUP_ENTRY') {
+      if (err.message.includes('email')) {
+        return res.status(400).json({ 
+          message: "Email already exists",
+          error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+      }
+      if (err.message.includes('username')) {
+        return res.status(400).json({ 
+          message: "Username already exists. Please try again.",
+          error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+      }
+    }
+    
+    if (err.code === 'ER_BAD_FIELD_ERROR') {
+      return res.status(500).json({ 
+        message: "Database schema error. Please contact support.",
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined
+      });
+    }
+    
     res.status(500).json({ 
-      message: "Server error",
+      message: "Server error. Please try again later.",
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }

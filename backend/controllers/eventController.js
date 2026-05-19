@@ -5,6 +5,7 @@
 
 import { Event } from "../models/Event.js";
 import { Booking } from "../models/Booking.js";
+import { sendBookingConfirmationEmail } from "../services/emailService.js";
 
 // Get all events
 export const getEvents = async (req, res) => {
@@ -87,13 +88,27 @@ export const getEventById = async (req, res) => {
 // Admin: Create event
 export const createEvent = async (req, res) => {
   try {
-    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included } = req.body;
 
     // Validation
     if (!name || !date || !time) {
       return res.status(400).json({
         success: false,
         message: "Name, date, and time are required"
+      });
+    }
+
+    // Validate image sizes (max ~14MB base64 = ~10MB image)
+    if (image_url && image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Card image is too large. Maximum size is 10MB"
+      });
+    }
+    if (hero_image_url && hero_image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Hero image is too large. Maximum size is 10MB"
       });
     }
 
@@ -108,7 +123,8 @@ export const createEvent = async (req, res) => {
       image_url: image_url || null,
       hero_image_url: hero_image_url || null,
       status: status || "active",
-      age_group: age_group || null
+      age_group: age_group || null,
+      whats_included: whats_included || null
     });
 
     const event = await Event.findById(eventId);
@@ -142,7 +158,7 @@ export const createEvent = async (req, res) => {
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group } = req.body;
+    const { name, description, date, time, max_players, price, location, image_url, hero_image_url, status, age_group, whats_included } = req.body;
 
     console.log('📝 Update event request:', { id, body: req.body });
 
@@ -156,6 +172,20 @@ export const updateEvent = async (req, res) => {
     }
 
     console.log('✅ Found event:', event);
+
+    // Validate image sizes if provided (max ~14MB base64 = ~10MB image)
+    if (image_url !== undefined && image_url && image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Card image is too large. Maximum size is 10MB"
+      });
+    }
+    if (hero_image_url !== undefined && hero_image_url && hero_image_url.trim().length > 14000000) {
+      return res.status(400).json({
+        success: false,
+        message: "Hero image is too large. Maximum size is 10MB"
+      });
+    }
 
     // Helper: check if a string value is "provided" (not undefined, not null, not empty string)
     const isValidString = (val) => val !== undefined && val !== null && val !== '';
@@ -179,7 +209,8 @@ export const updateEvent = async (req, res) => {
       image_url: image_url !== undefined ? (image_url || null) : event.image_url, // Allow clearing with empty string
       hero_image_url: hero_image_url !== undefined ? (hero_image_url || null) : event.hero_image_url, // Allow clearing with empty string
       status: isValidString(status) ? status : event.status,
-      age_group: age_group !== undefined ? (age_group || null) : event.age_group
+      age_group: age_group !== undefined ? (age_group || null) : event.age_group,
+      whats_included: whats_included !== undefined ? (whats_included || null) : event.whats_included
     };
 
     console.log('📤 Updating event with data:', updateData);
@@ -224,7 +255,7 @@ export const updateEvent = async (req, res) => {
   }
 };
 
-// Admin: Delete event
+// Admin: Delete event (soft delete - archive)
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -252,6 +283,41 @@ export const deleteEvent = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete event error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting event"
+    });
+  }
+};
+
+// Admin: Hard delete event (permanent deletion)
+export const hardDeleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    const deleted = await Event.hardDelete(id);
+
+    if (!deleted) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to delete event"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Event permanently deleted"
+    });
+  } catch (error) {
+    console.error("Hard delete event error:", error);
     res.status(500).json({
       success: false,
       message: "Error deleting event"
@@ -417,3 +483,55 @@ export const getMyEventBookings = async (req, res) => {
   }
 };
 
+// Admin: Send test email for an event
+export const sendTestEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { testEmail } = req.body;
+
+    if (!testEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Test email address is required"
+      });
+    }
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    // Create mock booking details for test email
+    const mockBookingDetails = {
+      id: 9999,
+      user_email: testEmail,
+      user_name: 'Test User',
+      email: testEmail,
+      name: 'Test User'
+    };
+
+    // Send test email
+    const emailSent = await sendBookingConfirmationEmail(mockBookingDetails, event, 'event');
+
+    if (emailSent) {
+      res.json({
+        success: true,
+        message: `Test email sent successfully to ${testEmail}`
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Failed to send test email. Check server logs for details."
+      });
+    }
+  } catch (error) {
+    console.error("Send test email error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Error sending test email"
+    });
+  }
+};

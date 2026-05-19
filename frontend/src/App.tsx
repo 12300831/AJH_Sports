@@ -19,6 +19,7 @@ type Page = 'home' | 'clubs' | 'clubsList' | 'account' | 'events' | 'coaches' | 
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [coachesKey, setCoachesKey] = useState(0);
 
   // Map URL paths to page states
   const pathToPage: Record<string, Page> = {
@@ -144,7 +145,9 @@ export default function App() {
       case 'player':
         return <PlayerWrapper onNavigate={handleNavigate} />;
       case 'coaches':
-        return <CoachesWrapper onNavigate={handleNavigate} />;
+        // CoachesWrapper will remount when navigating to 'coaches' page
+        // This ensures fresh data fetch from MySQL on every navigation
+        return <CoachesWrapper key={`coaches-${coachesKey}`} onNavigate={handleNavigate} />;
       case 'contact':
         return <ContactWrapper onNavigate={handleNavigate} />;
       case 'payment':

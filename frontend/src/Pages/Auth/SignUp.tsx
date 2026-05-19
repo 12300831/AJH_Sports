@@ -4,6 +4,9 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
+import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
+import { getAPI_URL } from '../../services/api';
 
 type Page = 'home' | 'clubs' | 'account' | 'events' | 'coaches' | 'contact' | 'signin' | 'signup' | 'dashboard' | 'player';
 
@@ -16,11 +19,118 @@ const TENNIS_IMAGE = '/images/tennis-rackets-balls.jpg';
 
 export function SignUp({ onNavigate }: SignUpProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    location: '',
+    sports: 'Tennis',
+  });
+  const { login } = useAuth();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const validatePassword = (password: string): boolean => {
+    if (password.length < 8) return false;
+    // Check for at least one symbol
+    const symbolRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    return symbolRegex.test(password);
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Connect to backend
-    onNavigate('player');
+    setLoading(true);
+
+    try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        toast.error('Please enter your full name');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.email.trim()) {
+        toast.error('Please enter your email address');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.phone.trim()) {
+        toast.error('Please enter your phone number');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.password) {
+        toast.error('Please enter a password');
+        setLoading(false);
+        return;
+      }
+
+      // Validate password strength
+      if (!validatePassword(formData.password)) {
+        toast.error('Password must be at least 8 characters and contain at least one symbol (e.g., @.!)');
+        setLoading(false);
+        return;
+      }
+
+      // Normalize email (trim and lowercase)
+      const normalizedEmail = formData.email.trim().toLowerCase();
+
+      // Call signup API
+      const response = await fetch(`${getAPI_URL()}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: normalizedEmail,
+          phone: formData.phone.trim(),
+          location: formData.location || null,
+          password: formData.password,
+          sports: formData.sports || 'Tennis',
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error(`Server returned invalid response (status ${response.status}). Please check if the backend server is running.`);
+      }
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || `Signup failed (${response.status})`;
+        console.error('Signup error response:', data);
+        throw new Error(errorMessage);
+      }
+
+      // Validate response data
+      if (!data.token) {
+        throw new Error('No token received from server');
+      }
+
+      if (!data.user) {
+        throw new Error('No user data received from server');
+      }
+
+      toast.success('Account created successfully!');
+
+      // Update auth context (this sets localStorage and user state)
+      login(data.token, data.user);
+
+      // Redirect to home page
+      setTimeout(() => {
+        onNavigate('home');
+      }, 100);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast.error(error.message || 'Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNavClick = (page: Page) => {
@@ -48,7 +158,10 @@ export function SignUp({ onNavigate }: SignUpProps) {
                 type="text"
                 placeholder="Enter your fullname"
                 className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -58,20 +171,11 @@ export function SignUp({ onNavigate }: SignUpProps) {
                 type="email"
                 placeholder="Enter your email"
                 className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                disabled={loading}
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-              <select
-                className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all"
-                required
-              >
-                <option value="">Select your role</option>
-                <option value="admin">Admin</option>
-                <option value="player">Player</option>
-              </select>
             </div>
 
             <div>
@@ -80,7 +184,10 @@ export function SignUp({ onNavigate }: SignUpProps) {
                 type="tel"
                 placeholder="Enter your phone number"
                 className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -91,12 +198,16 @@ export function SignUp({ onNavigate }: SignUpProps) {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   className="w-full bg-white border-gray-300 focus:border-[#e0cb23] focus:ring-[#e0cb23] transition-all pr-10"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555] hover:text-black"
+                  disabled={loading}
                 >
                   {showPassword ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -109,20 +220,40 @@ export function SignUp({ onNavigate }: SignUpProps) {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Location (Optional)</label>
-              <select className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all">
+              <select 
+                className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                disabled={loading}
+              >
                 <option value="">Select Location</option>
-                <option value="sydney">Sydney, NSW</option>
-                <option value="melbourne">Melbourne, VIC</option>
-                <option value="brisbane">Brisbane, QLD</option>
-                <option value="central-coast">Central Coast, NSW</option>
+                <option value="Sydney, NSW">Sydney, NSW</option>
+                <option value="Melbourne, VIC">Melbourne, VIC</option>
+                <option value="Brisbane, QLD">Brisbane, QLD</option>
+                <option value="Central Coast, NSW">Central Coast, NSW</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Sport <span className="text-red-500">*</span></label>
+              <select 
+                className="w-full h-9 sm:h-10 rounded-md border border-gray-300 bg-white px-3 py-1 text-base md:text-sm outline-none focus:border-[#e0cb23] focus:ring-2 focus:ring-[#e0cb23]/20 transition-all"
+                value={formData.sports}
+                onChange={(e) => setFormData({ ...formData, sports: e.target.value })}
+                required
+                disabled={loading}
+              >
+                <option value="Tennis">Tennis</option>
+                <option value="Table Tennis">Table Tennis</option>
               </select>
             </div>
 
             <Button
               type="submit"
               className="w-full bg-[#e0cb23] text-black hover:bg-[#cdb720] font-semibold h-11 sm:h-12 text-sm sm:text-base mt-4 sm:mt-6 shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] border-0"
+              disabled={loading}
             >
-              Sign Up
+              {loading ? 'Creating Account...' : 'Sign Up'}
             </Button>
           </form>
 

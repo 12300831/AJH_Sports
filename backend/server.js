@@ -42,6 +42,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import coachRoutes from "./routes/coachRoutes.js";
+import lessonRoutes from "./routes/lessonRoutes.js";
 import bookingPaymentRoutes from "./routes/bookingPaymentRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
@@ -125,11 +126,13 @@ app.use(passport.session());
 
 // Body parser middleware (JSON)
 // Note: Webhook endpoint uses raw body, so we apply JSON parser to all routes except webhook
+// Increased limit to 20MB to support 10MB image uploads (base64 encoded images are ~33% larger)
+// Azure App Service may also need configuration - see web.config or Azure Portal Application Settings
 app.use((req, res, next) => {
   if (req.originalUrl === '/api/payments/webhook') {
     next(); // Skip JSON parsing for webhook endpoint
   } else {
-    express.json()(req, res, next);
+    express.json({ limit: '20mb' })(req, res, next);
   }
 });
 
@@ -141,6 +144,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/coaches", coachRoutes);
+app.use("/api/lessons", lessonRoutes);
 app.use("/api/booking-payments", bookingPaymentRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/setup", setupRoutes);

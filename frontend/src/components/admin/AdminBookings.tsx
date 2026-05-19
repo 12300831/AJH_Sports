@@ -25,9 +25,11 @@ import {
 import {
   getEventBookings,
   getCoachBookings,
+  getLessonBookings,
   updateBookingStatus,
   type EventBooking,
   type CoachBooking,
+  type LessonBooking,
 } from '../../services/adminService';
 import { AdminLayout } from './AdminLayout';
 import { toast } from 'sonner';
@@ -45,8 +47,10 @@ interface AdminBookingsProps {
 export function AdminBookings({ onNavigate }: AdminBookingsProps) {
   const [eventBookings, setEventBookings] = useState<EventBooking[]>([]);
   const [coachBookings, setCoachBookings] = useState<CoachBooking[]>([]);
+  const [lessonBookings, setLessonBookings] = useState<LessonBooking[]>([]);
   const [filteredEventBookings, setFilteredEventBookings] = useState<EventBooking[]>([]);
   const [filteredCoachBookings, setFilteredCoachBookings] = useState<CoachBooking[]>([]);
+  const [filteredLessonBookings, setFilteredLessonBookings] = useState<LessonBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -58,14 +62,17 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
   const loadBookings = async () => {
     try {
       setLoading(true);
-      const [events, coaches] = await Promise.all([
+      const [events, coaches, lessons] = await Promise.all([
         getEventBookings(),
         getCoachBookings(),
+        getLessonBookings(),
       ]);
       setEventBookings(events);
       setCoachBookings(coaches);
+      setLessonBookings(lessons);
       setFilteredEventBookings(events);
       setFilteredCoachBookings(coaches);
+      setFilteredLessonBookings(lessons);
     } catch (error: any) {
       toast.error(error.message || 'Failed to load bookings');
     } finally {
@@ -76,6 +83,7 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
   useEffect(() => {
     let filteredEvents = eventBookings;
     let filteredCoaches = coachBookings;
+    let filteredLessons = lessonBookings;
 
     // Apply search filter
     if (searchQuery.trim() !== '') {
@@ -92,21 +100,29 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
           b.user_name?.toLowerCase().includes(query) ||
           b.user_email?.toLowerCase().includes(query)
       );
+      filteredLessons = lessonBookings.filter(
+        (b) =>
+          b.lesson_title?.toLowerCase().includes(query) ||
+          b.user_name?.toLowerCase().includes(query) ||
+          b.user_email?.toLowerCase().includes(query)
+      );
     }
 
     // Apply status filter
     if (statusFilter !== 'all') {
       filteredEvents = filteredEvents.filter((b) => b.status === statusFilter);
       filteredCoaches = filteredCoaches.filter((b) => b.status === statusFilter);
+      filteredLessons = filteredLessons.filter((b) => b.status === statusFilter);
     }
 
     setFilteredEventBookings(filteredEvents);
     setFilteredCoachBookings(filteredCoaches);
-  }, [searchQuery, statusFilter, eventBookings, coachBookings]);
+    setFilteredLessonBookings(filteredLessons);
+  }, [searchQuery, statusFilter, eventBookings, coachBookings, lessonBookings]);
 
   const handleStatusChange = async (
     bookingId: number,
-    type: 'event' | 'coach',
+    type: 'event' | 'coach' | 'lesson',
     newStatus: 'pending' | 'confirmed' | 'cancelled'
   ) => {
     try {
@@ -165,6 +181,9 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
               </TabsTrigger>
               <TabsTrigger value="coaches">
                 Coach Bookings ({coachBookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="lessons">
+                Lesson Bookings ({lessonBookings.length})
               </TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-3">
@@ -237,7 +256,7 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
                             </div>
                           </TableCell>
                           <TableCell>
-                            ${booking.event_price?.toFixed(2) || '0.00'}
+                            ${booking.event_price ? parseFloat(booking.event_price.toString()).toFixed(2) : '0.00'}
                           </TableCell>
                           <TableCell>{getStatusBadge(booking.status)}</TableCell>
                           <TableCell>{getPaymentBadge(booking.payment_status)}</TableCell>
@@ -324,6 +343,89 @@ export function AdminBookings({ onNavigate }: AdminBookingsProps) {
                               value={booking.status}
                               onValueChange={(value: 'pending' | 'confirmed' | 'cancelled') =>
                                 handleStatusChange(booking.id, 'coach', value)
+                              }
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="confirmed">Confirmed</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="lessons">
+            <Card>
+              <CardHeader>
+                <CardTitle>Lesson Bookings</CardTitle>
+                <CardDescription>Manage all group coaching lesson bookings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center py-8">Loading bookings...</div>
+                ) : filteredLessonBookings.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    {searchQuery || statusFilter !== 'all' ? 'No bookings found matching your filters.' : 'No lesson bookings found.'}
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Lesson</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Sessions Remaining</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Payment</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLessonBookings.map((booking) => (
+                        <TableRow key={booking.id}>
+                          <TableCell>{booking.id}</TableCell>
+                          <TableCell className="font-medium">
+                            {booking.lesson_title || `Lesson #${booking.lesson_id}`}
+                            {booking.lesson_category && (
+                              <div className="text-xs text-gray-500">{booking.lesson_category}</div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              <div>{booking.user_name || `User #${booking.user_id}`}</div>
+                              <div className="text-gray-500 text-xs">
+                                {booking.user_email || ''}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={booking.booking_type === 'pack' ? 'default' : 'secondary'}>
+                              {booking.booking_type === 'pack' ? '10 Pack' : 'Single'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {booking.booking_type === 'pack' 
+                              ? (booking.sessions_remaining !== null ? booking.sessions_remaining : 'N/A')
+                              : 'N/A'}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                          <TableCell>{getPaymentBadge(booking.payment_status)}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={booking.status}
+                              onValueChange={(value: 'pending' | 'confirmed' | 'cancelled') =>
+                                handleStatusChange(booking.id, 'lesson', value)
                               }
                             >
                               <SelectTrigger className="w-[140px]">
