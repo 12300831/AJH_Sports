@@ -26,15 +26,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify Firebase service account secret
+      - name: Verify Firebase deploy secret
         run: |
-          if [ -z "$FIREBASE_SA" ]; then
-            echo "::error::Missing GitHub secret FIREBASE_SERVICE_ACCOUNT."
-            echo "Create it: GitHub repo → Settings → Secrets and variables → Actions → New repository secret"
-            echo "Value: full JSON from Firebase Console → Project settings → Service accounts → Generate new private key"
+          if [ -n "$FIREBASE_TOKEN" ]; then
+            echo "Using FIREBASE_TOKEN for deploy."
+          elif [ -n "$FIREBASE_SA" ]; then
+            echo "Using FIREBASE_SERVICE_ACCOUNT for deploy."
+          else
+            echo "::error::Missing FIREBASE_TOKEN or FIREBASE_SERVICE_ACCOUNT GitHub Actions secret."
             exit 1
           fi
         env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Setup Node.js
@@ -54,10 +57,18 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL != '' && secrets.VITE_API_URL || env.VITE_API_URL }}
         run: npm run build
 
-      - name: Authenticate to Google Cloud (Firebase)
+      - name: Authenticate to Google Cloud (service account)
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' }}
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy to Firebase Hosting
-        run: npx firebase-tools@14.4.0 deploy --only hosting --project "${{ env.FIREBASE_PROJECT_ID }}" --non-interactive
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |
+          if [ -n "$FIREBASE_TOKEN" ]; then
+            npx firebase-tools@14.4.0 deploy --only hosting --project "${{ env.FIREBASE_PROJECT_ID }}" --non-interactive --token "$FIREBASE_TOKEN"
+          else
+            npx firebase-tools@14.4.0 deploy --only hosting --project "${{ env.FIREBASE_PROJECT_ID }}" --non-interactive
+          fi
